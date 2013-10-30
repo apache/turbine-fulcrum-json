@@ -21,13 +21,17 @@ package org.apache.fulcrum.json;
 
 import java.text.DateFormat;
 
-import org.apache.avalon.framework.service.ServiceException;
-
 
 
 /**
- * ParserService defines the methods which are needed by the parser objects
- * to get their necessities.
+ * JsonService defines methods needed to serialize and deserialize and hepler methos if needed.
+ * 
+ * Some  methods expect a class parameter. 
+ * 
+ * If you want to call theses methods from an environment, where you could only
+ * provide strings (e.g. velocity context), just wrap the method and call 
+ * <code>Class clazz = Class.forName(className);</code> for the parameter. 
+ * 
  *
  * @author gk
  * @version $Id$
@@ -37,30 +41,87 @@ public interface JsonService
     /** Avalon Identifier **/
     String ROLE = JsonService.class.getName();
 
-    /** Default Encoding for Parameter Parser */
-    String ENCODING_DEFAULT = "UTf-8";
-
 
     /**
-     * Use the JsonService 
+     * Serializes a Java object
+     * 
+     * @param src The java object to be serialized.
      *
-     * @return A object of
+     * @return JSON string 
      *
-     * @throws ServiceException if parsing fails or the UploadService
-     * is not available
+     * @throws Exception if JSON serialization fails 
      */
     String ser(Object src) throws Exception;
     
+    /**
+     * Serializes a Java object
+     *
+     * @param src The java object to be serialized
+     * @param type Type, which should be used for the provided object .
+     *  
+     * @return JSON string
+     *
+     * @throws Exception if JSON serialization fails 
+     */
     <T> String ser( Object src , Class<T> type ) throws Exception;
 
+    /**
+     * Deserialzes a JSON string 
+     * 
+     * @param src Tthe JSON string to be deserialized
+     * @param type The java type to be used as a class
+     * 
+     * @return an object 
+     *
+     * @throws Exception if JSON deserialization fails
+     */
     <T> T deSer(String src, Class<T> type) throws Exception;
     
+    /**
+     * Serialize only object properties where filters attributes are provided
+     * 
+     * @param src The Java object to serialize
+     * @param filterClass The class to which the filtering should be applied
+     * @param filterAttr The class bean attributes which should be serialized
+     *
+     * @return JSON string 
+     *
+     * @throws Exception if JSON serialization or filter registration fails 
+     */
     public <T> String serializeOnlyFilter(Object src, Class<T> filterClass, String ... filterAttr ) throws Exception;
     
+    /**
+     * Serialize all object properties excluding provided filters attributes
+     *   
+     * @param src The Java object to serialize
+     * @param filterClass The class to which the filtering should be applied
+     * @param filterAttr The bean attributes which should not be serialized
+     * 
+     * @return JSON string 
+     *
+     * @throws Exception if JSON serialization or filter registration fails 
+     */
     public <T> String serializeAllExceptFilter(Object src, Class<T> filterClass, String ... filterAttr ) throws Exception;
     
+    /**
+     * Adds an adapter (mixin, serializer,..) for the target class depending on the JsonService implementation 
+     *
+     * @param name A name for the adapter
+     * @param target The target class for this adapter
+     * @param mixin The adapter/mixin for the target class
+     *
+     * @return JsonService
+     *
+     * @throws Exception if adapter registration fails 
+     */
     public JsonService addAdapter( String name, Class target, Class mixin ) throws Exception; 
     
+    /**
+     * @param df The {@link DateFormat} to be used by the JsonService.
+     * 
+     * It could be provided by component configuration too.
+     * 
+     */
     public void setDateFormat(final DateFormat df );
 
 }
