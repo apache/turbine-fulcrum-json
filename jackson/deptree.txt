@@ -1,0 +1,35 @@
+[INFO] Scanning for projects...
+[WARNING] 
+[WARNING] Some problems were encountered while building the effective model for org.apache.fulcrum:fulcrum-json-jackson:jar:1.0.0-SNAPSHOT
+[WARNING] 'parent.relativePath' of POM org.apache.fulcrum:fulcrum-json-parent:1.0.0-SNAPSHOT (C:\dc\apache.org\fulcrum\fulcrum\json\pom.xml) points at org.apache.fulcrum:fulcrum instead of org.apache.turbine:turbine-parent, please verify your project structure @ org.apache.fulcrum:fulcrum-json-parent:1.0.0-SNAPSHOT, C:\dc\apache.org\fulcrum\fulcrum\json\pom.xml, line 23, column 12
+[WARNING] 
+[WARNING] It is highly recommended to fix these problems because they threaten the stability of your build.
+[WARNING] 
+[WARNING] For this reason, future Maven versions might no longer support building such malformed projects.
+[WARNING] 
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building Fulcrum JSON Jackson Impl 1.0.0-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] --- maven-dependency-plugin:2.1:tree (default-cli) @ fulcrum-json-jackson ---
+[INFO] org.apache.fulcrum:fulcrum-json-jackson:jar:1.0.0-SNAPSHOT
+[INFO] +- commons-lang:commons-lang:jar:2.5:compile
+[INFO] +- org.apache.avalon.framework:avalon-framework-api:jar:4.3.1:compile
+[INFO] +- org.apache.fulcrum:fulcrum-json-api:jar:1.0.0-SNAPSHOT:compile
+[INFO] |  \- org.apache.fulcrum:fulcrum-crypto:jar:1.0.7:compile
+[INFO] +- org.apache.fulcrum:fulcrum-json-api:test-jar:tests:1.0.0-SNAPSHOT:test
+[INFO] +- junit:junit:jar:3.8.1:test
+[INFO] +- org.apache.fulcrum:fulcrum-testcontainer:jar:1.0.6:test
+[INFO] +- org.apache.fulcrum:fulcrum-yaafi:jar:1.0.6:test
+[INFO] |  \- org.apache.avalon.framework:avalon-framework-impl:jar:4.3.1:test
+[INFO] +- org.codehaus.jackson:jackson-mapper-asl:jar:1.9.13:compile
+[INFO] |  \- org.codehaus.jackson:jackson-core-asl:jar:1.9.13:compile
+[INFO] \- org.codehaus.jackson:jackson-xc:jar:1.9.13:compile
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 1.390s
+[INFO] Finished at: Thu Oct 17 09:56:10 CEST 2013
+[INFO] Final Memory: 10M/110M
+[INFO] ------------------------------------------------------------------------
