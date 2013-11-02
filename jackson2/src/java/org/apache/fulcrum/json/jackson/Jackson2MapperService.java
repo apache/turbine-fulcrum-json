@@ -100,7 +100,7 @@ public class Jackson2MapperService extends AbstractLogEnabled
     String[] defaultTypeDefs = null;
 
     @Override
-    public synchronized String ser( Object src )
+    public String ser( Object src )
         throws Exception
     {
         if (filters.containsKey( src.getClass().getName() )) {
@@ -165,7 +165,7 @@ public class Jackson2MapperService extends AbstractLogEnabled
     }
 
     @SuppressWarnings( "rawtypes" )
-    public synchronized String withMixinModule( Object src, String name, Class target, Class mixin ) throws JsonProcessingException {
+    public String withMixinModule( Object src, String name, Class target, Class mixin ) throws JsonProcessingException {
         Module mx = new MixinModule( name, target, mixin );
         getLogger().debug( "registering module "+ mx + "  for: " + mixin);
         return mapper.registerModule( mx ).writer().writeValueAsString( src );

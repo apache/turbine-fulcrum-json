@@ -42,7 +42,7 @@ public class GSONServiceTest extends BaseUnitTest
 {
     private JsonService sc = null;
     private final String preDefinedOutput = 
-        "{\"configurationName\":\"Config.xml\",\"name\":\"mytest\"}";
+        "{\"container\":{\"cf\":\"Config.xml\"},\"configurationName\":\"Config.xml\",\"name\":\"mytest\"}";
 
     /**
      * Constructor for test.
@@ -75,11 +75,36 @@ public class GSONServiceTest extends BaseUnitTest
         assertEquals("Encryption failed ", TestClass.class, deson.getClass());
     }
     
-    public void testSerializeExclude() throws Exception
+    public void testSerializeExclude00() throws Exception
+    {    
+        String serJson = sc.serializeAllExceptFilter(  new TestClass("mytest"), (Class)null, (String[])null );
+        assertEquals("Encryption failed ", "{\"container\":{\"cf\":\"Config.xml\"},\"configurationName\":\"Config.xml\",\"name\":\"mytest\"}", serJson);
+    }
+    
+    public void testSerializeExcludeClass() throws Exception
     {    
         String serJson = sc.serializeAllExceptFilter(  new TestClass("mytest"),  String.class, (String[])null );
+        assertEquals("Encryption failed ", "{\"container\":{}}", serJson);
+    }
+    
+    public void testSerializeExcludeClassAndField() throws Exception
+    {    
+    	String serJson = sc.serializeAllExceptFilter(  new TestClass("mytest"),  String.class, "container" );
         System.out.println("serJson:"+ serJson);
         assertEquals("Encryption failed ", "{}", serJson);
+    }
+    
+    public void testSerializeExcludeClassAndFields() throws Exception
+    {    
+    	String serJson = sc.serializeAllExceptFilter(  new TestClass("mytest"),  Map.class, "configurationName", "name" );
+        assertEquals("Encryption failed ", "{}", serJson);
+    }
+    
+    public void testSerializeExcludeField() throws Exception
+    {    
+   
+    	String serJson = sc.serializeAllExceptFilter(  new TestClass("mytest"),  (Class)null, "configurationName" );
+        assertEquals("Encryption failed ", "{\"container\":{\"cf\":\"Config.xml\"},\"name\":\"mytest\"}", serJson);
     }
     
     public void testSerializeDate() throws Exception

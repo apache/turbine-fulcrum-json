@@ -1,5 +1,7 @@
 package org.apache.fulcrum.json;
 
+
+import java.util.HashMap;
 import java.util.Map;
 
 public class TestClass
@@ -10,7 +12,15 @@ public class TestClass
     /** Setup our default configurationFileName */
     private String configurationName = "Config.xml";
 
-    /** Setup our default parameterFileName */
+    public Map<String, Object> getContainer() {
+		return container;
+	}
+
+	public void setContainer(Map<String, Object> container) {
+		this.container = container;
+	}
+
+	/** Setup our default parameterFileName */
     private String name = null;
     
     public TestClass()
@@ -20,6 +30,8 @@ public class TestClass
     
     public TestClass(String name) {
         this.name = name;
+        this.container = new HashMap<String, Object>();
+        this.container.put("cf", configurationName);
     }
 
     public String getName()

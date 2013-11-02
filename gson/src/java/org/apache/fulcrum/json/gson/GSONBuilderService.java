@@ -22,8 +22,10 @@ package org.apache.fulcrum.json.gson;
 import java.lang.reflect.Type;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Hashtable;
 
 import org.apache.avalon.framework.activity.Initializable;
@@ -112,7 +114,7 @@ public class GSONBuilderService extends AbstractLogEnabled
     public <T> String serializeAllExceptFilter( Object src, Class<T> filterClass, String... filterAttr )
         throws Exception
     {
-        return gson.addSerializationExclusionStrategy(exclude( filterClass) ).create().toJson( src );
+        return gson.addSerializationExclusionStrategy(exclude( filterClass, filterAttr) ).create().toJson( src );
     }
     
     public JsonService registerTypeAdapter( JsonSerializer serdeser, Type type) {
@@ -199,29 +201,36 @@ public class GSONBuilderService extends AbstractLogEnabled
         }
     }
     
-    private ExclusionStrategy exclude(Class clazz)
+    private ExclusionStrategy exclude(Class clazz, String...filterAttrs)
     {
         return new ExclusionStrategy() {
 
-               private Class<?> excludedThisClass;
+               public Class<?> excludedThisClass;
+               public HashSet<String> excludedAttributes;
                
-               private ExclusionStrategy init(Class<?> excludedThisClass) {
+               private ExclusionStrategy init(Class<?> excludedThisClass, String... filterAttrs) {
                    this.excludedThisClass = excludedThisClass;
+                   if (filterAttrs != null) {
+                	   this.excludedAttributes = new HashSet<String>(filterAttrs.length);
+                	   Collections.addAll(this.excludedAttributes, filterAttrs);
+                   } else 
+                	   this.excludedAttributes = new HashSet<String>();
+                  
                    return this;
                  }
                
                  @Override
                  public boolean shouldSkipClass(Class<?> clazz) {
-                   return excludedThisClass.equals(clazz);
+                   return (excludedThisClass != null)? excludedThisClass.equals(clazz): false;
                  }
 
                 @Override
                 public boolean shouldSkipField( FieldAttributes paramFieldAttributes )
                 {
-                    // TODO Auto-generated method stub
-                    return false;
+                	//return paramFieldAttributes.getDeclaringClass() == excludedThisClass && excludesAttributes.contains(paramFieldAttributes.getName());
+                	return (!excludedAttributes.isEmpty())? this.excludedAttributes.contains(paramFieldAttributes.getName()): false;
                 }
-           }.init( clazz );
+           }.init( clazz, filterAttrs );
     }
 
 
