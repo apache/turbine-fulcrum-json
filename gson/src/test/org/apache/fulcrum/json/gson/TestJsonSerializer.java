@@ -11,14 +11,13 @@ import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
 public class TestJsonSerializer implements JsonSerializer<TestClass> {
-    
-    public TestJsonSerializer()
-    {
+
+    public TestJsonSerializer() {
     }
 
     @Override
-    public JsonElement serialize( TestClass src, Type typeOfSrc, JsonSerializationContext context )
-    {
+    public JsonElement serialize(TestClass src, Type typeOfSrc,
+            JsonSerializationContext context) {
         final JsonObject json = new JsonObject();
         json.addProperty("n", src.getName());
         json.addProperty("p", src.getConfigurationName());
@@ -27,4 +26,4 @@ public class TestJsonSerializer implements JsonSerializer<TestClass> {
         json.add("c", categoriesArray);
         return json;
     }
-  }
+}

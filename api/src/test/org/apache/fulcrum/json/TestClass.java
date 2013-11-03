@@ -1,6 +1,5 @@
 package org.apache.fulcrum.json;
 
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,48 +12,40 @@ public class TestClass
     private String configurationName = "Config.xml";
 
     public Map<String, Object> getContainer() {
-		return container;
-	}
+        return container;
+    }
 
-	public void setContainer(Map<String, Object> container) {
-		this.container = container;
-	}
+    public void setContainer(Map<String, Object> container) {
+        this.container = container;
+    }
 
-	/** Setup our default parameterFileName */
+    /** Setup our default parameterFileName */
     private String name = null;
-    
-    public TestClass()
-    {
+
+    public TestClass() {
         // TODO Auto-generated constructor stub
     }
-    
+
     public TestClass(String name) {
         this.name = name;
         this.container = new HashMap<String, Object>();
         this.container.put("cf", configurationName);
     }
 
-    public String getName()
-    {
+    public String getName() {
         return name;
     }
 
-    public void setName( String name )
-    {
+    public void setName(String name) {
         this.name = name;
     }
 
-    public String getConfigurationName()
-    {
+    public String getConfigurationName() {
         return configurationName;
     }
 
-    public void setConfigurationName( String configurationName )
-    {
+    public void setConfigurationName(String configurationName) {
         this.configurationName = configurationName;
     }
 
-
-   
 }
-

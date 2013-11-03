@@ -26,55 +26,50 @@ import java.util.List;
 import org.codehaus.jackson.map.introspect.AnnotatedClass;
 import org.codehaus.jackson.map.introspect.JacksonAnnotationIntrospector;
 
-public class CustomIntrospector extends JacksonAnnotationIntrospector
-{
+public class CustomIntrospector extends JacksonAnnotationIntrospector {
 
-  public List<String> externalFilterClasses = Collections.synchronizedList(new ArrayList<String>());
-    
-  @Override
-  public Object findFilterId(AnnotatedClass ac) {
+    public List<String> externalFilterClasses = Collections
+            .synchronizedList(new ArrayList<String>());
+
+    @Override
+    public Object findFilterId(AnnotatedClass ac) {
         // Let's default to current behavior if annotation is found:
         Object id = super.findFilterId(ac);
         // but use simple class name if not
         if (id == null) {
             String name = ac.getName();
-            if (!externalFilterClasses.isEmpty() && externalFilterClasses.contains(name )  ) {
-               id= name;
+            if (!externalFilterClasses.isEmpty()
+                    && externalFilterClasses.contains(name)) {
+                id = name;
             }
         }
         return id;
     }
 
-    public List<String> getExternalFilterClasses()
-    {
+    public List<String> getExternalFilterClasses() {
         return externalFilterClasses;
     }
-    
-    public void setExternalFilterClass( Class externalFilterClass )
-    {
-        if (! externalFilterClasses.contains( externalFilterClass.getName() )) {
-        externalFilterClasses.add( externalFilterClass.getName() );
-        }        
+
+    public void setExternalFilterClass(Class externalFilterClass) {
+        if (!externalFilterClasses.contains(externalFilterClass.getName())) {
+            externalFilterClasses.add(externalFilterClass.getName());
+        }
     }
-    
-    public void setExternalFilterClasses( Class ... classes )
-    {
-        
-        for ( int i = 0; i < classes.length; i++ )
-        {
-            if (! externalFilterClasses.contains( classes[i].getName() )) {
-                
-                externalFilterClasses.add( classes[i].getName() );
+
+    public void setExternalFilterClasses(Class... classes) {
+
+        for (int i = 0; i < classes.length; i++) {
+            if (!externalFilterClasses.contains(classes[i].getName())) {
+
+                externalFilterClasses.add(classes[i].getName());
             }
         }
     }
-    
-    public void removeExternalFilterClass( Class externalFilterClass )
-    {
-        if (externalFilterClasses.contains( externalFilterClass.getName() )) {
-          externalFilterClasses.remove( externalFilterClass.getName() );
-        }        
-    }
 
+    public void removeExternalFilterClass(Class externalFilterClass) {
+        if (externalFilterClasses.contains(externalFilterClass.getName())) {
+            externalFilterClasses.remove(externalFilterClass.getName());
+        }
+    }
 
 }

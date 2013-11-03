@@ -19,7 +19,6 @@ package org.apache.fulcrum.json.jackson;
  * under the License.
  */
 
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -36,208 +35,213 @@ import org.apache.fulcrum.testcontainer.BaseUnitTest;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 
-
 /**
  * Jackson1 JSON Test
- *
+ * 
  * @author gk
  * @version $Id$
  */
-public class JacksonMapperTest extends BaseUnitTest
-{
+public class JacksonMapperTest extends BaseUnitTest {
     private JsonService sc = null;
     Logger logger;
 
     /**
      * Constructor for test.
-     *
-     * @param testName name of the test being executed
+     * 
+     * @param testName
+     *            name of the test being executed
      */
-    public JacksonMapperTest(String testName)
-    {
+    public JacksonMapperTest(String testName) {
         super(testName);
     }
 
-
-    public void setUp() throws Exception
-    {
+    public void setUp() throws Exception {
         super.setUp();
-        sc = (JsonService) this.lookup( JsonService.ROLE );
-        logger =  new ConsoleLogger( ConsoleLogger.LEVEL_DEBUG );  
+        sc = (JsonService) this.lookup(JsonService.ROLE);
+        logger = new ConsoleLogger(ConsoleLogger.LEVEL_DEBUG);
     }
 
-    public void testSerialize() throws Exception
-    {
-        String serJson = sc.ser( new JacksonMapperTest("mytest") );
+    public void testSerialize() throws Exception {
+        String serJson = sc.ser(new JacksonMapperTest("mytest"));
         assertEquals("Set failed ", "{\"name\":\"mytest\"}", serJson);
     }
-    
-    public void testSerializeDateWithDefaultDateFormat() throws Exception
-    {
 
-        Map<String,Date> map = new HashMap<String,Date>();
-        map.put( "date", Calendar.getInstance().getTime() );
-        String serJson = sc.ser( map ); 
-        assertTrue("Serialize with Adapater failed ", serJson.matches( "\\{\"date\":\"\\d\\d/\\d\\d/\\d{4}\"\\}" ));
+    public void testSerializeDateWithDefaultDateFormat() throws Exception {
 
-    }
-    
-    public void testDeSerialize1() throws Exception
-    {
-
-        Map<String,Integer> map = new HashMap<String,Integer>();
-        map.put( "name", 5001 );
-        Map deserMap = (Map)sc.deSer(  sc.ser( map ), Map.class );
-        assertEquals("Integer DeSer failed ", 5001, deserMap.get( "name" ));
+        Map<String, Date> map = new HashMap<String, Date>();
+        map.put("date", Calendar.getInstance().getTime());
+        String serJson = sc.ser(map);
+        assertTrue("Serialize with Adapater failed ",
+                serJson.matches("\\{\"date\":\"\\d\\d/\\d\\d/\\d{4}\"\\}"));
 
     }
-    
-    public void testSerializeSingleObjectExcludeWithMixins() throws Exception
-    { 
-        sc.addAdapter("M4RMixin", Rectangle.class, Mixin.class );
-        String serRect = sc.ser( new Rectangle(25, 3) );
+
+    public void testDeSerialize1() throws Exception {
+
+        Map<String, Integer> map = new HashMap<String, Integer>();
+        map.put("name", 5001);
+        Map deserMap = (Map) sc.deSer(sc.ser(map), Map.class);
+        assertEquals("Integer DeSer failed ", 5001, deserMap.get("name"));
+
+    }
+
+    public void testSerializeSingleObjectExcludeWithMixins() throws Exception {
+        sc.addAdapter("M4RMixin", Rectangle.class, Mixin.class);
+        String serRect = sc.ser(new Rectangle(25, 3));
         assertEquals("DeSer failed ", "{\"width\":25}", serRect);
 
     }
-    
-    public void testSerializeTwoObjectsIncludeOnlyAnnotationCustomFilterId() throws Exception
-    { 
+
+    public void testSerializeTwoObjectsIncludeOnlyAnnotationCustomFilterId()
+            throws Exception {
         Bean filteredBean = new Bean();
-        filteredBean.setName( "joe" );
-        String bean = sc.serializeOnlyFilter( filteredBean, Bean.class,"name" );
+        filteredBean.setName("joe");
+        String bean = sc.serializeOnlyFilter(filteredBean, Bean.class, "name");
         assertEquals("Ser filtered Bean failed ", "{\"name\":\"joe\"}", bean);
-        logger.debug( "bean: " +bean);
-        
+        logger.debug("bean: " + bean);
+
         Rectangle filteredRectangle = new Rectangle(5, 10);
-        filteredRectangle.setName( "jim" );
-        String rectangle = sc.serializeOnlyFilter( filteredRectangle, Rectangle.class,"w","name" );
-        assertEquals("Ser filtered Rectangle failed ", "{\"w\":5,\"name\":\"jim\"}", rectangle);
-        logger.debug( "rectangle: " +rectangle);
+        filteredRectangle.setName("jim");
+        String rectangle = sc.serializeOnlyFilter(filteredRectangle,
+                Rectangle.class, "w", "name");
+        assertEquals("Ser filtered Rectangle failed ",
+                "{\"w\":5,\"name\":\"jim\"}", rectangle);
+        logger.debug("rectangle: " + rectangle);
 
     }
 
-    public void testDeSerialize() throws Exception
-    {
-        String serJson = sc.ser( new TestClass("mytest") );
-        Object deson = sc.deSer( serJson, TestClass.class );
+    public void testDeSerialize() throws Exception {
+        String serJson = sc.ser(new TestClass("mytest"));
+        Object deson = sc.deSer(serJson, TestClass.class);
         assertEquals("DeSer failed ", TestClass.class, deson.getClass());
     }
-    
-    public void testMixins() throws Exception
-    {     
+
+    public void testMixins() throws Exception {
 
         Rectangle filteredRectangle = new Rectangle(5, 10);
-        filteredRectangle.setName( "jim" );        
-        String serRect = sc.addAdapter("M4RMixin", Rectangle.class, Mixin.class ).
-                        ser( filteredRectangle );
+        filteredRectangle.setName("jim");
+        String serRect = sc
+                .addAdapter("M4RMixin", Rectangle.class, Mixin.class).ser(
+                        filteredRectangle);
         assertEquals("Ser failed ", "{\"width\":5}", serRect);
     }
-    
-    public void testMixis2() throws Exception
-    {     
+
+    public void testMixis2() throws Exception {
         Bean filteredBean = new Bean();
-        filteredBean.setName( "joe" );
+        filteredBean.setName("joe");
         Rectangle filteredRectangle = new Rectangle(5, 10);
-        filteredRectangle.setName( "jim" );
-        
-        String serRect =  sc.addAdapter("M4RMixin2", Rectangle.class, Mixin2.class ).
-                        ser( filteredRectangle );
+        filteredRectangle.setName("jim");
+
+        String serRect = sc.addAdapter("M4RMixin2", Rectangle.class,
+                Mixin2.class).ser(filteredRectangle);
         assertEquals("Ser failed ", "{\"name\":\"jim\",\"width\":5}", serRect);
-        
-        String bean = sc.serializeOnlyFilter( filteredBean, Bean.class,"name" );
+
+        String bean = sc.serializeOnlyFilter(filteredBean, Bean.class, "name");
         assertEquals("Ser filtered Bean failed ", "{\"name\":\"joe\"}", bean);
     }
-    
-    public void testFilteredCollectionOfBeans() throws Exception
-    { 
-       
+
+    public void testFilteredCollectionOfBeans() throws Exception {
+
         List<Bean> beanList = new ArrayList<Bean>();
-        for ( int i = 0; i < 10; i++ )
-        {
+        for (int i = 0; i < 10; i++) {
             Bean filteredBean = new Bean();
-            filteredBean.setName( "joe" +i);
-            filteredBean.setAge( i);
-            beanList.add( filteredBean ); 
-        }                
-        String result = sc.serializeOnlyFilter( beanList, Bean.class, "name", "age" );
-        logger.debug( "result: " +result);
-        Object objResult = ((JacksonMapperService)sc).deSer( result, List.class, Bean.class );
-        List<Bean> beanList2 =  (List<Bean>)objResult;
+            filteredBean.setName("joe" + i);
+            filteredBean.setAge(i);
+            beanList.add(filteredBean);
+        }
+        String result = sc.serializeOnlyFilter(beanList, Bean.class, "name",
+                "age");
+        logger.debug("result: " + result);
+        Object objResult = ((JacksonMapperService) sc).deSer(result,
+                List.class, Bean.class);
+        List<Bean> beanList2 = (List<Bean>) objResult;
         assertTrue("DeSer failed ", beanList2 instanceof List);
         assertTrue("DeSer failed ", beanList2.size() == 10);
-        for ( Bean bean :beanList2 )
-        {
-            logger.debug( "deser bean: " + bean.getName() + " is " + bean.getAge());
+        for (Bean bean : beanList2) {
+            logger.debug("deser bean: " + bean.getName() + " is "
+                    + bean.getAge());
         }
-        
+
     }
-    
-    public void testMixinCollectionOfBeans() throws Exception
-    { 
-       
+
+    public void testMixinCollectionOfBeans() throws Exception {
+
         List<Bean> beanList = new ArrayList<Bean>();
-        for ( int i = 0; i < 10; i++ )
-        {
+        for (int i = 0; i < 10; i++) {
             Bean filteredBean = new Bean();
-            filteredBean.setName( "joe" +i);
-            filteredBean.setAge( i);
-            beanList.add( filteredBean ); 
-        }                
-        String result = sc.addAdapter("M4RMixin", Bean.class, BeanMixin.class ).
-                        ser( beanList );
-        logger.debug( "result: " +result);
-        Object objResult = ((JacksonMapperService)sc).deSer( result, List.class, Bean.class );
-        List<Bean> beanList2 =  (List<Bean>)objResult;
+            filteredBean.setName("joe" + i);
+            filteredBean.setAge(i);
+            beanList.add(filteredBean);
+        }
+        String result = sc.addAdapter("M4RMixin", Bean.class, BeanMixin.class)
+                .ser(beanList);
+        logger.debug("result: " + result);
+        Object objResult = ((JacksonMapperService) sc).deSer(result,
+                List.class, Bean.class);
+        List<Bean> beanList2 = (List<Bean>) objResult;
         assertTrue("DeSer failed ", beanList2 instanceof List);
         assertTrue("DeSer failed ", beanList2.size() == 10);
-        for ( Bean bean :beanList2 )
-        {
-            logger.debug( "deser bean: " + bean.getName() + " is " + bean.getAge());
+        for (Bean bean : beanList2) {
+            logger.debug("deser bean: " + bean.getName() + " is "
+                    + bean.getAge());
         }
-        
+
     }
-    
-    //@JsonFilter("myFilter")
+
+    // @JsonFilter("myFilter")
     static class Bean {
         private String name;
         private int age;
         public String profession;
-        public Bean()
-        {
+
+        public Bean() {
         }
-        public String getName()
-        {
+
+        public String getName() {
             return name;
         }
-        public void setName( String name )
-        {
+
+        public void setName(String name) {
             this.name = name;
         }
-        public int getAge()
-        {
+
+        public int getAge() {
             return age;
         }
-        public void setAge( int age )
-        {
+
+        public void setAge(int age) {
             this.age = age;
         }
     }
-    
-    public static abstract class Mixin2
-    {
-            void MixIn2(int w, int h) { }
-            @JsonProperty("width") abstract int getW(); // rename property
-            @JsonIgnore abstract int getH(); 
-            @JsonIgnore abstract int getSize(); // exclude
-            abstract String getName();
+
+    public static abstract class Mixin2 {
+        void MixIn2(int w, int h) {
+        }
+
+        @JsonProperty("width")
+        abstract int getW(); // rename property
+
+        @JsonIgnore
+        abstract int getH();
+
+        @JsonIgnore
+        abstract int getSize(); // exclude
+
+        abstract String getName();
     }
-    
-    public static abstract class BeanMixin
-    {
-            void BeanMixin() { }
-            @JsonIgnore abstract int getAge(); 
-            @JsonIgnore String profession; // exclude
-            @JsonProperty abstract String getName();//
+
+    public static abstract class BeanMixin {
+        void BeanMixin() {
+        }
+
+        @JsonIgnore
+        abstract int getAge();
+
+        @JsonIgnore
+        String profession; // exclude
+
+        @JsonProperty
+        abstract String getName();//
     }
 
 }

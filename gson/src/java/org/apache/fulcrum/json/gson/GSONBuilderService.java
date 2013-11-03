@@ -46,194 +46,203 @@ import com.google.gson.reflect.TypeToken;
 
 /**
  * 
- * By default multiple serialization of the same object in a single thread is not support 
- * (e.g adapter + default for the same bean / object).  
+ * By default multiple serialization of the same object in a single thread is
+ * not support (e.g adapter + default for the same bean / object).
  * 
  * 
  * @author gk
  * @version $Id$
- *
+ * 
  */
-public class GSONBuilderService extends AbstractLogEnabled
-    implements JsonService, Initializable, Configurable
-{
-    
+public class GSONBuilderService extends AbstractLogEnabled implements
+        JsonService, Initializable, Configurable {
+
     private static final String GLOBAL_ADAPTERS = "globalAdapters";
 
     private static final String DATE_FORMAT = "dateFormat";
-    
+
     private String dateFormat;
-    
+
     final String DEFAULTDATEFORMAT = "MM/dd/yyyy";
-    
-    private Hashtable<String,String> adapters = null;
-    
+
+    private Hashtable<String, String> adapters = null;
+
     GsonBuilder gson;
 
     @Override
-    public String ser( Object src )
-        throws Exception
-    {
-        getLogger().debug( "ser" + src );
-        return gson.create().toJson( src );
+    public String ser(Object src) throws Exception {
+        getLogger().debug("ser" + src);
+        return gson.create().toJson(src);
     }
-    
-    @Override
-    public <T> String ser( Object src , Class<T> type ) throws Exception
-    {
-        getLogger().debug( "ser::" + src + " with type" + type );
-  
-        Type collectionType = new TypeToken<T>(){}.getType();
-        return gson.create().toJson( src , collectionType);
-    }
-    
-    @Override
-    public <T> T deSer( String json,  Class<T> type )
-        throws Exception
-    {
-        // TODO Auto-generated method stub
-        getLogger().debug( "deser:" + json );
-        return gson.create().fromJson(json, type);
-    }
-    
-    @Override
-    public <T> String serializeOnlyFilter( Object src, Class<T> filterClass, String... filterAttr )
-        throws Exception
-    {
-        throw new Exception("Not yet implemented!");
-    }
-    
-    @Override
-    public JsonService addAdapter( String name, Class target, Class adapter ) throws Exception
-    { 
-        gson.registerTypeAdapter(target, adapter.newInstance());
-        return this;
-    }   
 
     @Override
-    public <T> String serializeAllExceptFilter( Object src, Class<T> filterClass, String... filterAttr )
-        throws Exception
-    {
-        return gson.addSerializationExclusionStrategy(exclude( filterClass, filterAttr) ).create().toJson( src );
+    public <T> String ser(Object src, Class<T> type) throws Exception {
+        getLogger().debug("ser::" + src + " with type" + type);
+
+        Type collectionType = new TypeToken<T>() {
+        }.getType();
+        return gson.create().toJson(src, collectionType);
     }
-    
-    public JsonService registerTypeAdapter( JsonSerializer serdeser, Type type) {
+
+    @Override
+    public <T> T deSer(String json, Class<T> type) throws Exception {
+        // TODO Auto-generated method stub
+        getLogger().debug("deser:" + json);
+        return gson.create().fromJson(json, type);
+    }
+
+    @Override
+    public <T> String serializeOnlyFilter(Object src, Class<T> filterClass,
+            String... filterAttr) throws Exception {
+        throw new Exception("Not yet implemented!");
+    }
+
+    @Override
+    public JsonService addAdapter(String name, Class target, Object adapter)
+            throws Exception {
+        gson.registerTypeAdapter(target, adapter);
+        return this;
+    }
+
+    @Override
+    public JsonService addAdapter(String name, Class target, Class adapter)
+            throws Exception {
+        gson.registerTypeAdapter(target, adapter.newInstance());
+        return null;
+    }
+
+    @Override
+    public <T> String serializeAllExceptFilter(Object src,
+            Class<T> filterClass, String... filterAttr) throws Exception {
+        return gson
+                .addSerializationExclusionStrategy(
+                        exclude(filterClass, filterAttr)).create().toJson(src);
+    }
+
+    public JsonService registerTypeAdapter(JsonSerializer serdeser, Type type) {
         gson.registerTypeAdapter(type, serdeser);
         return this;
     }
-    
+
     @Override
-    public void setDateFormat(final DateFormat df ) { 
+    public void setDateFormat(final DateFormat df) {
         JsonSerializer<Date> ser = new JsonSerializer<Date>() {
             @Override
-            public JsonElement serialize(Date src, Type typeOfSrc, JsonSerializationContext 
-                       context) {
-              return src == null ? null : new JsonPrimitive(df.format( src ));
+            public JsonElement serialize(Date src, Type typeOfSrc,
+                    JsonSerializationContext context) {
+                return src == null ? null : new JsonPrimitive(df.format(src));
             }
-         };
-        registerTypeAdapter( ser, Date.class );
+        };
+        registerTypeAdapter(ser, Date.class);
     }
 
-    public void getJsonService()
-        throws InstantiationException
-    {     
-//        gson.registerTypeAdapter(Date.class, ser).
-//        addSerializationExclusionStrategy( exclude(ObjectKey.class) ).
-//        addSerializationExclusionStrategy( exclude(ComboKey.class) );
-        //return gson.create().toJson( src );
+    public void getJsonService() throws InstantiationException {
+        // gson.registerTypeAdapter(Date.class, ser).
+        // addSerializationExclusionStrategy( exclude(ObjectKey.class) ).
+        // addSerializationExclusionStrategy( exclude(ComboKey.class) );
+        // return gson.create().toJson( src );
     }
-
 
     @Override
-    public void configure( Configuration conf )
-        throws ConfigurationException
-    {
+    public void configure(Configuration conf) throws ConfigurationException {
 
-        getLogger().debug( "conf.getName()" + conf.getName());
-        final Configuration configuredDateFormat = conf.getChild(DATE_FORMAT, true);
-        this.dateFormat = configuredDateFormat.getValue(DEFAULTDATEFORMAT);    
-        final Configuration configuredAdapters = conf.getChild(GLOBAL_ADAPTERS, true);
-        if (configuredAdapters != null)
-        {
+        getLogger().debug("conf.getName()" + conf.getName());
+        final Configuration configuredDateFormat = conf.getChild(DATE_FORMAT,
+                true);
+        this.dateFormat = configuredDateFormat.getValue(DEFAULTDATEFORMAT);
+        final Configuration configuredAdapters = conf.getChild(GLOBAL_ADAPTERS,
+                true);
+        if (configuredAdapters != null) {
             Configuration[] nameVal = configuredAdapters.getChildren();
-            for (int i = 0; i < nameVal.length; i++)
-            {
+            for (int i = 0; i < nameVal.length; i++) {
                 String key = nameVal[i].getName();
-                getLogger().debug( "configured key: " +key);
-                if  (key.equals( "adapter" )) {
-                    String forClass = nameVal[i].getAttribute( "forClass" );
-                    this.adapters = new Hashtable<String,String>();   
-                    this.adapters.put(forClass,nameVal[i].getValue() );
+                getLogger().debug("configured key: " + key);
+                if (key.equals("adapter")) {
+                    String forClass = nameVal[i].getAttribute("forClass");
+                    this.adapters = new Hashtable<String, String>();
+                    this.adapters.put(forClass, nameVal[i].getValue());
                 }
             }
         }
+        // TODO provide configurable Type Adapters
     }
 
     @Override
-    public void initialize()
-        throws Exception
-    {
+    public void initialize() throws Exception {
         gson = new GsonBuilder();
-        getLogger().debug("initialized: gson:"+ gson);     
-        getLogger().info("setting date format to:"+ dateFormat);    
-        setDateFormat( new SimpleDateFormat(dateFormat) );
-        
+        getLogger().debug("initialized: gson:" + gson);
+        getLogger().info("setting date format to:" + dateFormat);
+        setDateFormat(new SimpleDateFormat(dateFormat));
+
         if (adapters != null) {
             Enumeration<String> enumKey = adapters.keys();
             while (enumKey.hasMoreElements()) {
                 String forClass = enumKey.nextElement();
                 String avClass = adapters.get(forClass);
-                if(avClass != null) {
-                    try
-                    {
-                      getLogger().debug("initializing: adapters " +avClass +" forClass:"+ forClass);
-                       Class adapterForClass =  Class.forName(forClass);
-                       Class adapterClass =  Class.forName(avClass);
-                       addAdapter( "Test Adapter",  adapterForClass ,adapterClass );
-                      
+                if (avClass != null) {
+                    try {
+                        getLogger().debug(
+                                "initializing: adapters " + avClass
+                                        + " forClass:" + forClass);
+                        Class adapterForClass = Class.forName(forClass);
+                        Class adapterClass = Class.forName(avClass);
+                        addAdapter("Test Adapter", adapterForClass,
+                                adapterClass);
+
+                    } catch (Exception e) {
+                        throw new Exception(
+                                "JsonMapperService: Error instantiating "
+                                        + avClass + " for " + forClass);
                     }
-                    catch (Exception e )
-                    {
-                        throw new Exception( "JsonMapperService: Error instantiating " + avClass + " for " + forClass);
-                    }
-                } 
+                }
             }
         }
     }
-    
-    private ExclusionStrategy exclude(Class clazz, String...filterAttrs)
-    {
+
+    /**
+     * Simple Exclusion strategy to filter class or fields used by this service
+     * for serialization (not yet deserialization).
+     * 
+     * @param clazz
+     *            The class to be filtered out.
+     * @param filterAttrs
+     *            The fieldnames to be filtered as string
+     * @return the strategy applied by GSON
+     */
+    private ExclusionStrategy exclude(Class clazz, String... filterAttrs) {
         return new ExclusionStrategy() {
 
-               public Class<?> excludedThisClass;
-               public HashSet<String> excludedAttributes;
-               
-               private ExclusionStrategy init(Class<?> excludedThisClass, String... filterAttrs) {
-                   this.excludedThisClass = excludedThisClass;
-                   if (filterAttrs != null) {
-                	   this.excludedAttributes = new HashSet<String>(filterAttrs.length);
-                	   Collections.addAll(this.excludedAttributes, filterAttrs);
-                   } else 
-                	   this.excludedAttributes = new HashSet<String>();
-                  
-                   return this;
-                 }
-               
-                 @Override
-                 public boolean shouldSkipClass(Class<?> clazz) {
-                   return (excludedThisClass != null)? excludedThisClass.equals(clazz): false;
-                 }
+            public Class<?> excludedThisClass;
+            public HashSet<String> excludedAttributes;
 
-                @Override
-                public boolean shouldSkipField( FieldAttributes paramFieldAttributes )
-                {
-                	//return paramFieldAttributes.getDeclaringClass() == excludedThisClass && excludesAttributes.contains(paramFieldAttributes.getName());
-                	return (!excludedAttributes.isEmpty())? this.excludedAttributes.contains(paramFieldAttributes.getName()): false;
-                }
-           }.init( clazz, filterAttrs );
+            private ExclusionStrategy init(Class<?> excludedThisClass,
+                    String... filterAttrs) {
+                this.excludedThisClass = excludedThisClass;
+                if (filterAttrs != null) {
+                    this.excludedAttributes = new HashSet<String>(
+                            filterAttrs.length);
+                    Collections.addAll(this.excludedAttributes, filterAttrs);
+                } else
+                    this.excludedAttributes = new HashSet<String>();
+
+                return this;
+            }
+
+            @Override
+            public boolean shouldSkipClass(Class<?> clazz) {
+                return (excludedThisClass != null) ? excludedThisClass
+                        .equals(clazz) : false;
+            }
+
+            @Override
+            public boolean shouldSkipField(FieldAttributes paramFieldAttributes) {
+                // return paramFieldAttributes.getDeclaringClass() ==
+                // excludedThisClass &&
+                // excludesAttributes.contains(paramFieldAttributes.getName());
+                return (!excludedAttributes.isEmpty()) ? this.excludedAttributes
+                        .contains(paramFieldAttributes.getName()) : false;
+            }
+        }.init(clazz, filterAttrs);
     }
-
-
-
 
 }

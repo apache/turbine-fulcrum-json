@@ -25,56 +25,82 @@ import java.util.List;
 
 import com.fasterxml.jackson.databind.introspect.AnnotatedClass;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 
-public class CustomIntrospector extends JacksonAnnotationIntrospector
-{
-    public List<String> externalFilterClasses = Collections.synchronizedList(new ArrayList());
-   // public List<String> externalFilterClasses =new ArrayList();
-    
-  @Override
-  public Object findFilterId(AnnotatedClass ac) {
+/**
+ * The intent of this custom introspector is to provide filtering capabilities
+ * by using String parameters (properties and class types), which could be
+ * adjusted e.g. from a scriptable context (velocity template).
+ * 
+ * 
+ * @author gk
+ * @version $Id$
+ * 
+ */
+public class CustomIntrospector extends JacksonAnnotationIntrospector {
+    public List<String> externalFilterClasses = Collections
+            .synchronizedList(new ArrayList());
+
+    /**
+     * Filtering on method types
+     * 
+     */
+    @Override
+    public Boolean isIgnorableType(AnnotatedClass ac) {
+        Boolean isIgnorable = super.isIgnorableType(ac);
+        if (isIgnorable == null || !isIgnorable) {
+            if (!externalFilterClasses.isEmpty()
+                    && externalFilterClasses.contains(ac.getName())) {
+                isIgnorable = true;
+            }
+        }
+        return isIgnorable;
+    }
+
+    /**
+     * @return Object Filtering on properties returns an object, if
+     *         {@link #externalFilterClasses} contains the class provided. The
+     *         filter itself currently is {@link SimpleFilterProvider}.
+     */
+    @Override
+    public Object findFilterId(AnnotatedClass ac) {
         // Let's default to current behavior if annotation is found:
         Object id = super.findFilterId(ac);
         // but use simple class name if not
         if (id == null) {
             String name = ac.getName();
-            if (!externalFilterClasses.isEmpty() && externalFilterClasses.contains(name )  ) {
-               id= name;
+            if (!externalFilterClasses.isEmpty()
+                    && externalFilterClasses.contains(name)) {
+                id = name;
             }
         }
         return id;
     }
 
-    public List<String> getExternalFilterClasses()
-    {
+    public List<String> getExternalFilterClasses() {
         return externalFilterClasses;
     }
-    
-    public void setExternalFilterClass( Class externalFilterClass )
-    {
-        if (! externalFilterClasses.contains( externalFilterClass.getName() )) {
-        externalFilterClasses.add( externalFilterClass.getName() );
-        }        
+
+    public void setExternalFilterClass(Class externalFilterClass) {
+        if (!externalFilterClasses.contains(externalFilterClass.getName())) {
+            externalFilterClasses.add(externalFilterClass.getName());
+        }
     }
-    
-    public void setExternalFilterClasses( Class ... classes )
-    {
-        
-        for ( int i = 0; i < classes.length; i++ )
-        {
-            if (! externalFilterClasses.contains( classes[i].getName() )) {
-                
-                externalFilterClasses.add( classes[i].getName() );
+
+    public void setExternalFilterClasses(Class... classes) {
+
+        for (int i = 0; i < classes.length; i++) {
+            if (!externalFilterClasses.contains(classes[i].getName())) {
+
+                externalFilterClasses.add(classes[i].getName());
             }
         }
     }
-    
-    public void removeExternalFilterClass( Class externalFilterClass )
-    {
-        if (externalFilterClasses.contains( externalFilterClass.getName() )) {
-          externalFilterClasses.remove( externalFilterClass.getName() );
-        }        
-    }
 
+    public void removeExternalFilterClass(Class externalFilterClass) {
+        if (externalFilterClasses.contains(externalFilterClass.getName())) {
+            externalFilterClasses.remove(externalFilterClass.getName());
+        }
+    }
 
 }
