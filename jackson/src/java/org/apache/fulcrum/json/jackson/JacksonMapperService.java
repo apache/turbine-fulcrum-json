@@ -138,6 +138,13 @@ public class JacksonMapperService extends AbstractLogEnabled implements
     @Override
     public synchronized <T> String serializeAllExceptFilter(Object src,
             Class<T> filterClass, String... filterAttr) throws Exception {
+        return serializeAllExceptFilter(src, filterClass, false, filterAttr);
+    }
+    
+    @Override
+    public <T> String serializeAllExceptFilter(Object src,
+            Class<T> filterClass, boolean refreshFilter, String... filterAttr)
+            throws Exception {
         setCustomIntrospectorWithExternalFilterId(filterClass);
         FilterProvider filter;
         if (!this.filters.containsKey(filterClass.getName())) {
@@ -155,9 +162,14 @@ public class JacksonMapperService extends AbstractLogEnabled implements
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public synchronized <T> String serializeOnlyFilter(Object src,
             Class<T> filterClass, String... filterAttr) throws Exception {
+        return serializeOnlyFilter(src, filterClass, false, filterAttr);
+    }
+    
+    @Override
+    public <T> String serializeOnlyFilter(Object src, Class<T> filterClass,
+            boolean refreshFilter, String... filterAttr) throws Exception {
         setCustomIntrospectorWithExternalFilterId(filterClass);
         FilterProvider filter;
         if (!this.filters.containsKey(filterClass.getName())) {
@@ -170,7 +182,7 @@ public class JacksonMapperService extends AbstractLogEnabled implements
         }
         String serialized = ser(src, filter);
         getLogger().debug("serialized " + serialized);
-        if (!cacheFilters)
+        if (!cacheFilters || refreshFilter)
             removeFilterClass(filterClass);
         return serialized;
     }
@@ -417,4 +429,5 @@ public class JacksonMapperService extends AbstractLogEnabled implements
             context.setMixInAnnotations(this.clazz, this.mixin);
         }
     }
+
 }

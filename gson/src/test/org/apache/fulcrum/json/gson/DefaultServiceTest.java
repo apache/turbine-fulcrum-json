@@ -128,6 +128,20 @@ public class DefaultServiceTest extends BaseUnitTest {
                 "[{'w':0,'h':0,'name':'rect0'},{'w':1,'h':1,'name':'rect1'},{'w':2,'h':2,'name':'rect2'},{'w':3,'h':3,'name':'rect3'},{'w':4,'h':4,'name':'rect4'},{'w':5,'h':5,'name':'rect5'},{'w':6,'h':6,'name':'rect6'},{'w':7,'h':7,'name':'rect7'},{'w':8,'h':8,'name':'rect8'},{'w':9,'h':9,'name':'rect9'}]",
                 adapterSer.replace('"', '\''));
     }
+    
+    public void testSerializationCollectioPrimitiveWrapper() throws Exception {
+
+        List<Integer> intList = new ArrayList<Integer>();
+        for (int i = 0; i < 10; i++) {
+            Integer integer = new Integer(i*i);
+            intList.add(integer);
+        }
+        String result = sc.ser(intList);
+        assertEquals(
+                "Serialization of beans failed ",
+                "[0,1,4,9,16,25,36,49,64,81]",
+                result);
+    }
 
     public void testSerializeTypeAdapterForCollection() throws Exception {
         sc.addAdapter("Collection Adapter", ArrayList.class,

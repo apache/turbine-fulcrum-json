@@ -83,12 +83,24 @@ public interface JsonService {
     <T> T deSer(String src, Class<T> type) throws Exception;
 
     /**
+     * @see #serializeOnlyFilter(Object, Class, boolean, String...).
+     * 
+     * <code>refreshFilter</code> is <code>false</code>.
+     */
+    public <T> String serializeOnlyFilter(Object src, Class<T> filterClass,
+            String... filterAttr) throws Exception;
+    
+    /**
      * Serialize only object properties where filters attributes are provided
      * 
      * @param src
      *            The Java object to serialize
      * @param filterClass
      *            The class to which the filtering should be applied
+     *            
+     * @param refreshFilter
+     *             refresh Filter (clean cache for this filerClass)
+     *  
      * @param filterAttr
      *            The class bean attributes which should be serialized
      * 
@@ -97,7 +109,7 @@ public interface JsonService {
      * @throws Exception
      *             if JSON serialization or filter registration fails
      */
-    public <T> String serializeOnlyFilter(Object src, Class<T> filterClass,
+    public <T> String serializeOnlyFilter(Object src, Class<T> filterClass, boolean refreshFilter,
             String... filterAttr) throws Exception;
 
     /**
@@ -109,6 +121,8 @@ public interface JsonService {
      *            The class to which the filtering should be applied. If its the
      *            same class, just the filterAttributes get applied. If not the
      *            class is filtered out, if found as a property type.
+     * @param refreshFilter
+     *            refresh Filter (clean cache for this filerClass)      
      * 
      * @param filterAttr
      *            The bean attributes which should not be serialized
@@ -117,6 +131,14 @@ public interface JsonService {
      * 
      * @throws Exception
      *             if JSON serialization or filter registration fails
+     */
+    public <T> String serializeAllExceptFilter(Object src,
+            Class<T> filterClass, boolean refreshFilter, String... filterAttr) throws Exception;
+    
+    /** 
+     * @see #serializeAllExceptFilter(Object, Class, boolean, String...)
+     * 
+     * <code>refreshFilter</code> is <code>false</code>.
      */
     public <T> String serializeAllExceptFilter(Object src,
             Class<T> filterClass, String... filterAttr) throws Exception;

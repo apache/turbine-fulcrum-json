@@ -29,6 +29,7 @@ import java.util.Map;
 import org.apache.fulcrum.json.JsonService;
 import org.apache.fulcrum.json.Rectangle;
 import org.apache.fulcrum.json.TestClass;
+import org.apache.fulcrum.json.jackson.JacksonMapperTest.Bean;
 import org.apache.fulcrum.json.jackson.filters.CustomModuleWrapper;
 import org.apache.fulcrum.testcontainer.BaseUnitTest;
 
@@ -131,6 +132,20 @@ public class DefaultServiceTest extends BaseUnitTest {
                 "collect ser",
                 "[{'w':0,'h':0,'name':'rect0','size':0},{'w':1,'h':1,'name':'rect1','size':1},{'w':2,'h':2,'name':'rect2','size':4},{'w':3,'h':3,'name':'rect3','size':9},{'w':4,'h':4,'name':'rect4','size':16},{'w':5,'h':5,'name':'rect5','size':25},{'w':6,'h':6,'name':'rect6','size':36},{'w':7,'h':7,'name':'rect7','size':49},{'w':8,'h':8,'name':'rect8','size':64},{'w':9,'h':9,'name':'rect9','size':81}]",
                 adapterSer.replace('"', '\''));
+    }
+    
+    public void testSerializationCollectioPrimitiveWrapper() throws Exception {
+
+        List<Integer> intList = new ArrayList<Integer>();
+        for (int i = 0; i < 10; i++) {
+            Integer integer = new Integer(i*i);
+            intList.add(integer);
+        }
+        String result = sc.serializeOnlyFilter(intList, Integer.class, null);
+        assertEquals(
+                "Serialization of beans failed ",
+                "[0,1,4,9,16,25,36,49,64,81]",
+                result);
     }
 
     public void testSerializeTypeAdapterForCollection() throws Exception {

@@ -71,8 +71,9 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
  * not support (e.g filter + mixin or default + filter for the same bean /
  * object).
  * 
- * Note: If using {@link CustomIntrospector} unregister filters by setting
- * {@link #cacheFilters} to <code>false</code>.
+ * Note: If using {@link SimpleNameIntrospector}, filters are set by class id, which are cached by default. 
+ * By setting {@link #cacheFilters} to <code>false</code> each filter will be unregistered and the cache cleaned.
+ * On the other hand, by setting the refresh parameterin method calls using {@link #filter(Object, Class, FilterContext, boolean, String...)} class filtering is done only on class level.
  * 
  * @author gk
  * @version $Id$
@@ -120,7 +121,12 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
 
     @Override
     public <T> String ser(Object src, Class<T> type) throws Exception {
-        getLogger().debug("ser::" + src + " with type" + type);
+        if (src == null) {
+            getLogger().info("no serializable object:" + src + " for type "+ type);
+            return null;
+        } else {
+            getLogger().debug("ser class::" + src.getClass() + " with type" + type);
+        }
         if (filters.containsKey(src.getClass().getName())) {
             getLogger()
                     .warn("Found registered filter - could not use custom view and custom filter for class:"
@@ -133,11 +139,16 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
     }
 
     public <T> String ser(Object src, FilterProvider filters) throws Exception {
-        String serResult;
+        String serResult= null;
+        if (src == null) {
+            getLogger().info("no serializable object:" + src);
+            return serResult;
+        } 
         if (filters != null) {
-            getLogger().debug("ser::" + src + " with filters " + filters);
+            getLogger().debug("ser class::" + src.getClass() + " with filters " + filters);
             serResult = mapper.writer(filters).writeValueAsString(src);
         } else {
+            getLogger().debug("ser class::" + src.getClass() + " without filters" +filters); 
             serResult = ser(src);
         }
         return serResult;
@@ -208,31 +219,48 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
         getLogger().debug("registering module " + mx + "  for: " + mixin);
         return mapper.registerModule(mx).writer().writeValueAsString(src);
     }
-
+    
     @Override
     public synchronized <T> String serializeAllExceptFilter(Object src,
             Class<T> filterClass, String... filterAttr) throws Exception {
+        return serializeAllExceptFilter(src, filterClass, false, filterAttr);
+    }
+
+    public synchronized <T> String serializeAllExceptFilter(Object src,
+            Class<T> filterClass, boolean refresh, String... filterAttr) throws Exception {
         FilterContext fc = new FilterContext();
         if (filterAttr != null)
             fc.setFilter(SimpleBeanPropertyFilter
                     .serializeAllExcept(filterAttr));
-        return filter(src, filterClass, fc, filterAttr);
+        return filter(src, filterClass, fc, refresh, filterAttr);
+    }
+    
+    @Override
+    public synchronized <T> String serializeOnlyFilter(Object src,
+            Class<T> filterClass,  String... filterAttr) throws Exception {
+        return serializeOnlyFilter(src, filterClass, false, filterAttr);
     }
 
     @Override
     public synchronized <T> String serializeOnlyFilter(Object src,
-            Class<T> filterClass, String... filterAttr) throws Exception {
+            Class<T> filterClass, boolean refresh, String... filterAttr) throws Exception {
         FilterContext fc = new FilterContext();
-        fc.setFilter(SimpleBeanPropertyFilter.filterOutAllExcept(filterAttr));
-        return filter(src, filterClass, fc, filterAttr);
+        if (filterAttr != null && filterAttr.length > 0)
+            fc.setFilter(SimpleBeanPropertyFilter.filterOutAllExcept(filterAttr));
+        return filter(src, filterClass, fc, refresh, filterAttr);
     }
 
     private <T> String filter(Object src, Class<T> filterClass,
-            FilterContext fc, String... filterAttr) throws Exception {
+            FilterContext fc,  boolean refresh, String... filterAttr) throws Exception {
+        if (src == null) {
+            getLogger().info("no serializable object:" + src + " for filterClass "+ filterClass);
+            return null;
+        }
         FilterProvider filter = checkFilter(fc, src.getClass(), filterClass,
                 filterAttr);
+        getLogger().info("filtering with filter "+ filter);
         String serialized = ser(src, filter);
-        if (!cacheFilters) {
+        if (!cacheFilters || refresh) {
             removeFilter(filterClass);
             removeFilter(src.getClass());
         }
@@ -242,23 +270,20 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
     @SuppressWarnings("unchecked")
     private <T> FilterProvider checkFilter(FilterContext fc,
             Class rootFilterClass, Class<T> filterClass, String... filterAttr) {
-        SimpleFilterProvider filter = null;
-        // if (filterAttr == null) return filter;
-        filter = new SimpleFilterProvider();
-        if (filterAttr != null
+        SimpleFilterProvider filter = new SimpleFilterProvider();
+        if (filterAttr != null && filterAttr.length > 0
                 && (filterClass == null || !rootFilterClass.equals(filterClass))) {
             // filter attributes in root class
-            retrieveFilter(fc, rootFilterClass, filter, filterAttr);
+            filter = retrieveFilter(filter, fc, rootFilterClass, filterAttr);
         }
         if (filterClass != null) {
-            retrieveFilter(fc, filterClass, filter, filterAttr);
+            filter = retrieveFilter(filter, fc, filterClass, filterAttr);
         }
         return filter;
     }
 
-    private <T> SimpleFilterProvider retrieveFilter(FilterContext fc,
-            Class<T> filterClass, SimpleFilterProvider filter,
-            String... filterAttr) {
+    private <T> SimpleFilterProvider retrieveFilter(SimpleFilterProvider filter, FilterContext fc,
+            Class<T> filterClass, String... filterAttr) {
         if (!this.filters.containsKey(filterClass.getName())) {
             getLogger().debug("add filter for class" + filterClass.getName());
             if (fc.getFilter() != null) {
@@ -302,9 +327,9 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
 
     private <T> void setCustomIntrospectorWithExternalFilterId(
             Class<T> externalFilterId) {
-        if (primary instanceof CustomIntrospector) {
+        if (primary instanceof SimpleNameIntrospector) {
             if (externalFilterId != null) {
-                ((CustomIntrospector) primary)
+                ((SimpleNameIntrospector) primary)
                         .setExternalFilterClasses(externalFilterId);
                 getLogger()
                         .debug("added class for filters "
@@ -315,9 +340,9 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
 
     private <T> void removeCustomIntrospectorWithExternalFilterId(
             Class<T> externalFilterId) {
-        if (primary instanceof CustomIntrospector) {
+        if (primary instanceof SimpleNameIntrospector) {
             if (externalFilterId != null) {
-                ((CustomIntrospector) primary)
+                ((SimpleNameIntrospector) primary)
                         .removeExternalFilterClass(externalFilterId);
                 getLogger().debug(
                         "removed from introspector filter id  "
@@ -438,10 +463,12 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
                     "using default introspector:"
                             + primary.getClass().getName());
             mapper.setAnnotationIntrospector(primary);
-        } else {
+        } else if (primary != null && secondary != null){
             AnnotationIntrospector pair = new AnnotationIntrospectorPair(
                     primary, secondary);
             mapper.setAnnotationIntrospector(pair);
+        } else {
+            mapper.setAnnotationIntrospector(primary);
         }
 
         if (features != null) {

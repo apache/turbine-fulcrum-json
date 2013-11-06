@@ -1,0 +1,109 @@
+<?xml version="1.0"?>
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+
+<document>
+
+  <properties>
+    <title>JSON Component</title>
+    <author email="gk@apache.org">Georg Kallidis</author>
+  </properties>
+
+  <body>
+
+  <section name="Overview">
+    <p>
+      This Service serves as a JSON serializer or deserializer using <a href="http://code.google.com/p/google-gson/">GSON</a>.
+    </p>
+
+    <p>
+      It is written
+      for use in Turbine but it can be used in any container compatible
+      with Avalon's ECM container.
+    </p>
+    
+  </section>
+
+<section name="Configuration">
+    <subsection name="Role Configuration">
+      <source><![CDATA[
+   <role
+        name="org.apache.fulcrum.json.JsonService"
+        shorthand="json"
+        default-class="org.apache.fulcrum.json.gson.GSONBuilderService"/>
+]]></source>
+    </subsection>
+    
+    <subsection name="Component Configuration">
+      <table>
+        <tr>
+          <th>Item</th>
+          <th>Datatype</th>
+          <th>Cardinality</th>
+          <th>Description</th>
+        </tr>
+        <tr>
+          <td>globalAdapters</td>
+          <td>Complex</td>
+          <td>[0|1]</td>
+          <td>
+            If not set no adapter is set. Otherwise provide for each sub element <code>adapter</code> the class name of the adapter and set the attribute <code>forClass</code> to the class name the adapter should be applied. See the configuration example below. 
+          </td>
+        </tr>
+        <tr>
+          <td>dateFormat</td>
+          <td>String</td>
+          <td>[0|*]</td>
+          <td>
+            If set changes the date format. Provided string should be in a Format acceptable to the class <code>java.text.SimpleDateFormat.SimpleDateFormat(String)</code>. The default value is
+            <code>MM/dd/yyyy</code>. 
+          </td>
+        </tr>
+      </table>
+    </subsection>
+
+    <subsection name="Component Configuration Example">
+      <source><![CDATA[
+  <json>
+    <dateFormat>MM/dd/yyyy</dateFormat>
+    <globalAdapters>>
+      <adapter forClass="x.y.z.Class">a.b.c.d.AdapterForClassXYZ</adapter-->
+    </globalAdapters>
+  </json>
+]]></source>
+    </subsection>
+  </section>
+
+  <section name="Usage">
+    <p>
+    You get a JSON service from the service like this:
+    </p>
+
+    <source><![CDATA[
+JsonService jsonService = (JsonService)TurbineServices
+        .getInstance().getService(JsonService.ROLE);
+]]></source>
+
+    <p>
+    </p>
+
+  </section>
+
+</body>
+</document>

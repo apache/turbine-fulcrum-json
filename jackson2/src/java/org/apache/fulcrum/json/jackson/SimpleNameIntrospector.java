@@ -37,7 +37,7 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
  * @version $Id$
  * 
  */
-public class CustomIntrospector extends JacksonAnnotationIntrospector {
+public class SimpleNameIntrospector extends JacksonAnnotationIntrospector {
     public List<String> externalFilterClasses = Collections
             .synchronizedList(new ArrayList());
 

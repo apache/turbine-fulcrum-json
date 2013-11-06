@@ -21,7 +21,7 @@
 <componentConfig>
   <json>
   <annotationInspectors>
-      	<primary>org.apache.fulcrum.json.jackson.CustomIntrospector</primary>
+      	<primary>org.apache.fulcrum.json.jackson.SimpleNameIntrospector</primary>
         <secondary>com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector</secondary>
         <features>
           <feature value="false" type="com.fasterxml.jackson.databind.SerializationFeature">FAIL_ON_EMPTY_BEANS</feature>
