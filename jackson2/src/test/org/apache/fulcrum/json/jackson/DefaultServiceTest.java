@@ -22,6 +22,7 @@ package org.apache.fulcrum.json.jackson;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +30,6 @@ import java.util.Map;
 import org.apache.fulcrum.json.JsonService;
 import org.apache.fulcrum.json.Rectangle;
 import org.apache.fulcrum.json.TestClass;
-import org.apache.fulcrum.json.jackson.JacksonMapperTest.Bean;
 import org.apache.fulcrum.json.jackson.filters.CustomModuleWrapper;
 import org.apache.fulcrum.testcontainer.BaseUnitTest;
 
@@ -56,18 +56,11 @@ public class DefaultServiceTest extends BaseUnitTest {
     public void setUp() throws Exception {
         super.setUp();
         sc = (JsonService) this.lookup(JsonService.ROLE);
-
     }
 
     public void testSerialize() throws Exception {
         String serJson = sc.ser(new TestClass("mytest"));
         assertEquals("Serialization failed ", preDefinedOutput, serJson);
-    }
-
-    public void testDeSerialize() throws Exception {
-        String serJson = sc.ser(new TestClass("mytest"));
-        Object deson = sc.deSer(serJson, TestClass.class);
-        assertEquals("Serialization failed ", TestClass.class, deson.getClass());
     }
 
     public void testSerializeExclude00() throws Exception {
@@ -121,7 +114,7 @@ public class DefaultServiceTest extends BaseUnitTest {
     }
 
     // jackson serializes size too
-    public void testCollection() throws Exception {
+    public void testSerializeCollection() throws Exception {
         List<Rectangle> rectList = new ArrayList<Rectangle>();
         for (int i = 0; i < 10; i++) {
             Rectangle filteredRect = new Rectangle(i, i, "rect" + i);
@@ -162,7 +155,40 @@ public class DefaultServiceTest extends BaseUnitTest {
                 "collect ser",
                 "{'rect0':0,'rect1':1,'rect2':4,'rect3':9,'rect4':16,'rect5':25,'rect6':36,'rect7':49,'rect8':64,'rect9':81}",
                 adapterSer.replace('"', '\''));
+    }
+    
+    public void testMixinAdapter() throws Exception {
+        TestJsonSerializer tser = new TestJsonSerializer();
+        CustomModuleWrapper<TestClass> cmw = new CustomModuleWrapper<TestClass>(
+                tser, null);
+        sc.addAdapter("Collection Adapter", TestClass.class, cmw);
+        String adapterSer = sc.ser(new TestClass("mytest"));
+        assertEquals("failed adapter serialization:",
+                "{\"n\":\"mytest\",\"p\":\"Config.xml\",\"c\":[]}", adapterSer);
+    }
+    
+    public void testDeSerialize() throws Exception {
+        String serJson = sc.ser(new TestClass("mytest"));
+        Object deson = sc.deSer(serJson, TestClass.class);
+        assertEquals("Serialization failed ", TestClass.class, deson.getClass());
+    }
 
+    
+    public void testDeserializationCollection() throws Exception {
+        List<Rectangle> rectList = new ArrayList<Rectangle>(); 
+        for (int i = 0; i < 10; i++) {
+            Rectangle filteredRect = new Rectangle(i, i, "rect" + i);
+            rectList.add(filteredRect);
+        }
+        String serColl = sc.ser(rectList);
+
+        List typeRectList = new ArrayList(); //empty
+        Collection<Rectangle> resultList0 =  sc.deSerCollection(serColl, typeRectList, Rectangle.class);
+        
+        for (int i = 0; i < 10; i++) {
+            assertEquals("deser reread size failed", (i * i), ((List<Rectangle>)resultList0)
+                    .get(i).getSize());
+        }
     }
 
     public void testDeserializationTypeAdapterForCollection() throws Exception {
@@ -182,16 +208,6 @@ public class DefaultServiceTest extends BaseUnitTest {
             assertEquals("deser reread size failed", (i * i), resultList0
                     .get(i).getSize());
         }
-    }
-
-    public void testMixinAdapter() throws Exception {
-        TestJsonSerializer tser = new TestJsonSerializer();
-        CustomModuleWrapper<TestClass> cmw = new CustomModuleWrapper<TestClass>(
-                tser, null);
-        sc.addAdapter("Collection Adapter", TestClass.class, cmw);
-        String adapterSer = sc.ser(new TestClass("mytest"));
-        assertEquals("failed adapter serialization:",
-                "{\"n\":\"mytest\",\"p\":\"Config.xml\",\"c\":[]}", adapterSer);
     }
 
 }

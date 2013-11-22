@@ -39,6 +39,8 @@ import org.apache.fulcrum.json.jackson.filters.CustomModuleWrapper;
 import org.apache.fulcrum.json.jackson.filters.FilterContext;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonParser.Feature;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.AnnotationIntrospector;
@@ -72,8 +74,9 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
  * object).
  * 
  * Note: If using {@link SimpleNameIntrospector}, filters are set by class id, which are cached by default. 
- * By setting {@link #cacheFilters} to <code>false</code> each filter will be unregistered and the cache cleaned.
- * On the other hand, by setting the refresh parameterin method calls using {@link #filter(Object, Class, FilterContext, boolean, String...)} class filtering is done only on class level.
+ * By setting {@link #cacheFilters} to <code>false</code> each filter will be unregistered and cache cleaed.
+ * By setting the refresh parameter {@link #filter(Object, Class, FilterContext, boolean, String...)} on per-filter method call
+ * you could filter a class providing different properties.
  * 
  * @author gk
  * @version $Id$
@@ -144,14 +147,12 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
             getLogger().info("no serializable object:" + src);
             return serResult;
         } 
-        if (filters != null) {
-            getLogger().debug("ser class::" + src.getClass() + " with filters " + filters);
-            serResult = mapper.writer(filters).writeValueAsString(src);
-        } else {
+        if (filters == null) {
             getLogger().debug("ser class::" + src.getClass() + " without filters" +filters); 
-            serResult = ser(src);
-        }
-        return serResult;
+            return ser(src);
+        }    
+        getLogger().debug("ser class::" + src.getClass() + " with filters " + filters);
+        return mapper.writer(filters).writeValueAsString(src);
     }
 
     @Override
@@ -164,13 +165,18 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
 
         return reader.readValue(json);
     }
-
-    @SuppressWarnings("rawtypes")
-    public <T> T deSerCollection(String json,
-            Class<? extends Collection> collectionType, Class<T> type)
+    
+    public <T> Collection<T> deSerCollection2(String json, Class<? extends Collection> collectionClass, Class<T> type)
             throws Exception {
         return mapper.readValue(json, mapper.getTypeFactory()
-                .constructCollectionType(collectionType, type));
+                .constructCollectionType(collectionClass, type));
+    }
+    
+    @Override
+    public <T> Collection<T> deSerCollection(String json, Object collectionType, Class<T> type) 
+            throws Exception {
+        return mapper.readValue(json, mapper.getTypeFactory()
+                .constructCollectionType(((Collection<T>)collectionType).getClass(), type));
     }
 
     public void getJsonService() throws InstantiationException {
@@ -295,7 +301,10 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
         } else {
             filter = (SimpleFilterProvider) this.filters.get(filterClass
                     .getName());
+            //setCustomIntrospectorWithExternalFilterId(filterClass); // filter
+            // class
         }
+        getLogger().debug("set filter:"+ filter);
         return filter;
     }
 
@@ -486,7 +495,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
                 } catch (Exception e) {
                     throw new Exception(
                             "JsonMapperService: Error instantiating "
-                                    + featureType + " for " + featureKey);
+                                    + featureType + " for " + featureKey,e);
                 }
                 ConfigFeature feature = null;
                 if (featureKey != null && featureValue != null) {
@@ -541,6 +550,24 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
                                             + mapper.getSerializationConfig()
                                                     .isEnabled(
                                                             (MapperFeature) feature));
+                        } else if (configFeature.equals(JsonParser.class)) {
+                            Feature parserFeature = JsonParser.Feature.valueOf(featureKey);
+                            getLogger()
+                            .info("initializing parser feature: "
+                                    + parserFeature
+                                    + " with "
+                                    + featureValue);
+                            mapper.configure(parserFeature,
+                                    featureValue);
+                        } else if (configFeature.equals(JsonGenerator.class)) {
+                            com.fasterxml.jackson.core.JsonGenerator.Feature genFeature = JsonGenerator.Feature.valueOf(featureKey);
+                            getLogger()
+                            .info("initializing parser feature: "
+                                    + genFeature
+                                    + " with "
+                                    + featureValue);
+                            mapper.configure(genFeature,
+                                    featureValue);
                         }
                     } catch (Exception e) {
                         throw new Exception(
@@ -595,7 +622,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
         this.mapper = mapper;
     }
 
-    public final class MixinModule extends SimpleModule {
+    public static final class MixinModule extends SimpleModule {
         /**
          * 
          */
@@ -615,7 +642,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
         }
     }
 
-    public final class CustomModule<T> extends SimpleModule {
+    public static final class CustomModule<T> extends SimpleModule {
 
         private static final long serialVersionUID = 1L;
 

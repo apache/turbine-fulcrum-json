@@ -24,7 +24,8 @@
       	<primary>org.apache.fulcrum.json.jackson.CustomIntrospector</primary>
         <secondary>org.codehaus.jackson.xc.JaxbAnnotationIntrospector</secondary>
         <features>
-          <feature value="false">org.codehaus.jackson.map.SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS</feature>
+        <!--  support up to now only serializing features -->
+          <feature value="false">org.codehaus.jackson.map.SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS</feature> 
           <!-- feature value="true">org.codehaus.jackson.map.SerializationConfig.Feature.INDENT_OUTPUT</feature-->
         </features>
   </annotationInspectors>

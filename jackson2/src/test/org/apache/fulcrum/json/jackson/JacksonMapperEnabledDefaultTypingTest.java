@@ -149,7 +149,7 @@ public class JacksonMapperEnabledDefaultTypingTest extends BaseUnitTest {
         String result = sc.serializeOnlyFilter(beanList, Bean.class, "name",
                 "age");
         List<Bean> beanList2 = (List<Bean>) ((Jackson2MapperService) sc)
-                .deSerCollection(result, List.class, Bean.class);
+                .deSerCollection(result, beanList, Bean.class);
         assertTrue("DeSer failed ", beanList2.size() == 10);
         for (Bean bean : beanList2) {
             assertEquals("DeSer failed ", Bean.class, bean.getClass());
@@ -235,7 +235,7 @@ public class JacksonMapperEnabledDefaultTypingTest extends BaseUnitTest {
         String result = sc.addAdapter("M4RMixin", Bean.class, BeanMixin.class)
                 .ser(beanList);
         List<Bean> beanList2 = (List<Bean>) ((Jackson2MapperService) sc)
-                .deSerCollection(result, List.class, Bean.class);
+                .deSerCollection(result, beanList, Bean.class);
         assertTrue("DeSer failed ", beanList2.size() == 10);
         for (Bean bean : beanList2) {
             assertEquals("DeSer failed ", Bean.class, bean.getClass());
@@ -262,6 +262,7 @@ public class JacksonMapperEnabledDefaultTypingTest extends BaseUnitTest {
                 serRect.replace('"', '\''));
 
     }
+    
 
     // @JsonFilter("myFilter")
     static class Bean {

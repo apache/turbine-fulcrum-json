@@ -22,6 +22,7 @@ package org.apache.fulcrum.json.gson;
 import java.lang.reflect.Type;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
@@ -90,6 +91,15 @@ public class GSONBuilderService extends AbstractLogEnabled implements
         getLogger().debug("deser:" + json);
         return gson.create().fromJson(json, type);
     }
+    
+    @Override
+    public <T> Collection<T> deSerCollection(String json, Object collectionType,
+            Class<T> arg2) throws Exception {
+        getLogger().debug("deser:" + json);
+        getLogger().debug("collectionType:" + collectionType);
+        return  gson.create().fromJson(json, (Type)collectionType);
+    }
+    
 
     @Override
     public <T> String serializeOnlyFilter(Object src, Class<T> filterClass,

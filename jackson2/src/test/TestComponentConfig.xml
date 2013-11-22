@@ -26,7 +26,10 @@
         <features>
           <feature value="false" type="com.fasterxml.jackson.databind.SerializationFeature">FAIL_ON_EMPTY_BEANS</feature>
           <feature value="false" type="com.fasterxml.jackson.databind.DeserializationFeature">EAGER_DESERIALIZER_FETCH</feature>
+          <!--  do not fail of only getter is provided -->
+          <feature value="false" type="com.fasterxml.jackson.databind.DeserializationFeature">FAIL_ON_UNKNOWN_PROPERTIES</feature>          
           <feature value="false" type="com.fasterxml.jackson.databind.MapperFeature">ALLOW_FINAL_FIELDS_AS_MUTATORS</feature>
+          <feature value="true"  type="com.fasterxml.jackson.core.JsonParser">ALLOW_UNQUOTED_FIELD_NAMES</feature>
 
           <!-- feature value="true">com.fasterxml.jackson.databind.SerializationFeature.INDENT_OUTPUT</feature-->
         </features>

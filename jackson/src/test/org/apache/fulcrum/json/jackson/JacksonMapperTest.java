@@ -21,6 +21,7 @@ package org.apache.fulcrum.json.jackson;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -116,6 +117,24 @@ public class JacksonMapperTest extends BaseUnitTest {
         assertEquals("DeSer failed ", TestClass.class, deson.getClass());
     }
 
+//    public void testDeserializationCollection() throws Exception {
+//        List<Rectangle> rectList = new ArrayList<Rectangle>(); 
+//        for (int i = 0; i < 10; i++) {
+//            Rectangle filteredRect = new Rectangle(i, i, "rect" + i);
+//            rectList.add(filteredRect);
+//        }
+//        String serColl = sc.ser(rectList);
+//
+//        List<Rectangle> typeRectList = new ArrayList<Rectangle>(); //empty
+//        System.out.println("serColl:" + serColl);
+//        Collection<Rectangle> resultList0 =   sc.deSerCollection(serColl, typeRectList, Rectangle.class);
+//        
+//        for (int i = 0; i < 10; i++) {
+//            assertEquals("deser reread size failed", i , ((List<Rectangle>)resultList0)
+//                    .get(i).getW());
+//        }
+//    }
+    
     public void testMixins() throws Exception {
 
         Rectangle filteredRectangle = new Rectangle(5, 10);

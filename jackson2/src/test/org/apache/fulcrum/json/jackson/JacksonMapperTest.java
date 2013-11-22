@@ -21,6 +21,7 @@ package org.apache.fulcrum.json.jackson;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -134,7 +135,7 @@ public class JacksonMapperTest extends BaseUnitTest {
         String result = sc.serializeOnlyFilter(beanList, Bean.class, "name",
                 "age");
         List<Bean> beanList2 = (List<Bean>) ((Jackson2MapperService) sc)
-                .deSerCollection(result, List.class, Bean.class);
+                .deSerCollection2(result, List.class, Bean.class);
         assertTrue("DeSer failed ", beanList2.size() == 10);
         for (Bean bean : beanList2) {
             assertEquals("DeSer failed ", Bean.class, bean.getClass());
@@ -207,6 +208,27 @@ public class JacksonMapperTest extends BaseUnitTest {
                 result.replace('"', '\''));
     }
 
+    public void testDeSerUnQuotedObject() throws Exception {
+        String jsonString = "{name:\"joe\"}";
+        Bean result = sc.deSer(jsonString, Bean.class);
+        assertTrue("expected bean object!", result instanceof Bean);
+    }
+    
+    public void testDeserializationCollection2() throws Exception {
+        List<Rectangle> rectList = new ArrayList<Rectangle>(); 
+        for (int i = 0; i < 10; i++) {
+            Rectangle filteredRect = new Rectangle(i, i, "rect" + i);
+            rectList.add(filteredRect);
+        }
+        String serColl = sc.ser(rectList);
+        Collection<Rectangle> resultList0 =  ((Jackson2MapperService) sc) .deSerCollection2(serColl, ArrayList.class, Rectangle.class);
+        
+        for (int i = 0; i < 10; i++) {
+            assertEquals("deser reread size failed", (i * i), ((List<Rectangle>)resultList0)
+                    .get(i).getSize());
+        }
+    }
+    
     public void testDeSerializationCollectionWithMixin() throws Exception {
 
         List<Bean> beanList = new ArrayList<Bean>();
@@ -218,7 +240,7 @@ public class JacksonMapperTest extends BaseUnitTest {
         }
         String result = sc.addAdapter("M4RMixin", Bean.class, BeanMixin.class)
                 .ser(beanList);
-        Object beanList2 = ((Jackson2MapperService) sc).deSer(result,
+        Object beanList2 = sc.deSer(result,
                 List.class);
         assertTrue("DeSer failed ", beanList2 instanceof List);
         assertTrue("DeSer failed ", ((List) beanList2).size() == 10);

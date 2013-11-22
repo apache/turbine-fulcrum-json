@@ -20,6 +20,7 @@ package org.apache.fulcrum.json;
  */
 
 import java.text.DateFormat;
+import java.util.Collection;
 
 /**
  * JsonService defines methods needed to serialize and deserialize and hepler
@@ -68,7 +69,7 @@ public interface JsonService {
     <T> String ser(Object src, Class<T> type) throws Exception;
 
     /**
-     * Deserialzes a JSON string
+     * Deserializing a JSON string
      * 
      * @param src
      *            Tthe JSON string to be deserialized
@@ -81,6 +82,24 @@ public interface JsonService {
      *             if JSON deserialization fails
      */
     <T> T deSer(String src, Class<T> type) throws Exception;
+    
+    /**
+     * This is to deserialize collections. Depending on the implementation either both collectiontype and elementType is needed or 
+     * the elementType will be derived from the typed collectiontype.
+     * 
+     * @param json
+     *          The JSON string to be deserialized
+     * @param collectionType
+     *          A collection object, which will be used to derive the collection type. 
+     *          It could be just the collection or the typed collection. It may then be used to get the type for element type too.
+     *          Cft. implementation tests for more details (GSON). 
+     * @param elementType
+     *          The element type. This is need in any case to assure the generic checking.
+     * @return
+     * @throws Exception
+     */
+    <T> Collection<T> deSerCollection(String json, Object collectionType, Class<T> elementType) 
+            throws Exception;
 
     /**
      * @see #serializeOnlyFilter(Object, Class, boolean, String...).

@@ -19,9 +19,11 @@ package org.apache.fulcrum.json.gson;
  * under the License.
  */
 
+import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +32,8 @@ import org.apache.fulcrum.json.JsonService;
 import org.apache.fulcrum.json.Rectangle;
 import org.apache.fulcrum.json.TestClass;
 import org.apache.fulcrum.testcontainer.BaseUnitTest;
+
+import com.google.gson.reflect.TypeToken;
 
 /**
  * GSON JSON Test
@@ -60,12 +64,6 @@ public class DefaultServiceTest extends BaseUnitTest {
     public void testSerialize() throws Exception {
         String serJson = sc.ser(new TestClass("mytest"));
         assertEquals("Serialization failed ", preDefinedOutput, serJson);
-    }
-
-    public void testDeSerialize() throws Exception {
-        String serJson = sc.ser(new TestClass("mytest"));
-        Object deson = sc.deSer(serJson, TestClass.class);
-        assertEquals("Serialization failed ", TestClass.class, deson.getClass());
     }
 
     public void testSerializeExclude00() throws Exception {
@@ -116,7 +114,7 @@ public class DefaultServiceTest extends BaseUnitTest {
                 serJson.matches("\\{\"date\":\"\\d\\d/\\d\\d/\\d{4}\"\\}"));
     }
 
-    public void testCollection() throws Exception {
+    public void testSerializeCollection() throws Exception {
         List<Rectangle> rectList = new ArrayList<Rectangle>();
         for (int i = 0; i < 10; i++) {
             Rectangle filteredRect = new Rectangle(i, i, "rect" + i);
@@ -156,7 +154,34 @@ public class DefaultServiceTest extends BaseUnitTest {
                 "collect ser",
                 "{'rect0':0,'rect1':1,'rect2':4,'rect3':9,'rect4':16,'rect5':25,'rect6':36,'rect7':49,'rect8':64,'rect9':81}",
                 adapterSer.replace('"', '\''));
-
+    }
+    
+    public void testMixinAdapter() throws Exception {
+        sc.addAdapter("Test Adapter", TestClass.class, new TestJsonSerializer());
+        String adapterSer = sc.ser(new TestClass("mytest"));
+        assertEquals("failed adapter serialization:",
+                "{\"n\":\"mytest\",\"p\":\"Config.xml\",\"c\":[]}", adapterSer);
+    }
+    
+    public void testDeSerialize() throws Exception {
+        String serJson = sc.ser(new TestClass("mytest"));
+        Object deson = sc.deSer(serJson, TestClass.class);
+        assertEquals("Serialization failed ", TestClass.class, deson.getClass());
+    }
+   
+    public void testDeserializationCollection() throws Exception {
+        List<Rectangle> rectList = new ArrayList<Rectangle>();
+        for (int i = 0; i < 10; i++) {
+            Rectangle filteredRect = new Rectangle(i, i, "rect" + i);
+            rectList.add(filteredRect);
+        }
+        String serColl = sc.ser(rectList);
+        Type collectionType = new TypeToken<Collection<Rectangle>>() {}.getType();
+        List<Rectangle> resultList0 = (List<Rectangle>) ((org.apache.fulcrum.json.gson.GSONBuilderService)sc).deSerCollection(serColl, collectionType,Rectangle.class);
+        for (int i = 0; i < 10; i++) {
+            assertEquals("deser reread size failed", (i * i), resultList0
+                    .get(i).getSize());
+        }
     }
 
     public void testDeserializationTypeAdapterForCollection() throws Exception {
@@ -176,11 +201,5 @@ public class DefaultServiceTest extends BaseUnitTest {
         }
     }
 
-    public void testMixinAdapter() throws Exception {
-        sc.addAdapter("Test Adapter", TestClass.class, new TestJsonSerializer());
-        String adapterSer = sc.ser(new TestClass("mytest"));
-        assertEquals("failed adapter serialization:",
-                "{\"n\":\"mytest\",\"p\":\"Config.xml\",\"c\":[]}", adapterSer);
-    }
 
 }

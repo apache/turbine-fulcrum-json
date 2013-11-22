@@ -30,7 +30,7 @@
     <artifactId>fulcrum-json-parent</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>Fulcrum Json Master Build</name>
+    <name>Fulcrum JSON Master Build</name>
     <url>http://turbine.apache.org/fulcrum/fulcrum-json/</url>
     <scm>
       <connection>scm:svn:http://svn.apache.org/repos/asf/turbine/fulcrum/trunk/json/</connection>

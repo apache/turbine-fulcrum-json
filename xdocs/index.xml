@@ -42,8 +42,173 @@
       for generic applications.
     </p>
   </section>
+  
+  <section name="JSON Service with Jackson 2 API">
+    <subsection name="Overview">
+    <p>
+      This Service serves as a JSON serializer or deserializer using <a href="http://jackson.codehaus.org/">Jackson</a>. 
+    </p>
 
-  <section name="GSONBuilderService">
+    <p>
+      It is written
+      for use in Turbine but it can be used in any container compatible
+      with Avalon's ECM container.
+    </p>
+     </subsection>
+      <subsection name="Role Configuration">
+      <source><![CDATA[
+  <role
+        name="org.apache.fulcrum.json.JsonService"
+        shorthand="json"
+        default-class="org.apache.fulcrum.json.jackson.Jackson2MapperService"/>
+]]></source>
+    </subsection>
+     <subsection name="Component Configuration">
+      <table>
+        <tr>
+          <th>Item</th>
+          <th>Datatype</th>
+          <th>Cardinality</th>
+          <th>Description</th>
+        </tr>
+        <tr>
+          <td>annotationInspectors</td>
+          <td>Complex</td>
+          <td>[0|1]</td>
+          <td>
+            If empty just <code>com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector</code> is set as annotation introspector. Otherwise you could provide a primary and (optionally) a secondary introspector. Setting the special introspector
+            <code>org.apache.fulcrum.json.jackson.SimpleNameIntrospector</code> yields property and class name based filtering. See the configuration example below and in <a href="#velocity">section</a>. Features could be set to <code>false</code> or <code>true</code> by setting the attribute <b>value</b> of the sub element feature. The feature attribute <b>type</b> should be the class name of any sub interface of <code>com.fasterxml.jackson.databind.cfg.ConfigFeature</code>. The element content itself defines any feature (enum value) for this feature. Cft. the configuration example below.
+          </td>
+        </tr>
+        <tr>
+          <td>dateFormat</td>
+          <td>String</td>
+          <td>[0|*]</td>
+          <td>
+            If set changes the date format. The provided string should be in a format acceptable to the class <code>java.text.SimpleDateFormat.SimpleDateFormat(String)</code>. The default value is
+            <code>MM/dd/yyyy</code>. 
+          </td>
+        </tr>
+        <tr>
+          <td>defaultTyping</td>
+          <td>String</td>
+          <td>[0|*]</td>
+          <td>
+            The default is no defaultTyping. Otherwise set it to a Jackson 2 enum value in class <code>com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping</code>.
+          </td>
+        </tr>
+        <tr>
+          <td>cacheFilters</td>
+          <td>boolean</td>
+          <td>[0|*]</td>
+          <td>
+            If set to <code>true</code>, caching is not enabled. Each filter applied remains valid and is not removed.
+            This implicits, that you cannot retrieve for the same class/Bean other properties in another call.
+            You could then invalidate (refresh) the cache per class. Cft. the <code>filter*(t)</code> methods with <code>refreshfilter</code> property. The default value is <code>true</code>. 
+          </td>
+        </tr>
+      </table>
+    </subsection>
+    <subsection name="Component Configuration Example">
+      <source><![CDATA[
+<json>
+  <annotationInspectors>
+      	<primary>org.apache.fulcrum.json.jackson.CustomIntrospector</primary>
+        <secondary>com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector</secondary>
+        <features>
+          <feature value="false" type="com.fasterxml.jackson.databind.SerializationFeature">FAIL_ON_EMPTY_BEANS</feature>
+          <feature value="false" type="com.fasterxml.jackson.databind.DeserializationFeature">EAGER_DESERIALIZER_FETCH</feature>
+          <feature value="false" type="com.fasterxml.jackson.databind.MapperFeature">ALLOW_FINAL_FIELDS_AS_MUTATORS</feature>
+
+          <!-- feature value="true">com.fasterxml.jackson.databind.SerializationFeature.INDENT_OUTPUT</feature-->
+        </features>
+  </annotationInspectors>
+   <dateFormat>MM/dd/yyyy</dateFormat>
+   <defaultTyping type="NON_FINAL" key="type"/><!-- or e.g.  OBJECT_AND_NON_CONCRETE -->
+   <!-- cacheFilters>false</cacheFilters>
+  </json>
+]]></source>
+    </subsection>
+    <subsection name="Usage">
+    <p>
+    You get a JSON service from the service like this:
+    </p>
+
+    <source><![CDATA[
+JsonService jsonService = (JsonService)TurbineServices
+        .getInstance().getService(JsonService.ROLE);
+]]></source>
+
+    <p>
+    </p>
+  </subsection>
+  <subsection name="Usage in Velocity Template" id="velocity">
+    <p>
+    A lot of client data is nowadays provided by javascript and usage of Model-View-View Model (MVVM) frameworks is very popular. Having the required data in JSON format would be of some help.
+    Velocity provides the integration of Java objects into templates (HTML). To generate in this context
+    the data which should be exposed into Javascript you could integrate the provided serialization methods here, in the velocity context. As an example, you could provide it via the Turbine Pull service: 
+    </p>   
+    <source><![CDATA[
+    public Object getJson(Object src, String className, boolean refresh, String... props ) {
+        String result= null;
+        jsonService = (JsonService)TurbineServices.getInstance().getService(JsonService.ROLE);
+        try
+        {
+            Class clazz = Class.forName(className);
+            result = jsonService.serializeOnlyFilter( src, clazz, refresh, props );
+        }
+        catch ( Exception e )
+        {
+            log.error(e.getMessage(),e );
+        }
+        return result;        
+    }
+]]></source>
+     You could then call the json method from this tool in a velocity template like this:
+     
+     <source><![CDATA[
+    #set ($json =   $!pullTool.getJson($items, "x.y.z.Item", true, "prop1", "prop2", "prop3" ) )
+    
+    ## parse json in javascript ....
+]]></source>
+     What you get is the JSON data populated with all the fields you need (depending on serialization parameters the format may vary).
+    
+    <h4>Configuration Requirements</h4>
+    <p>
+    Add <code>org.apache.fulcrum.json.jackson.SimpleNameIntrospector</code> to the annotation inspectors as primary or secondary inspector. Of course annotations are still valid, as the Introspector extends JacksonAnnotationIntrospector and additionally calls the super class methods in its overwritten methods.
+    </p>
+   </subsection>
+
+    <subsection name="Integration of JSON to Object Deserialization" id="deser">
+    <p>
+    This could be done just by providing the JSON data as client parameter to a JSON-RPC-Service function (cft. services->JSON-RPC-Service). As an example for the function:
+    </p>   
+    <source><![CDATA[
+      // class is registered in screen
+      public <T> void deSerJsonItem(String src ) {
+            JsonService jsonService = (JsonService)TurbineServices
+            .getInstance().getService(JsonService.ROLE);
+            try
+            {
+                Item result = jsonService.deSer( src, Item.class );
+                // do something with result
+            }
+            catch ( Exception e )
+            {
+                log.error(e.getMessage(),e );
+            }       
+        }       
+      }
+]]></source>
+     You could then call the JSON method in Javascript like this:
+     <source><![CDATA[
+       jsonrpc.myFunctions.deSerJsonUser( JSON.stringify(jsonuser) );
+]]></source>
+    </subsection>
+ 
+  </section>
+
+  <section name="JSON Service with GSO API">
     <subsection name="Role Configuration">
       <source><![CDATA[
     <role
@@ -53,7 +218,10 @@
       ]]></source>
     </subsection>
 
+      <subsection name="jackson2">
+      </subsection>
   </section>
+  
 
 </body>
 </document>

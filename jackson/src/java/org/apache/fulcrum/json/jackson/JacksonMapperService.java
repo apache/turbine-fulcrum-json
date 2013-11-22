@@ -128,6 +128,13 @@ public class JacksonMapperService extends AbstractLogEnabled implements
         ObjectReader reader = mapper.reader(type);
         return reader.readValue(src);
     }
+    
+    @Override
+    public <T> Collection<T> deSerCollection(String json,
+            Object collectionType, Class<T> elementType) throws Exception {
+        return mapper.readValue(json, mapper.getTypeFactory()
+                .constructCollectionType(((Collection<T>)collectionType).getClass(), elementType));
+    }
 
     public <T> T deSer(String json, Class<? extends Collection> collectionType,
             Class<T> type) throws Exception {

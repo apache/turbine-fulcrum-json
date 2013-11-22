@@ -98,8 +98,10 @@ public class SimpleNameIntrospector extends JacksonAnnotationIntrospector {
     }
 
     public void removeExternalFilterClass(Class externalFilterClass) {
-        if (externalFilterClasses.contains(externalFilterClass.getName())) {
-            externalFilterClasses.remove(externalFilterClass.getName());
+        synchronized(externalFilterClasses) {
+            if (externalFilterClasses.contains(externalFilterClass.getName())) {
+                externalFilterClasses.remove(externalFilterClass.getName());
+            }
         }
     }
 

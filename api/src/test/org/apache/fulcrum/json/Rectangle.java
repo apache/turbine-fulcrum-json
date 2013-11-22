@@ -1,9 +1,13 @@
 package org.apache.fulcrum.json;
 
 public final class Rectangle {
-    final private int w, h;
+    private int w, h;
     private String name;
-
+ 
+    public Rectangle() {
+        // may be this is needed for deserialization, if not set otherwise
+    }
+    
     public Rectangle(int w, int h) {
         this.w = w;
         this.h = h;
