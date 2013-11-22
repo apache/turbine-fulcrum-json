@@ -151,7 +151,6 @@ JsonService jsonService = (JsonService)TurbineServices
     <source><![CDATA[
     public Object getJson(Object src, String className, boolean refresh, String... props ) {
         String result= null;
-        jsonService = (JsonService)TurbineServices.getInstance().getService(JsonService.ROLE);
         try
         {
             Class clazz = Class.forName(className);
@@ -186,8 +185,6 @@ JsonService jsonService = (JsonService)TurbineServices
     <source><![CDATA[
       // class is registered in screen
       public <T> void deSerJsonItem(String src ) {
-            JsonService jsonService = (JsonService)TurbineServices
-            .getInstance().getService(JsonService.ROLE);
             try
             {
                 Item result = jsonService.deSer( src, Item.class );
@@ -202,7 +199,7 @@ JsonService jsonService = (JsonService)TurbineServices
 ]]></source>
      You could then call the JSON method in Javascript like this:
      <source><![CDATA[
-       jsonrpc.myFunctions.deSerJsonUser( JSON.stringify(jsonuser) );
+       jsonrpc.myFunctions.deSerJsonItem( JSON.stringify(jsonitem) );
 ]]></source>
     </subsection>
  
