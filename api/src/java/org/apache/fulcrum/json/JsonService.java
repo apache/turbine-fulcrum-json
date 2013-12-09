@@ -128,7 +128,7 @@ public interface JsonService {
      * @throws Exception
      *             if JSON serialization or filter registration fails
      */
-    public <T> String serializeOnlyFilter(Object src, Class<T> filterClass, boolean refreshFilter,
+    public <T> String serializeOnlyFilter(Object src, Class<T> filterClass, Boolean refreshFilter,
             String... filterAttr) throws Exception;
 
     /**
@@ -152,7 +152,7 @@ public interface JsonService {
      *             if JSON serialization or filter registration fails
      */
     public <T> String serializeAllExceptFilter(Object src,
-            Class<T> filterClass, boolean refreshFilter, String... filterAttr) throws Exception;
+            Class<T> filterClass, Boolean refreshFilter, String... filterAttr) throws Exception;
     
     /** 
      * @see #serializeAllExceptFilter(Object, Class, boolean, String...)

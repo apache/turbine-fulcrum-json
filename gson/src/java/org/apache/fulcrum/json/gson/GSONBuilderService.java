@@ -109,7 +109,7 @@ public class GSONBuilderService extends AbstractLogEnabled implements
     
     @Override
     public <T> String serializeOnlyFilter(Object arg0, Class<T> arg1,
-            boolean arg2, String... arg3) throws Exception {
+            Boolean arg2, String... arg3) throws Exception {
         throw new Exception("Not yet implemented!");
     }
 
@@ -135,7 +135,7 @@ public class GSONBuilderService extends AbstractLogEnabled implements
     
     @Override
     public <T> String serializeAllExceptFilter(Object src, Class<T> filterClass,
-            boolean arg2, String... filterAttr) throws Exception {
+            Boolean arg2, String... filterAttr) throws Exception {
         return gson
                 .addSerializationExclusionStrategy(
                         exclude(filterClass, filterAttr)).create().toJson(src);

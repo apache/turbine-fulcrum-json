@@ -233,7 +233,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
     }
 
     public synchronized <T> String serializeAllExceptFilter(Object src,
-            Class<T> filterClass, boolean refresh, String... filterAttr) throws Exception {
+            Class<T> filterClass, Boolean refresh, String... filterAttr) throws Exception {
         FilterContext fc = new FilterContext();
         if (filterAttr != null)
             fc.setFilter(SimpleBeanPropertyFilter
@@ -249,7 +249,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
 
     @Override
     public synchronized <T> String serializeOnlyFilter(Object src,
-            Class<T> filterClass, boolean refresh, String... filterAttr) throws Exception {
+            Class<T> filterClass, Boolean refresh, String... filterAttr) throws Exception {
         FilterContext fc = new FilterContext();
         if (filterAttr != null && filterAttr.length > 0)
             fc.setFilter(SimpleBeanPropertyFilter.filterOutAllExcept(filterAttr));
