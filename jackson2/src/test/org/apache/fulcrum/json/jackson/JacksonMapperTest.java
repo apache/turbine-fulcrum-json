@@ -272,6 +272,28 @@ public class JacksonMapperTest extends BaseUnitTest {
                 "DeSer failed ",
                 "[{'width':25},{'width':250},{'name':'joe0'},{'name':'joe1'},{'name':'joe2'}]",
                 serRect.replace('"', '\''));
+        
+        // adding h and name for first two items, adding width for beans
+        String deSerTest = "[{\"width\":25,\"age\":99, \"h\":50,\"name\":\"rect1\"},{\"width\":250,\"name\":\"rect2\"},{\"name\":\"joe0\"},{\"name\":\"joe1\"},{\"name\":\"joe2\"}]";
+        
+        List typeRectList = new ArrayList(); //empty
+        // could not use Mixins here, but Adapters are still set
+        Collection<Rectangle> resultList0 =  sc.deSerCollection(deSerTest, typeRectList, Rectangle.class);
+        System.out.println("resultList0 class:" +resultList0.getClass());
+        for (int i = 0; i < 5; i++) {
+            // name and h should be null as it is ignored,  cft. Mixin
+            assertTrue(((List<Rectangle>)resultList0).get(i).getName()==null);
+            assertTrue(((List<Rectangle>)resultList0).get(i).getH()==0);
+        }
+        // could not use Mixins here, but Adapters are still set
+        Collection<Bean> resultList1 =  sc.deSerCollection(deSerTest, typeRectList, Bean.class);
+        System.out.println("resultList1 class:" +resultList1.getClass());
+        for (int i = 0; i < 5; i++) {
+            System.out.println("resultList1 "+i+ " name:"+((List<Bean>)resultList1).get(i).getName());
+            // name should NOT be null, age should be ignored, cft. BeanMixin
+            assertTrue(((List<Bean>)resultList1).get(i).getName()!=null);
+            assertTrue(((List<Bean>)resultList1).get(i).getAge()==0);
+        }
     }
 
     // @JsonFilter("myFilter")

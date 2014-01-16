@@ -124,13 +124,8 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
 
     @Override
     public <T> String ser(Object src, Class<T> type) throws Exception {
-        if (src == null) {
-            getLogger().info("no serializable object:" + src + " for type "+ type);
-            return null;
-        } else {
-            getLogger().debug("ser class::" + src.getClass() + " with type" + type);
-        }
-        if (filters.containsKey(src.getClass().getName())) {
+        getLogger().info("serializing object:" + src + " for type "+ type);
+        if (src != null && filters.containsKey(src.getClass().getName())) {
             getLogger()
                     .warn("Found registered filter - could not use custom view and custom filter for class:"
                             + src.getClass().getName());
@@ -138,7 +133,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
             // Exception("Found registered filter - could not use custom view and custom filter for class:"+
             // src.getClass().getName());
         }
-        return mapper.writerWithView(type).writeValueAsString(src);
+        return (type != null)? mapper.writerWithView(type).writeValueAsString(src): mapper.writeValueAsString(src);
     }
 
     public <T> String ser(Object src, FilterProvider filters) throws Exception {
@@ -258,17 +253,16 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
 
     private <T> String filter(Object src, Class<T> filterClass,
             FilterContext fc,  boolean refresh, String... filterAttr) throws Exception {
-        if (src == null) {
-            getLogger().info("no serializable object:" + src + " for filterClass "+ filterClass);
-            return null;
-        }
-        FilterProvider filter = checkFilter(fc, src.getClass(), filterClass,
+        FilterProvider filter = null;
+        if (src != null) {
+            filter = checkFilter(fc, src.getClass(), filterClass,
                 filterAttr);
+        }
         getLogger().info("filtering with filter "+ filter);
         String serialized = ser(src, filter);
         if (!cacheFilters || refresh) {
             removeFilter(filterClass);
-            removeFilter(src.getClass());
+            if (src != null) removeFilter(src.getClass());
         }
         return serialized;
     }
