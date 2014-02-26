@@ -31,11 +31,11 @@
     <description>Fulcrum JSON Basic API</description>
     <url>http://turbine.apache.org/fulcrum/fulcrum-json/fulcrum-json-api</url>
 
-    <!--scm>
+    <scm>
         <connection>scm:svn:http://svn.apache.org/repos/asf/turbine/fulcrum/trunk/json/api/</connection>
         <developerConnection>scm:svn:https://svn.apache.org/repos/asf/turbine/fulcrum/trunk/json/api/</developerConnection>
         <url>http://svn.apache.org/viewcvs/turbine/fulcrum/trunk/json/api/</url>
-    </scm-->
+    </scm>
 
     <dependencies>
         <dependency>

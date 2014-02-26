@@ -42,9 +42,9 @@
     <!-- Required for staging to work -->
      <distributionManagement>
     <site>
-        <id>apache.website</id>
+        <id>turbine.apache.org</id>
         <name>Fulcrum JSON Website</name>
-        <url>${fulcrum.deployment.protocol}://people.apache.org/www/turbine.apache.org/fulcrum/fulcrum-json/</url>
+        <url>http://turbine.apache.org/fulcrum/fulcrum-json/</url>
       </site>    
      </distributionManagement>      
 
@@ -82,6 +82,56 @@
     <build>
         <sourceDirectory>${basedir}/src/java</sourceDirectory>
         <testSourceDirectory>${basedir}/src/test</testSourceDirectory>
+        <plugins>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-scm-publish-plugin</artifactId>
+              <configuration>
+                <content>${siteContent.path}</content>
+                <tryUpdate>false</tryUpdate>
+              </configuration>
+            </plugin>
+        </plugins>
     </build>
+    
+     <profiles>
+        <profile>
+            <id>apache-release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <!-- build the source and binary distribution packages -->
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>fulcrum-source-release-assembly</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>single</goal>
+                                </goals>
+                                <configuration>
+                                    <runOnlyAtExecutionRoot>true</runOnlyAtExecutionRoot>
+                                    <descriptorRefs>
+                                        <descriptorRef>bin</descriptorRef>
+                                        <descriptorRef>project</descriptorRef>
+                                        <descriptorRef>src</descriptorRef>
+                                    </descriptorRefs>
+                                    <tarLongFileFormat>gnu</tarLongFileFormat>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
+  <properties>
+    <turbine.site.path>fulcrum/fulcrum-json</turbine.site.path>
+        <turbine.scmPubCheckoutDirectory>${turbine.site.cache}/fulcrum/json</turbine.scmPubCheckoutDirectory>
+        <turbine.site.cache>${project.build.directory}/turbine-sites</turbine.site.cache>
+        <siteContent.path>${project.build.directory}/staging</siteContent.path><!-- default stagingSiteURL -->
+  </properties> 
+    
 </project>

@@ -43,24 +43,31 @@
     </p>
   </section>
   
-  <section name="JSON Service with Jackson 2 API">
+  <section name="JSON Service Component with Jackson API">
     <subsection name="Overview">
     <p>
-      This Service serves as a JSON serializer or deserializer using <a href="http://jackson.codehaus.org/">Jackson</a>. 
+      This Service serves as a JSON serializer or deserializer using <a href="https://github.com/FasterXML/jackson">Jackson</a> Version 2 or Version 1.
     </p>
 
     <p>
-      It is written
-      for use in Turbine but it can be used in any container compatible
+      It is written for use in Turbine but it can be used in any container compatible
       with Avalon's ECM container.
     </p>
      </subsection>
       <subsection name="Role Configuration">
+      <p>Jackson Version 2.2.1</p>
       <source><![CDATA[
   <role
         name="org.apache.fulcrum.json.JsonService"
         shorthand="json"
         default-class="org.apache.fulcrum.json.jackson.Jackson2MapperService"/>
+]]></source>
+      <p>Jackson Version 1.9.13</p>
+      <source><![CDATA[
+  <role
+        name="org.apache.fulcrum.json.JsonService"
+        shorthand="json"
+        default-class="org.apache.fulcrum.json.jackson.JacksonMapperService"/>
 ]]></source>
     </subsection>
      <subsection name="Component Configuration">
@@ -149,7 +156,7 @@ JsonService jsonService = (JsonService)TurbineServices
     the data which should be exposed into Javascript you could integrate the provided serialization methods here, in the velocity context. As an example, you could provide it via the Turbine Pull service: 
     </p>   
     <source><![CDATA[
-    public Object getJson(Object src, String className, boolean refresh, String... props ) {
+    public Object getJson(Object src, String className, Boolean refresh, String... props ) {
         String result= null;
         try
         {
@@ -205,7 +212,7 @@ JsonService jsonService = (JsonService)TurbineServices
  
   </section>
 
-  <section name="JSON Service with GSO API">
+  <section name="JSON Service Component with GSON API">
     <subsection name="Role Configuration">
       <source><![CDATA[
     <role
@@ -214,9 +221,59 @@ JsonService jsonService = (JsonService)TurbineServices
         default-class="org.apache.fulcrum.json.gson.GSONBuilderService"/>
       ]]></source>
     </subsection>
+    <subsection name="Component Configuration">
+      <table>
+        <tr>
+          <th>Item</th>
+          <th>Datatype</th>
+          <th>Cardinality</th>
+          <th>Description</th>
+        </tr>
+        <tr>
+          <td>globalAdapters</td>
+          <td>Complex</td>
+          <td>[0|1]</td>
+          <td>
+            If not set no adapter is set. Otherwise provide for each sub element <code>adapter</code> the class name of the adapter and set the attribute <code>forClass</code> to the class name the adapter should be applied. See the configuration example below. 
+          </td>
+        </tr>
+        <tr>
+          <td>dateFormat</td>
+          <td>String</td>
+          <td>[0|*]</td>
+          <td>
+            If set changes the date format. Provided string should be in a Format acceptable to the class <code>java.text.SimpleDateFormat.SimpleDateFormat(String)</code>. The default value is
+            <code>MM/dd/yyyy</code>. 
+          </td>
+        </tr>
+      </table>
+    </subsection>
 
-      <subsection name="jackson2">
-      </subsection>
+    <subsection name="Component Configuration Example">
+      <source><![CDATA[
+  <json>
+    <dateFormat>MM/dd/yyyy</dateFormat>
+    <globalAdapters>>
+      <adapter forClass="x.y.z.Class">a.b.c.d.AdapterForClassXYZ</adapter-->
+    </globalAdapters>
+  </json>
+]]></source>
+    </subsection>
+    
+      <subsection name="Usage">
+    <p>
+    You get a JSON service from the service like this:
+    </p>
+
+    <source><![CDATA[
+JsonService jsonService = (JsonService)TurbineServices
+        .getInstance().getService(JsonService.ROLE);
+]]></source>
+
+    <p>
+    </p>
+  </subsection>
+
   </section>
   
 
