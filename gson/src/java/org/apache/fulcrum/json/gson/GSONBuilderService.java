@@ -113,6 +113,11 @@ public class GSONBuilderService extends AbstractLogEnabled implements
         throw new Exception("Not yet implemented!");
     }
 
+    /**
+     * registering an adapter 
+     * 
+     * @see GsonBuilder#registerTypeAdapter(Type, Object)
+     */
     @Override
     public JsonService addAdapter(String name, Class target, Object adapter)
             throws Exception {
@@ -120,6 +125,12 @@ public class GSONBuilderService extends AbstractLogEnabled implements
         return this;
     }
 
+    /**
+     * registering an adapter. Unregistering could be only done by reinitialize {@link GsonBuilder} 
+     * using @link {@link GSONBuilderService#initialize()}, although a new Adapter with the same target overwrites the previously defined.
+     * 
+     * @see GsonBuilder#registerTypeAdapter(Type, Object)
+     */
     @Override
     public JsonService addAdapter(String name, Class target, Class adapter)
             throws Exception {
@@ -266,5 +277,6 @@ public class GSONBuilderService extends AbstractLogEnabled implements
             }
         }.init(clazz, filterAttrs);
     }
+    
 
 }

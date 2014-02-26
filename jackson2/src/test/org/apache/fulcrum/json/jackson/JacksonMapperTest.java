@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.avalon.framework.activity.Initializable;
 import org.apache.avalon.framework.logger.ConsoleLogger;
 import org.apache.avalon.framework.logger.Logger;
 import org.apache.fulcrum.json.JsonService;
@@ -293,6 +294,14 @@ public class JacksonMapperTest extends BaseUnitTest {
             // name should NOT be null, age should be ignored, cft. BeanMixin
             assertTrue(((List<Bean>)resultList1).get(i).getName()!=null);
             assertTrue(((List<Bean>)resultList1).get(i).getAge()==0);
+        }
+        ((Initializable)sc).initialize();// reinit to default settings
+        Collection<Rectangle> resultList3 =  sc.deSerCollection(deSerTest, typeRectList, Rectangle.class);
+        // h should be set again without Mixin
+        assertTrue(((List<Rectangle>)resultList3).get(0).getH()!=0);
+        for (int i = 0; i < 5; i++) {
+            // name should be set without Mixin
+            assertTrue(((List<Rectangle>)resultList3).get(i).getName()!=null);
         }
     }
 

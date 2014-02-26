@@ -164,7 +164,8 @@ public interface JsonService {
 
     /**
      * Adds an adapter (mixin, serializer,..) for the target class depending on
-     * the JsonService implementation
+     * the JsonService implementation.
+     * Cft. to {@link #addAdapter(String, Class, Object)}
      * 
      * @param name
      *            A name for the adapter
@@ -183,7 +184,9 @@ public interface JsonService {
 
     /**
      * Adds an adapter (mixin, serializer,..) for the target class depending on
-     * the JsonService implementation
+     * the JsonService implementation. Adapters could by default not deregistered. If you want
+     * to get rid of it, you have to (@see {@link #reInitService()} (or overwrite with the same target type, depending on
+     * implementation) 
      * 
      * @param name
      *            A name for the adapter

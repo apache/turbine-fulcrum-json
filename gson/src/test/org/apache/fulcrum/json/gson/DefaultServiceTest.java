@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.avalon.framework.activity.Initializable;
 import org.apache.fulcrum.json.JsonService;
 import org.apache.fulcrum.json.Rectangle;
 import org.apache.fulcrum.json.TestClass;
@@ -161,6 +162,11 @@ public class DefaultServiceTest extends BaseUnitTest {
         String adapterSer = sc.ser(new TestClass("mytest"));
         assertEquals("failed adapter serialization:",
                 "{\"n\":\"mytest\",\"p\":\"Config.xml\",\"c\":[]}", adapterSer);
+        //System.out.println("adapterSer:"+adapterSer);
+        ((Initializable)sc).initialize(); //reinit
+        String defaultSer = sc.ser(new TestClass("mytest"));
+        assertEquals("failed adapter serialization:",
+                "{\"container\":{\"cf\":\"Config.xml\"},\"configurationName\":\"Config.xml\",\"name\":\"mytest\"}", defaultSer);
     }
     
     public void testDeSerialize() throws Exception {
