@@ -23,7 +23,7 @@ import java.text.DateFormat;
 import java.util.Collection;
 
 /**
- * JsonService defines methods needed to serialize and deserialize and hepler
+ * This class defines methods needed to serialize and deserialize and helper
  * methos if needed.
  * 
  * Some methods expect a class parameter.
@@ -33,7 +33,7 @@ import java.util.Collection;
  * <code>Class clazz = Class.forName(className);</code> for the parameter.
  * 
  * 
- * @author gk
+ * @author <a href="mailto:gk@apache.org">Georg Kallidis</a>
  * @version $Id$
  */
 public interface JsonService {
@@ -90,7 +90,6 @@ public interface JsonService {
      * @param json
      *          The JSON string to be deserialized
      * @param collectionType
-     *          A collection object, which will be used to derive the collection type. 
      *          It could be just the collection or the typed collection. It may then be used to get the type for element type too.
      *          Cft. implementation tests for more details (GSON). 
      * @param elementType
@@ -118,7 +117,7 @@ public interface JsonService {
      *            The class to which the filtering should be applied
      *            
      * @param refreshFilter
-     *             refresh Filter (clean cache for this filerClass)
+     *             refresh filter (clean cache for this filterClass)
      *  
      * @param filterAttr
      *            The class bean attributes which should be serialized
@@ -141,7 +140,7 @@ public interface JsonService {
      *            same class, just the filterAttributes get applied. If not the
      *            class is filtered out, if found as a property type.
      * @param refreshFilter
-     *            refresh Filter (clean cache for this filerClass)      
+     *            refresh filter (clean cache for this filterClass)      
      * 
      * @param filterAttr
      *            The bean attributes which should not be serialized
@@ -194,7 +193,7 @@ public interface JsonService {
      *            The target class for this adapter
      * @param mixin
      *            The adapter/mixin for the target object
-     *            (serializer/deserializer)
+     *            (module/serializer/deserializer)
      * 
      * @return JsonService
      * 

@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.avalon.framework.activity.Initializable;
@@ -43,6 +44,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonParser.Feature;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.Version;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.AnnotationIntrospector;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonDeserializer;
@@ -78,7 +80,7 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
  * By setting the refresh parameter {@link #filter(Object, Class, FilterContext, boolean, String...)} on per-filter method call
  * you could filter a class providing different properties.
  * 
- * @author gk
+ * @author <a href="mailto:gk@apache.org">Georg Kallidis</a>
  * @version $Id$
  * 
  */
@@ -167,12 +169,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
                 .constructCollectionType(collectionClass, type));
     }
     
-    @Override
-    public <T> Collection<T> deSerCollection(String json, Object collectionType, Class<T> type) 
-            throws Exception {
-        return mapper.readValue(json, mapper.getTypeFactory()
-                .constructCollectionType(((Collection<T>)collectionType).getClass(), type));
-    }
+
 
     public void getJsonService() throws InstantiationException {
     }
@@ -434,7 +431,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
 
     @Override
     public void initialize() throws Exception {
-        mapper = new ObjectMapper();
+        mapper = new ObjectMapper(null, null, null);// add configurable JsonFactory,.. later?
 
         Enumeration<String> enumKey = annotationInspectors.keys();
         while (enumKey.hasMoreElements()) {
@@ -658,4 +655,16 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
             mapper.configure(SerializationFeature.FLUSH_AFTER_WRITE_VALUE, true);
     }
 
+    @Override
+    public <T> Collection<T> deSerCollection(String json,
+            Object collectionType, Class<T> elementType) throws Exception {
+        if (collectionType instanceof TypeReference) {
+            return mapper.readValue(json, (TypeReference)collectionType);
+        } else {
+            return mapper.readValue(json, mapper.getTypeFactory()
+                    .constructCollectionType(((Collection<T>)collectionType).getClass(), elementType));            
+        }
+
+    }
+    
 }

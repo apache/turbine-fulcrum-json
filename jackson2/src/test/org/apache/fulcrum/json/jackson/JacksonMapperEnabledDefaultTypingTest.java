@@ -35,6 +35,7 @@ import org.apache.fulcrum.testcontainer.BaseUnitTest;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
 
 /**
@@ -96,7 +97,10 @@ public class JacksonMapperEnabledDefaultTypingTest extends BaseUnitTest {
     public void testDeSerializeDate() throws Exception {
         Map<String, Date> map = new HashMap<String, Date>();
         map.put("date", Calendar.getInstance().getTime());
-        String serJson = ((Jackson2MapperService) sc).ser(map, Map.class);
+        String serJson0 =  sc.ser(map);
+        System.out.println("serJson0:"+ serJson0);
+        String serJson =  sc.ser(map, Map.class);
+        System.out.println("serJsonwithmap:"+ serJson);
         Map<String, Date> serDate = (Map<String, Date>) sc.deSer(serJson,
                 Map.class);
         assertEquals("Date DeSer failed ", Date.class, serDate.get("date")
@@ -148,8 +152,9 @@ public class JacksonMapperEnabledDefaultTypingTest extends BaseUnitTest {
         }
         String result = sc.serializeOnlyFilter(beanList, Bean.class, "name",
                 "age");
+        TypeReference typeRef = new TypeReference<List<Bean>>(){};
         List<Bean> beanList2 = (List<Bean>) ((Jackson2MapperService) sc)
-                .deSerCollection(result, beanList, Bean.class);
+                .deSerCollection(result, typeRef, Bean.class);
         assertTrue("DeSer failed ", beanList2.size() == 10);
         for (Bean bean : beanList2) {
             assertEquals("DeSer failed ", Bean.class, bean.getClass());
@@ -234,8 +239,10 @@ public class JacksonMapperEnabledDefaultTypingTest extends BaseUnitTest {
         }
         String result = sc.addAdapter("M4RMixin", Bean.class, BeanMixin.class)
                 .ser(beanList);
+        //System.out.println("result:::"+ result);
+        TypeReference typeRef = new TypeReference<List<Bean>>(){};
         List<Bean> beanList2 = (List<Bean>) ((Jackson2MapperService) sc)
-                .deSerCollection(result, beanList, Bean.class);
+                .deSerCollection(result, typeRef, Bean.class);
         assertTrue("DeSer failed ", beanList2.size() == 10);
         for (Bean bean : beanList2) {
             assertEquals("DeSer failed ", Bean.class, bean.getClass());

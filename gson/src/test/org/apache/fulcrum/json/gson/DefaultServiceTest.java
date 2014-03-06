@@ -199,8 +199,7 @@ public class DefaultServiceTest extends BaseUnitTest {
             rectList.add(filteredRect);
         }
         String adapterSer = sc.ser(rectList);
-        ArrayList<Rectangle> resultList0 = sc
-                .deSer(adapterSer, ArrayList.class);
+        ArrayList<Rectangle> resultList0 = sc.deSer(adapterSer, ArrayList.class);
         for (int i = 0; i < 10; i++) {
             assertEquals("deser reread size failed", (i * i), resultList0
                     .get(i).getSize());

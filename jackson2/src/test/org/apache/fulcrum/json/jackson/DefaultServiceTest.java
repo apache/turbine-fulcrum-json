@@ -33,6 +33,8 @@ import org.apache.fulcrum.json.TestClass;
 import org.apache.fulcrum.json.jackson.filters.CustomModuleWrapper;
 import org.apache.fulcrum.testcontainer.BaseUnitTest;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+
 /**
  * Jackson 2 JSON Test
  * 
@@ -181,10 +183,11 @@ public class DefaultServiceTest extends BaseUnitTest {
             rectList.add(filteredRect);
         }
         String serColl = sc.ser(rectList);
+        //System.out.println("serColl:" +serColl);
 
-        List typeRectList = new ArrayList(); //empty
-        Collection<Rectangle> resultList0 =  sc.deSerCollection(serColl, typeRectList, Rectangle.class);
-        
+        TypeReference typeRef = new TypeReference<List<Rectangle>>(){};
+        Collection<Rectangle> resultList0 =  sc.deSerCollection(serColl, typeRef, Rectangle.class);
+        //System.out.println("resultList0 class:" +resultList0.getClass());
         for (int i = 0; i < 10; i++) {
             assertEquals("deser reread size failed", (i * i), ((List<Rectangle>)resultList0)
                     .get(i).getSize());
