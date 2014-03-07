@@ -67,7 +67,7 @@ public class DefaultServiceTest extends BaseUnitTest {
         assertEquals("Serialization failed ", preDefinedOutput, serJson);
     }
 
-    public void testSerializeExclude00() throws Exception {
+    public void testSerializeExcludeNothing() throws Exception {
         String serJson = sc.serializeAllExceptFilter(new TestClass("mytest"),
                 (Class) null, (String[]) null);
         assertEquals(
@@ -76,6 +76,7 @@ public class DefaultServiceTest extends BaseUnitTest {
                 serJson);
     }
 
+    // deep exclude?!
     public void testSerializeExcludeClass() throws Exception {
         String serJson = sc.serializeAllExceptFilter(new TestClass("mytest"),
                 String.class, (String[]) null);

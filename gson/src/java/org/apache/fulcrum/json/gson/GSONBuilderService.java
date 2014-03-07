@@ -94,7 +94,7 @@ public class GSONBuilderService extends AbstractLogEnabled implements
     
     @Override
     public <T> Collection<T> deSerCollection(String json, Object collectionType,
-            Class<T> arg2) throws Exception {
+            Class<T> elementType) throws Exception {
         getLogger().debug("deser:" + json);
         getLogger().debug("collectionType:" + collectionType);
         return  gson.create().fromJson(json, (Type)collectionType);

@@ -101,7 +101,7 @@ public interface JsonService {
             throws Exception;
 
     /**
-     * @see #serializeOnlyFilter(Object, Class, boolean, String...).
+     * @see #serializeOnlyFilter(Object, Class, Boolean, String...).
      * 
      * <code>refreshFilter</code> is <code>false</code>.
      */
@@ -154,7 +154,7 @@ public interface JsonService {
             Class<T> filterClass, Boolean refreshFilter, String... filterAttr) throws Exception;
     
     /** 
-     * @see #serializeAllExceptFilter(Object, Class, boolean, String...)
+     * @see #serializeAllExceptFilter(Object, Class, Boolean, String...)
      * 
      * <code>refreshFilter</code> is <code>false</code>.
      */
