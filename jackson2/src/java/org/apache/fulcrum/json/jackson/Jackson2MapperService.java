@@ -23,12 +23,10 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.avalon.framework.activity.Initializable;
 import org.apache.avalon.framework.configuration.Configurable;
@@ -112,44 +110,34 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
 
     @Override
     public String ser(Object src) throws Exception {
-        if (filters.containsKey(src.getClass().getName())) {
-            getLogger().warn(
-                    "Found registered filter - using instead of default view filter for class:"
-                            + src.getClass().getName());
-            // throw new
-            // Exception("Found registered filter - could not use custom view and custom filter for class:"+
-            // src.getClass().getName());
-        }
-        return mapper.writerWithView(Object.class).writeValueAsString(src);
-        // return mapper.writer().writeValueAsString(src);
+        return ser(src, false);
     }
 
     @Override
     public <T> String ser(Object src, Class<T> type) throws Exception {
-        getLogger().info("serializing object:" + src + " for type "+ type);
-        if (src != null && filters.containsKey(src.getClass().getName())) {
-            getLogger()
-                    .warn("Found registered filter - could not use custom view and custom filter for class:"
-                            + src.getClass().getName());
-            // throw new
-            // Exception("Found registered filter - could not use custom view and custom filter for class:"+
-            // src.getClass().getName());
-        }
-        return (type != null)? mapper.writerWithView(type).writeValueAsString(src): mapper.writeValueAsString(src);
+       return ser(src, type, false);
     }
 
-    public <T> String ser(Object src, FilterProvider filters) throws Exception {
+    public <T> String ser(Object src, FilterProvider filter) throws Exception {
+        return ser(src, filter, false);
+    }
+    
+    public <T> String ser(Object src, FilterProvider filter, Boolean cleanCache) throws Exception {
         String serResult= null;
         if (src == null) {
             getLogger().info("no serializable object:" + src);
             return serResult;
         } 
-        if (filters == null) {
-            getLogger().debug("ser class::" + src.getClass() + " without filters" +filters); 
+        if (filter == null) {
+            getLogger().debug("ser class::" + src.getClass() + " without filter " +filter); 
             return ser(src);
         }    
-        getLogger().debug("ser class::" + src.getClass() + " with filters " + filters);
-        return mapper.writer(filters).writeValueAsString(src);
+        getLogger().debug("ser class::" + src.getClass() + " with filter " + filter);
+        String res =  mapper.writer(filter).writeValueAsString(src);
+        if (cleanCache) {
+            cleanSerializerCache();
+        }
+        return res;
     }
 
     @Override
@@ -174,20 +162,33 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
     public void getJsonService() throws InstantiationException {
     }
 
+    /**
+     * @param name name of the module
+     * @param target target class
+     * @param mixin provide mixin as class. 
+     *      Deregistering module could be only done by setting this parameter to null.
+     * 
+     * @see #addAdapter(String, Class, Object)
+     */
     @Override
     public JsonService addAdapter(String name, Class target, Class mixin)
             throws Exception {
         Module mx = new MixinModule(name, target, mixin);
-        getLogger().debug("registering module " + mx + "  for: " + mixin);
+        getLogger().debug("registering unversioned simple mixin module named " + name + " of type " + mixin + "  for: " + target);
         mapper.registerModule(mx);
         return this;
     }
 
     /**
+     * Add a named module
+     * 
+     * @param name name of the module
+     * 
+     * @param target target class
      * 
      * @param module
      *            Either an Jackson Module @link {@link Module} or an custom
-     *            wrapper @link CustomModuleWrapper.
+     *            wrapper @link CustomModuleWrapper. 
      * 
      * @see JsonService#addAdapter(String, Class, Object)
      */
@@ -198,7 +199,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
             CustomModuleWrapper cmw = (CustomModuleWrapper) module;
             Module cm = new CustomModule(name, target, cmw.getSer(),
                     cmw.getDeSer());
-            getLogger().debug("registering module " + cm + "  for: " + target);
+            getLogger().debug("registering custom module " + cm + "  for: " + target);
             mapper.registerModule(cm);
         } else if (module instanceof Module) {
             getLogger().debug(
@@ -225,12 +226,12 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
     }
 
     public synchronized <T> String serializeAllExceptFilter(Object src,
-            Class<T> filterClass, Boolean refresh, String... filterAttr) throws Exception {
+            Class<T> filterClass, Boolean clean, String... filterAttr) throws Exception {
         FilterContext fc = new FilterContext();
         if (filterAttr != null)
             fc.setFilter(SimpleBeanPropertyFilter
                     .serializeAllExcept(filterAttr));
-        return filter(src, filterClass, fc, refresh, filterAttr);
+        return filter(src, filterClass, fc, clean, filterAttr);
     }
     
     @Override
@@ -243,13 +244,58 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
     public synchronized <T> String serializeOnlyFilter(Object src,
             Class<T> filterClass, Boolean refresh, String... filterAttr) throws Exception {
         FilterContext fc = new FilterContext();
-        if (filterAttr != null && filterAttr.length > 0)
+        if (filterAttr != null && filterAttr.length > 0) {
             fc.setFilter(SimpleBeanPropertyFilter.filterOutAllExcept(filterAttr));
+            getLogger().debug("setting filteroutAllexcept filter for size of filterAttr: " + filterAttr.length);
+        }
         return filter(src, filterClass, fc, refresh, filterAttr);
     }
+    
+    @Override
+    public String ser(Object src, Boolean cleanCache) throws Exception {
+        if (filters.containsKey(src.getClass().getName())) {
+            getLogger().warn(
+                    "Found registered filter - using instead of default view filter for class:"
+                            + src.getClass().getName());
+            // throw new
+            // Exception("Found registered filter - could not use custom view and custom filter for class:"+
+            // src.getClass().getName());
+            SimpleFilterProvider filter = (SimpleFilterProvider) this.filters.get(src.getClass()
+                    .getName());
+            return ser(src, filter);//mapper.writerWithView(src.getClass()).writeValueAsString(src);
+        }
+        String res = mapper.writerWithView(Object.class).writeValueAsString(src);
+        if (cleanCache) {
+            cleanSerializerCache();
+        }
+        return res;
+    }
+
+    @Override
+    public <T> String ser(Object src, Class<T> type, Boolean cleanCache)
+            throws Exception {
+        getLogger().info("serializing object:" + src + " for type "+ type);
+        if (src != null && filters.containsKey(src.getClass().getName())) {
+            getLogger()
+                    .warn("Found registered filter - could not use custom view and custom filter for class:"
+                            + src.getClass().getName());
+            // throw new
+            // Exception("Found registered filter - could not use custom view and custom filter for class:"+
+            // src.getClass().getName());
+            SimpleFilterProvider filter = (SimpleFilterProvider) this.filters.get(src.getClass()
+                    .getName());
+            return ser(src, filter);
+        }
+
+        String res = (type != null)? mapper.writerWithView(type).writeValueAsString(src): mapper.writeValueAsString(src);
+        if (cleanCache) {
+            cleanSerializerCache();
+        }
+        return res;
+    }  
 
     private <T> String filter(Object src, Class<T> filterClass,
-            FilterContext fc,  boolean refresh, String... filterAttr) throws Exception {
+            FilterContext fc,  boolean clean, String... filterAttr) throws Exception {
         FilterProvider filter = null;
         if (src != null) {
             filter = checkFilter(fc, src.getClass(), filterClass,
@@ -257,7 +303,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
         }
         getLogger().info("filtering with filter "+ filter);
         String serialized = ser(src, filter);
-        if (!cacheFilters || refresh) {
+        if (!cacheFilters || clean) {
             removeFilter(filterClass);
             if (src != null) removeFilter(src.getClass());
         }
@@ -282,7 +328,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
     private <T> SimpleFilterProvider retrieveFilter(SimpleFilterProvider filter, FilterContext fc,
             Class<T> filterClass, String... filterAttr) {
         if (!this.filters.containsKey(filterClass.getName())) {
-            getLogger().debug("add filter for class" + filterClass.getName());
+            getLogger().debug("add filter for class " + filterClass.getName());
             if (fc.getFilter() != null) {
                 filter.addFilter(filterClass.getName(), fc.getFilter());
             }
@@ -308,20 +354,24 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
                     .get(filterClass.getName());
             smpfilter.removeFilter(filterClass.getName());
             this.filters.remove(filterClass.getName());
-            if (mapper.getSerializerProvider() instanceof DefaultSerializerProvider) {
-                int cachedSerProvs = ((DefaultSerializerProvider) mapper
-                        .getSerializerProvider()).cachedSerializersCount();
-                if (cachedSerProvs > 0) {
-                    getLogger()
-                            .debug("flushing cachedSerializersCount:"
-                                    + cachedSerProvs);
-                    ((DefaultSerializerProvider) mapper.getSerializerProvider())
-                            .flushCachedSerializers();
-                }
-            }
+            cleanSerializerCache();
             getLogger().debug(
                     "removed from  SimpleFilterProvider filters "
                             + filterClass.getName());
+        }
+    }
+    
+    private void cleanSerializerCache() {
+        if (mapper.getSerializerProvider() instanceof DefaultSerializerProvider) {
+            int cachedSerProvs = ((DefaultSerializerProvider) mapper
+                    .getSerializerProvider()).cachedSerializersCount();
+            if (cachedSerProvs > 0) {
+                getLogger()
+                        .debug("flushing cachedSerializersCount:"
+                                + cachedSerProvs);
+                ((DefaultSerializerProvider) mapper.getSerializerProvider())
+                        .flushCachedSerializers();
+            }
         }
     }
 
@@ -588,8 +638,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
 
         mapper.setDateFormat(new SimpleDateFormat(dateFormat));
 
-        filters = Collections
-                .synchronizedMap(new HashMap<String, FilterProvider>());
+        filters = new ConcurrentHashMap<String, FilterProvider>();
         getLogger().debug("initialized mapper:" + mapper);
 
         mapper.getSerializerProvider().setNullValueSerializer(
@@ -665,6 +714,5 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
                     .constructCollectionType(((Collection<T>)collectionType).getClass(), elementType));            
         }
 
-    }
-    
+    } 
 }

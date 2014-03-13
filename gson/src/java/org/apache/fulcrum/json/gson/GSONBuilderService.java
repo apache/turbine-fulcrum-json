@@ -28,6 +28,7 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Iterator;
 
 import org.apache.avalon.framework.activity.Initializable;
 import org.apache.avalon.framework.configuration.Configurable;
@@ -38,6 +39,7 @@ import org.apache.fulcrum.json.JsonService;
 
 import com.google.gson.ExclusionStrategy;
 import com.google.gson.FieldAttributes;
+import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
@@ -104,7 +106,9 @@ public class GSONBuilderService extends AbstractLogEnabled implements
     @Override
     public <T> String serializeOnlyFilter(Object src, Class<T> filterClass,
             String... filterAttr) throws Exception {
-        throw new Exception("Not yet implemented!");
+        return  gson
+        .addSerializationExclusionStrategy(
+                include(filterClass, filterAttr)).create().toJson(src);
     }
     
     @Override
@@ -141,15 +145,26 @@ public class GSONBuilderService extends AbstractLogEnabled implements
     @Override
     public <T> String serializeAllExceptFilter(Object src,
             Class<T> filterClass, String... filterAttr) throws Exception {
-        return serializeAllExceptFilter(src, filterClass, false, filterAttr);
+        return gson
+                .addSerializationExclusionStrategy(
+                        exclude(filterClass, filterAttr)).create().toJson(src);
     }
     
     @Override
     public <T> String serializeAllExceptFilter(Object src, Class<T> filterClass,
-            Boolean arg2, String... filterAttr) throws Exception {
-        return gson
-                .addSerializationExclusionStrategy(
-                        exclude(filterClass, filterAttr)).create().toJson(src);
+            Boolean clearCache, String... filterAttr) throws Exception {
+        throw new Exception("Not yet implemented!");
+    }
+    
+    @Override
+    public String ser(Object src, Boolean refreshCache) throws Exception {
+        throw new Exception("Not implemented!");
+    }
+
+    @Override
+    public <T> String ser(Object src, Class<T> type, Boolean refreshCache)
+            throws Exception {
+        throw new Exception("Not implemented!");
     }
 
     public JsonService registerTypeAdapter(JsonSerializer serdeser, Type type) {
@@ -277,6 +292,52 @@ public class GSONBuilderService extends AbstractLogEnabled implements
             }
         }.init(clazz, filterAttrs);
     }
+    
+    private ExclusionStrategy include(Class clazz, String... filterAttrs) {
+        return new ExclusionStrategy() {
+
+            private Class<?> includeThisClass;
+            private HashSet<String> includedAttributes;
+
+            private ExclusionStrategy init(Class<?> includeThisClass,
+                    String... filterAttrs) {
+                this.includeThisClass = includeThisClass;
+                if (filterAttrs != null) {
+                    this.includedAttributes = new HashSet<String>(
+                            filterAttrs.length);
+                    getLogger().debug(" ... adding includedAttributes:" + filterAttrs.length);
+                    Collections.addAll(this.includedAttributes, filterAttrs);
+                    for (String includedAttribute : includedAttributes) {
+                        getLogger().debug("includedAttribute:" +includedAttribute);
+                    }
+                } else
+                    this.includedAttributes = new HashSet<String>();
+
+                return this;
+            }
+
+            /**
+             * skip is current class is not equal provided class
+             */
+            @Override
+            public boolean shouldSkipClass(Class<?> clazz) {
+                getLogger().debug(includeThisClass+ ": comparing include class:" + clazz);
+                return (includeThisClass != null) ? !includeThisClass
+                        .equals(clazz) : false;
+            }
+
+            /**
+             * skip if current field attribute is not included are skip else
+             */
+            @Override
+            public boolean shouldSkipField(FieldAttributes paramFieldAttributes) { 
+                return (!includedAttributes.isEmpty()) ? !this.includedAttributes
+                        .contains(paramFieldAttributes.getName()) : true;        
+
+            }
+        }.init(clazz, filterAttrs);
+    }
+
     
 
 }

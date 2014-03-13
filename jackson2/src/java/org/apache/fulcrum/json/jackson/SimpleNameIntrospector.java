@@ -19,9 +19,8 @@ package org.apache.fulcrum.json.jackson;
  * under the License.
  */
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.fasterxml.jackson.databind.introspect.AnnotatedClass;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
@@ -38,8 +37,7 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
  * 
  */
 public class SimpleNameIntrospector extends JacksonAnnotationIntrospector {
-    public List<String> externalFilterClasses = Collections
-            .synchronizedList(new ArrayList());
+    public List<String> externalFilterClasses = new CopyOnWriteArrayList<String>();
 
     /**
      * Filtering on method types
@@ -98,11 +96,9 @@ public class SimpleNameIntrospector extends JacksonAnnotationIntrospector {
     }
 
     public void removeExternalFilterClass(Class externalFilterClass) {
-        synchronized(externalFilterClasses) {
             if (externalFilterClasses.contains(externalFilterClass.getName())) {
                 externalFilterClasses.remove(externalFilterClass.getName());
             }
-        }
     }
 
 }

@@ -206,6 +206,45 @@ public class DefaultServiceTest extends BaseUnitTest {
                     .get(i).getSize());
         }
     }
+    
+    public void testSerializeWithMixinAndFilter2() throws Exception {
+        Rectangle filteredRectangle = new Rectangle(5, 10);
+        filteredRectangle.setName("jim");
+        //
+        sc.addAdapter("M4RMixin2", Rectangle.class,
+                TypeAdapterForRectangle.class);
+        
+        // as gson adds all kind, we could not easiy use multiple strategies
+        String rectangle = sc.ser(filteredRectangle);
+        assertEquals(
+                "Ser filtered Rectangle failed ",
+                "{\"name\":\"jim\",\"width\":5}",
+                rectangle); 
+    }
+    
+    public void testSerializeWithMixinAndFilter3() throws Exception {
+
+        // as gson adds we could not use multiple disjunct exclusion strategies
+        String serJson = sc.serializeOnlyFilter(new TestClass("mytest"),
+                (Class) null, "configurationName");
+        assertEquals("Serialization failed ",
+                "{\"configurationName\":\"Config.xml\"}",
+                serJson);        
+    }
+    
+    public void testSerializeWithMixinAndFilter4() throws Exception {
+
+        // as gson adds we could not use multiple disjunct exclusion strategies
+        Rectangle filteredRectangle = new Rectangle(5, 10);
+        filteredRectangle.setName("jim");
+        String rectangle = sc.serializeOnlyFilter(filteredRectangle, (Class) null, "w");
+        assertEquals(
+                "Ser filtered Rectangle failed ",
+                "{\"w\":5}",
+                rectangle);
+        
+    }
+
 
 
 }

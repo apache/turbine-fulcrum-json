@@ -91,6 +91,23 @@ public class JacksonMapperService extends AbstractLogEnabled implements
 
     @Override
     public synchronized String ser(Object src) throws Exception {
+        return ser(src, false);
+    }
+
+    @Override
+    public <T> String ser(Object src, Class<T> type) throws Exception {
+        return ser(src, type, false);
+    }
+
+    public synchronized <T> String ser(Object src, FilterProvider filters)
+            throws Exception {
+        getLogger().debug("ser::" + src + " with filters " + filters);
+        String serResult = mapper.writer(filters).writeValueAsString(src);
+        return serResult;
+    }
+    
+    @Override
+    public String ser(Object src, Boolean cleanCache) throws Exception {
         if (filters.containsKey(src.getClass().getName())) {
             getLogger().warn(
                     "Found registered filter - using instead of default view filter for class:"
@@ -103,7 +120,8 @@ public class JacksonMapperService extends AbstractLogEnabled implements
     }
 
     @Override
-    public <T> String ser(Object src, Class<T> type) throws Exception {
+    public <T> String ser(Object src, Class<T> type, Boolean cleanCache)
+            throws Exception {
         getLogger().debug("ser::" + src + " with type" + type);
         if (filters.containsKey(src.getClass().getName())) {
             getLogger()
@@ -114,13 +132,6 @@ public class JacksonMapperService extends AbstractLogEnabled implements
             // src.getClass().getName());
         }
         return mapper.writerWithView(type).writeValueAsString(src);
-    }
-
-    public synchronized <T> String ser(Object src, FilterProvider filters)
-            throws Exception {
-        getLogger().debug("ser::" + src + " with filters " + filters);
-        String serResult = mapper.writer(filters).writeValueAsString(src);
-        return serResult;
     }
 
     @Override

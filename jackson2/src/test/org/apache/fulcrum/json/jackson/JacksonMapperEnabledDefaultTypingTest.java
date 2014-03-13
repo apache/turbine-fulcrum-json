@@ -200,15 +200,76 @@ public class JacksonMapperEnabledDefaultTypingTest extends BaseUnitTest {
         Rectangle filteredRectangle = new Rectangle(5, 10);
         filteredRectangle.setName("jim");
 
-        String serRect = sc.addAdapter("M4RMixin2", Rectangle.class,
+       String serRect =  sc.addAdapter("M4RMixin2", Rectangle.class,
                 Mixin2.class).ser(filteredRectangle);
         assertEquals("Ser failed ", "{\"name\":\"jim\",\"width\":5}", serRect);
 
-        String bean = sc.serializeOnlyFilter(filteredBean, Bean.class, "name");
+        //
+        String bean = sc.addAdapter("M4RBeanMixin", Bean.class,
+                BeanMixin.class).ser(filteredBean);;
+        
         assertEquals(
                 "Ser filtered Bean failed ",
                 "{\"type\":\"org.apache.fulcrum.json.jackson.JacksonMapperEnabledDefaultTypingTest$Bean\",\"name\":\"joe\"}",
                 bean);
+    }
+    
+    public void testSerializeWithMixinAndFilter() throws Exception {
+        Bean filteredBean = new Bean();
+        filteredBean.setName("joe");
+        //
+        sc.addAdapter("M4RBeanMixin", Bean.class,
+                BeanMixin.class);
+        // profession was already set to ignore, does not change
+        String bean = sc.serializeOnlyFilter(filteredBean, Bean.class, "profession");
+        assertEquals(
+                "Ser filtered Bean failed ",
+                "{\"type\":\"org.apache.fulcrum.json.jackson.JacksonMapperEnabledDefaultTypingTest$Bean\"}",
+                bean);
+    }
+    
+    public void testSerializeWithUnregisteredMixinAndFilter() throws Exception {
+        Bean filteredBean = new Bean();
+        filteredBean.setName("joe");
+        //
+        sc.addAdapter("M4RBeanMixin", Bean.class,
+                BeanMixin.class)
+        .addAdapter("M4RBeanMixin", Bean.class,
+                null);
+        // now profession is used after cleaning adapter
+        String bean = sc.serializeOnlyFilter(filteredBean, Bean.class, "profession");
+        assertEquals(
+                "Ser filtered Bean failed ",
+                "{\"type\":\"org.apache.fulcrum.json.jackson.JacksonMapperEnabledDefaultTypingTest$Bean\",\"profession\":\"\"}",
+                bean);
+    }
+
+    public void testSerializeWithMixinAndFilter2() throws Exception {
+        Rectangle filteredRectangle = new Rectangle(5, 10);
+        filteredRectangle.setName("jim");
+        //
+        sc.addAdapter("M4RMixin2", Rectangle.class,
+                Mixin2.class);
+        
+        // if serialization is done this way, filtering has no effect. 
+        // this is may be a bug in Jackson: as mixin modules may be cached..?  
+        String rectangle0 = sc.ser(filteredRectangle,Rectangle.class,true);
+        assertEquals(
+                "Ser filtered Rectangle failed ",
+                "{\"name\":\"jim\",\"width\":5}",
+                rectangle0);
+        // filtering out name, using width from mixin2 as a second filter
+        String rectangle = sc.serializeOnlyFilter(filteredRectangle, Rectangle.class, true, "width");
+        assertEquals(
+                "Ser filtered Rectangle failed ",
+                "{\"width\":5}",
+                rectangle);
+        // default for mixin
+       String rectangle1 = sc.ser(filteredRectangle);
+       assertEquals(
+              "Ser filtered Rectangle failed ",
+              "{\"name\":\"jim\",\"width\":5}",
+              rectangle1);
     }
 
     public void testSerializationCollectionWithMixin() throws Exception {

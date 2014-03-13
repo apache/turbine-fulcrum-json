@@ -52,6 +52,17 @@ public interface JsonService {
      *             if JSON serialization fails
      */
     String ser(Object src) throws Exception;
+    
+    /**
+     * @param src
+     *              The java object to be serialized.
+     * @param refreshCache 
+     *              If <code>true</code>, try to refresh cache after serialization
+     * 
+     * For other attributes @see {@link #ser(Object)}
+
+     */
+    String ser(Object src, Boolean cleanCache) throws Exception;
 
     /**
      * Serializes a Java object
@@ -64,9 +75,20 @@ public interface JsonService {
      * @return JSON string
      * 
      * @throws Exception
-     *             if JSON serialization fails
+     *             If JSON serialization fails
      */
     <T> String ser(Object src, Class<T> type) throws Exception;
+    
+    /**
+     * 
+     * @param src
+     * @param type
+     * @param refreshCache 
+     *          If <code>true</code>, try to clean cache after serialization
+     * 
+     * For other attributes @see {@link #ser(Object, Class)}
+     */
+    <T> String ser(Object src, Class<T> type, Boolean cleanCache) throws Exception;
 
     /**
      * Deserializing a JSON string
@@ -103,21 +125,21 @@ public interface JsonService {
     /**
      * @see #serializeOnlyFilter(Object, Class, Boolean, String...).
      * 
-     * <code>refreshFilter</code> is <code>false</code>.
+     * <code>refreshFilter</code> is set to <code>false</code> for this method call.
      */
     public <T> String serializeOnlyFilter(Object src, Class<T> filterClass,
             String... filterAttr) throws Exception;
     
     /**
-     * Serialize only object properties where filters attributes are provided
+     * Serialize only object properties where filter attributes are provided
      * 
      * @param src
      *            The Java object to serialize
      * @param filterClass
      *            The class to which the filtering should be applied
      *            
-     * @param refreshFilter
-     *             refresh filter (clean cache for this filterClass)
+     * @param cleanFilter
+     *             clean filter (clean cache for this filterClass) if <code>true</code>,  after serialization.
      *  
      * @param filterAttr
      *            The class bean attributes which should be serialized
@@ -127,7 +149,7 @@ public interface JsonService {
      * @throws Exception
      *             if JSON serialization or filter registration fails
      */
-    public <T> String serializeOnlyFilter(Object src, Class<T> filterClass, Boolean refreshFilter,
+    public <T> String serializeOnlyFilter(Object src, Class<T> filterClass, Boolean cleanFilter,
             String... filterAttr) throws Exception;
 
     /**
@@ -139,8 +161,8 @@ public interface JsonService {
      *            The class to which the filtering should be applied. If its the
      *            same class, just the filterAttributes get applied. If not the
      *            class is filtered out, if found as a property type.
-     * @param refreshFilter
-     *            refresh filter (clean cache for this filterClass)      
+     * @param cleanFilter
+     *            refresh filter (clean cache for this filterClass) after serialization.      
      * 
      * @param filterAttr
      *            The bean attributes which should not be serialized
@@ -151,7 +173,7 @@ public interface JsonService {
      *             if JSON serialization or filter registration fails
      */
     public <T> String serializeAllExceptFilter(Object src,
-            Class<T> filterClass, Boolean refreshFilter, String... filterAttr) throws Exception;
+            Class<T> filterClass, Boolean cleanFilter, String... filterAttr) throws Exception;
     
     /** 
      * @see #serializeAllExceptFilter(Object, Class, Boolean, String...)
@@ -182,9 +204,9 @@ public interface JsonService {
             throws Exception;
 
     /**
-     * Adds an adapter (mixin, serializer,..) for the target class depending on
+     * Add an adapter (mixin, serializer,..) for the target class depending on
      * the JsonService implementation. Adapters could by default not deregistered. If you want
-     * to get rid of it, you have to (@see {@link #reInitService()} (or overwrite with the same target type, depending on
+     * to get rid of them, you have to (@see {@link #reInitService()} (or overwrite with the same target type, depending on
      * implementation) 
      * 
      * @param name
