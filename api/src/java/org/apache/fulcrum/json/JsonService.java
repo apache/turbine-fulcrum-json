@@ -59,8 +59,6 @@ public interface JsonService {
      * @param refreshCache 
      *              If <code>true</code>, try to refresh cache after serialization
      * 
-     * For other attributes @see {@link #ser(Object)}
-
      */
     String ser(Object src, Boolean cleanCache) throws Exception;
 
@@ -70,7 +68,7 @@ public interface JsonService {
      * @param src
      *            The java object to be serialized
      * @param type
-     *            Type, which should be used for the provided object .
+     *            Java Type, which should be used for the provided object .
      * 
      * @return JSON string
      * 
@@ -96,7 +94,7 @@ public interface JsonService {
      * @param src
      *            Tthe JSON string to be deserialized
      * @param type
-     *            The java type to be used as a class
+     *            The Java Type to be used as a class
      * 
      * @return an object
      * 
@@ -162,7 +160,7 @@ public interface JsonService {
      *            same class, just the filterAttributes get applied. If not the
      *            class is filtered out, if found as a property type.
      * @param cleanFilter
-     *            refresh filter (clean cache for this filterClass) after serialization.      
+     *            clean filter (clean cache for this filterClass) after serialization.      
      * 
      * @param filterAttr
      *            The bean attributes which should not be serialized

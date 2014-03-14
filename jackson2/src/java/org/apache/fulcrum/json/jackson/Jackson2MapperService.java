@@ -66,17 +66,17 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 /**
- * Jackson 2 Impl of @link {@link JsonService}.
+ * Jackson 2 Impl of {@link JsonService}.
  * 
  * 
  * By default multiple serialization of the same object in a single thread is
- * not support (e.g filter + mixin or default + filter for the same bean /
+ * not supported (e.g filter + mixin or default + filter for the same bean /
  * object).
  * 
  * Note: If using {@link SimpleNameIntrospector}, filters are set by class id, which are cached by default. 
  * By setting {@link #cacheFilters} to <code>false</code> each filter will be unregistered and the cache cleaned.
- * By setting the refresh parameter {@link #filter(Object, Class, FilterContext, boolean, String...)} on per-filter method call
- * you could filter a class providing different properties.
+ * By setting the Boolean parameter clean {@link #filter(Object, Class, FilterContext, Boolean, String...)} 
+ * you could filter a class differently for each call.
  * 
  * @author <a href="mailto:gk@apache.org">Georg Kallidis</a>
  * @version $Id$
@@ -295,7 +295,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
     }  
 
     private <T> String filter(Object src, Class<T> filterClass,
-            FilterContext fc,  boolean clean, String... filterAttr) throws Exception {
+            FilterContext fc,  Boolean clean, String... filterAttr) throws Exception {
         FilterProvider filter = null;
         if (src != null) {
             filter = checkFilter(fc, src.getClass(), filterClass,
