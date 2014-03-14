@@ -94,39 +94,6 @@
         </plugins>
     </build>
     
-     <profiles>
-        <profile>
-            <id>apache-release</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <!-- build the source and binary distribution packages -->
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-assembly-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>fulcrum-source-release-assembly</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>single</goal>
-                                </goals>
-                                <configuration>
-                                    <runOnlyAtExecutionRoot>true</runOnlyAtExecutionRoot>
-                                    <descriptorRefs>
-                                        <descriptorRef>bin</descriptorRef>
-                                        <descriptorRef>project</descriptorRef>
-                                        <descriptorRef>src</descriptorRef>
-                                    </descriptorRefs>
-                                    <tarLongFileFormat>gnu</tarLongFileFormat>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
-
   <properties>
     <turbine.site.path>fulcrum/fulcrum-json</turbine.site.path>
         <turbine.scmPubCheckoutDirectory>${turbine.site.cache}/fulcrum/json</turbine.scmPubCheckoutDirectory>
