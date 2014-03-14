@@ -66,7 +66,7 @@ public class GSONBuilderService extends AbstractLogEnabled implements
 
     private String dateFormat;
 
-    final String DEFAULTDATEFORMAT = "MM/dd/yyyy";
+    private static final String DEFAULTDATEFORMAT = "MM/dd/yyyy";
 
     private Hashtable<String, String> adapters = null;
 

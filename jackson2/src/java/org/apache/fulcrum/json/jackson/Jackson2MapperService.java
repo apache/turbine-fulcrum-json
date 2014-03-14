@@ -125,11 +125,11 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
     public <T> String ser(Object src, FilterProvider filter, Boolean cleanCache) throws Exception {
         String serResult= null;
         if (src == null) {
-            getLogger().info("no serializable object:" + src);
+            getLogger().info("no serializable object.");
             return serResult;
         } 
         if (filter == null) {
-            getLogger().debug("ser class::" + src.getClass() + " without filter " +filter); 
+            getLogger().debug("ser class::" + src.getClass() + " without filter."); 
             return ser(src);
         }    
         getLogger().debug("ser class::" + src.getClass() + " with filter " + filter);

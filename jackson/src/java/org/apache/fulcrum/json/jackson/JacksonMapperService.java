@@ -112,7 +112,7 @@ public class JacksonMapperService extends AbstractLogEnabled implements
     
     @Override
     public String ser(Object src, Boolean cleanCache) throws Exception {
-        if (filters.containsKey(src.getClass().getName())) {
+        if (src.getClass() != null && filters.containsKey(src.getClass().getName())) {
             getLogger().warn(
                     "Found registered filter - using instead of default view filter for class:"
                             + src.getClass().getName());
@@ -127,7 +127,7 @@ public class JacksonMapperService extends AbstractLogEnabled implements
     public <T> String ser(Object src, Class<T> type, Boolean cleanCache)
             throws Exception {
         getLogger().debug("ser::" + src + " with type" + type);
-        if (filters.containsKey(src.getClass().getName())) {
+        if (src.getClass() != null && filters.containsKey(src.getClass().getName())) {
             getLogger()
                     .warn("Found registered filter - could not use custom view and custom filter for class:"
                             + src.getClass().getName());
@@ -197,7 +197,6 @@ public class JacksonMapperService extends AbstractLogEnabled implements
             Boolean refreshFilter, String... filterAttr) throws Exception {
         setCustomIntrospectorWithExternalFilterId(filterClass);
         FilterProvider filter = null;
-        getLogger().debug("filterClass::" + filterClass + " , filterAttr: " + filterAttr);
         if (filterClass == null && src != null && src.getClass() != null) {
             filterClass =(Class<T>) src.getClass();
         }
@@ -450,7 +449,7 @@ public class JacksonMapperService extends AbstractLogEnabled implements
         this.mapper = mapper;
     }
 
-    public class MixinModule extends SimpleModule {
+    public static class MixinModule extends SimpleModule {
         public final Class<?> clazz;
         public final Class<?> mixin;
 
