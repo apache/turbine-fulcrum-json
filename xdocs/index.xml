@@ -28,25 +28,24 @@
   <body>
 
   <section name="Overview">
-    <p>
-      This component provides JSON serialization of objects and deserialization of JSON strings. It is written
-      for use in Turbine but it can be used in any container compatible
-      with Avalon's ECM container.
-      There are three implementations
+    <p>The intent of this  component is to provide a configurable and customized integration of JSON De-/Seriallizers ousing GSON, Jackson 1 and Jackson 2 APIs into Avalon/Turbine. 
+    
+     It is written for use in Turbine but it can be used in any container compatible
+      with Avalon's ECM container. There are three implementations
       <ul>
         <li>GSONBuilderService and</li>
         <li>Jackson2MapperService</li>
         <li>JacksonMapperService</li>
-      </ul>.
-      All Services <code>SimpleLocalizationService</code> provide basic serialization and deserialization functions
-      for generic applications.
+      </ul>
+      All Services provide basic serialization and deserialization functions for applications.
     </p>
   </section>
   
-  <section name="JSON Service Component with Jackson API">
+  <section name="JSON Service Component with Jackson 1 / 2 API">
     <subsection name="Overview">
     <p>
       This Service serves as a JSON serializer or deserializer using <a href="https://github.com/FasterXML/jackson">Jackson</a> Version 2 or Version 1.
+      The JSON Jackson 2 submodule is the most elaborated of the three sub modules. It provides attribute and class filtering and cache cleaning mechanism.
     </p>
 
     <p>
@@ -110,7 +109,7 @@
           <td>
             If set to <code>true</code>, caching is enabled. Each filter applied remains valid and is not removed.
             This implicits, that you cannot retrieve for the same class/bean different properties in different calls.
-            You could invalidate (refresh) the cache per class, in many methods, cft. method parameters named <code>refresh*</code> or <code>clean*</code>. The default value is <code>true</code>. 
+            Otherwise different serializations per call are possible. You could invalidate (refresh) the cache per class, in most methods providing a Boolean parameter, cft. method parameters named <code>refresh*</code> or <code>clean*</code>. The default value is <code>true</code>.
           </td>
         </tr>
       </table>
@@ -184,9 +183,9 @@ JsonService jsonService = (JsonService)TurbineServices
     </p>
    </subsection>
 
-    <subsection name="Integration of JSON to Object Deserialization" id="deser">
+    <subsection name="JSON to Object Deserialization" id="deser">
     <p>
-    This could be done by providing the JSON data as client parameter to a JSON-RPC-Service function (cft. services->JSON-RPC-Service). As an example for the function:
+    This could be done by providing the JSON data as client parameter to a JSON-RPC-Service function (cft. services->JSON-RPC-Service). As an example consider this:
     </p>   
     <source><![CDATA[
       // class is registered in screen
@@ -203,7 +202,7 @@ JsonService jsonService = (JsonService)TurbineServices
         }       
       }
 ]]></source>
-     You could then call the JSON method in Javascript like this:
+     You could then call the JSON method in a Javascript section like this:
      <source><![CDATA[
        jsonrpc.myFunctions.deSerJsonItem( JSON.stringify(jsonitem) );
 ]]></source>

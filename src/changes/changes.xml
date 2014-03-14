@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<document>
+  <properties>
+    <title>Changes</title>
+    <author email="gk@apache.org">Georg Kallidis</author>
+  </properties>
+  <body>
+    <release version="1.0.0" date="">
+      <action dev="gk" type="add">
+    Renamed refreshFilter to cleanFilter/Cache parameter name and added type to more methods in JsonService.
+      </action>
+      <action dev="gk" type="update">
+    Null-Checking in methods.
+    Deregistering of adapaters (Tests)
+      </action>
+      <action dev="gk" type="add">
+    Added mixin deserializing for collection.
+      </action>
+      <action dev="gk" type="update">
+    Changed from primitive type boolean to Boolean in serialize* methods to avoid errors (ambigous varargs argument handling).
+      </action>
+      <action dev="gk" type="add">
+    Added refreshFilter parameter to serialize* methods
+    Added collectionType deserialization
+    Added method to service interface JsonService to allow for object adapters 
+    More configurable Jackson 2 and GSON service components
+      </action>
+    </release>
+  </body>
+</document>
+
