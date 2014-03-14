@@ -83,8 +83,7 @@
           <td>Complex</td>
           <td>[0|1]</td>
           <td>
-            If empty just <code>com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector</code> is set as annotation introspector. Otherwise you could provide a primary and (optionally) a secondary introspector. Setting the special introspector
-            <code>org.apache.fulcrum.json.jackson.SimpleNameIntrospector</code> yields property and class name based filtering. See the configuration example below and in <a href="#velocity">section</a>. Features could be set to <code>false</code> or <code>true</code> by setting the attribute <b>value</b> of the sub element feature. The feature attribute <b>type</b> should be the class name of any sub interface of <code>com.fasterxml.jackson.databind.cfg.ConfigFeature</code>. The element content itself defines any feature (enum value) for this feature. Cft. the configuration example below.
+            If empty <code>com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector</code> is set as annotation introspector. You could otherwise provide a primary and (optionally) a secondary introspector. Setting the special introspector <code>org.apache.fulcrum.json.jackson.SimpleNameIntrospector</code> yields property and class name based filtering. See the configuration example below and in <a href="#velocity">section</a>. Features could be set to <code>false</code> or <code>true</code> by setting the attribute <b>value</b> of the sub element feature. The feature attribute <b>type</b> should be the class name of any sub interface of <code>com.fasterxml.jackson.databind.cfg.ConfigFeature</code>. The element content itself defines any feature (enum value) for this feature. Cft. the configuration example below.
           </td>
         </tr>
         <tr>
@@ -109,9 +108,9 @@
           <td>boolean</td>
           <td>[0|*]</td>
           <td>
-            If set to <code>true</code>, caching is not enabled. Each filter applied remains valid and is not removed.
-            This implicits, that you cannot retrieve for the same class/Bean other properties in another call.
-            You could then invalidate (refresh) the cache per class. Cft. the <code>filter*(t)</code> methods with <code>refreshfilter</code> property. The default value is <code>true</code>. 
+            If set to <code>true</code>, caching is enabled. Each filter applied remains valid and is not removed.
+            This implicits, that you cannot retrieve for the same class/bean different properties in different calls.
+            You could invalidate (refresh) the cache per class, in many methods, cft. method parameters named <code>refresh*</code> or <code>clean*</code>. The default value is <code>true</code>. 
           </td>
         </tr>
       </table>
@@ -187,7 +186,7 @@ JsonService jsonService = (JsonService)TurbineServices
 
     <subsection name="Integration of JSON to Object Deserialization" id="deser">
     <p>
-    This could be done just by providing the JSON data as client parameter to a JSON-RPC-Service function (cft. services->JSON-RPC-Service). As an example for the function:
+    This could be done by providing the JSON data as client parameter to a JSON-RPC-Service function (cft. services->JSON-RPC-Service). As an example for the function:
     </p>   
     <source><![CDATA[
       // class is registered in screen

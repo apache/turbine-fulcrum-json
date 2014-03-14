@@ -74,7 +74,7 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
  * object).
  * 
  * Note: If using {@link SimpleNameIntrospector}, filters are set by class id, which are cached by default. 
- * By setting {@link #cacheFilters} to <code>false</code> each filter will be unregistered and cache cleaed.
+ * By setting {@link #cacheFilters} to <code>false</code> each filter will be unregistered and the cache cleaned.
  * By setting the refresh parameter {@link #filter(Object, Class, FilterContext, boolean, String...)} on per-filter method call
  * you could filter a class providing different properties.
  * 
@@ -104,7 +104,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
     final String DEFAULTDATEFORMAT = "MM/dd/yyyy";
 
     final boolean defaultType = false;
-    public boolean cacheFilters = true; // true -> more efficient, if not using
+    public boolean cacheFilters = true; // true -> this is by default true in jackson, if not using
                                         // multiple serialization in one thread
     String[] defaultTypeDefs = null;
 
