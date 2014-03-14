@@ -101,6 +101,10 @@ public class JacksonMapperService extends AbstractLogEnabled implements
 
     public synchronized <T> String ser(Object src, FilterProvider filters)
             throws Exception {
+        if (filters == null) {
+            getLogger().debug("ser class::" + src.getClass() + " without filter "); 
+            return ser(src);
+        } 
         getLogger().debug("ser::" + src + " with filters " + filters);
         String serResult = mapper.writer(filters).writeValueAsString(src);
         return serResult;
@@ -164,14 +168,17 @@ public class JacksonMapperService extends AbstractLogEnabled implements
             Class<T> filterClass, Boolean refreshFilter, String... filterAttr)
             throws Exception {
         setCustomIntrospectorWithExternalFilterId(filterClass);
-        FilterProvider filter;
-        if (!this.filters.containsKey(filterClass.getName())) {
-            filter = new SimpleFilterProvider().addFilter(
-                    filterClass.getName(),
-                    SimpleBeanPropertyFilter.serializeAllExcept(filterAttr));
-            this.filters.put(filterClass.getName(), filter);
-        } else {
-            filter = this.filters.get(filterClass.getName());
+        FilterProvider filter = null;
+        if ( filterClass != null) {
+            if (filterAttr != null && filterAttr.length > 0 && 
+                            !this.filters.containsKey(filterClass.getName())) {
+                filter = new SimpleFilterProvider().addFilter(
+                        filterClass.getName(),
+                        SimpleBeanPropertyFilter.serializeAllExcept(filterAttr));
+                this.filters.put(filterClass.getName(), filter);
+            } else {
+                filter = this.filters.get(filterClass.getName());
+            }
         }
         String serialized = ser(src, filter);
         if (!cacheFilters)
@@ -189,14 +196,26 @@ public class JacksonMapperService extends AbstractLogEnabled implements
     public <T> String serializeOnlyFilter(Object src, Class<T> filterClass,
             Boolean refreshFilter, String... filterAttr) throws Exception {
         setCustomIntrospectorWithExternalFilterId(filterClass);
-        FilterProvider filter;
-        if (!this.filters.containsKey(filterClass.getName())) {
-            filter = new SimpleFilterProvider().addFilter(
-                    filterClass.getName(),
-                    SimpleBeanPropertyFilter.filterOutAllExcept(filterAttr));
-            this.filters.put(filterClass.getName(), filter);
-        } else {
-            filter = this.filters.get(filterClass.getName());
+        FilterProvider filter = null;
+        getLogger().debug("filterClass::" + filterClass + " , filterAttr: " + filterAttr);
+        if (filterClass == null && src != null && src.getClass() != null) {
+            filterClass =(Class<T>) src.getClass();
+        }
+        if ( filterClass != null) {
+            if (!this.filters.containsKey(filterClass.getName())) {
+                getLogger().debug("filterClass::" + filterClass.getName() + " with filterAttr: " + filterAttr);
+                if (filterAttr != null) {
+                filter = new SimpleFilterProvider().addFilter(
+                        filterClass.getName(),
+                        SimpleBeanPropertyFilter.filterOutAllExcept(filterAttr));
+                this.filters.put(filterClass.getName(), filter);
+                } else {
+                    filter =  new SimpleFilterProvider();
+                    this.filters.put(filterClass.getName(),filter);   
+                }
+            } else {
+                filter = this.filters.get(filterClass.getName());
+            }
         }
         String serialized = ser(src, filter);
         getLogger().debug("serialized " + serialized);

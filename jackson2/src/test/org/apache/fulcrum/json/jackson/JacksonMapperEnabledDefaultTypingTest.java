@@ -113,7 +113,7 @@ public class JacksonMapperEnabledDefaultTypingTest extends BaseUnitTest {
         String bean = sc.serializeOnlyFilter(filteredBean, Bean.class, "name");
         assertEquals(
                 "Ser filtered Bean failed ",
-                "{\"type\":\"org.apache.fulcrum.json.jackson.JacksonMapperEnabledDefaultTypingTest$Bean\",\"name\":\"joe\"}",
+                "{\"type\":\"org.apache.fulcrum.json.jackson.Bean\",\"name\":\"joe\"}",
                 bean);
 
         Rectangle filteredRectangle = new Rectangle(5, 10);
@@ -137,7 +137,7 @@ public class JacksonMapperEnabledDefaultTypingTest extends BaseUnitTest {
                 "age");
         assertEquals(
                 "Serialization of beans failed ",
-                "['java.util.ArrayList',[{'type':'org.apache.fulcrum.json.jackson.JacksonMapperEnabledDefaultTypingTest$Bean','name':'joe0','age':0},{'type':'org.apache.fulcrum.json.jackson.JacksonMapperEnabledDefaultTypingTest$Bean','name':'joe1','age':1},{'type':'org.apache.fulcrum.json.jackson.JacksonMapperEnabledDefaultTypingTest$Bean','name':'joe2','age':2},{'type':'org.apache.fulcrum.json.jackson.JacksonMapperEnabledDefaultTypingTest$Bean','name':'joe3','age':3},{'type':'org.apache.fulcrum.json.jackson.JacksonMapperEnabledDefaultTypingTest$Bean','name':'joe4','age':4},{'type':'org.apache.fulcrum.json.jackson.JacksonMapperEnabledDefaultTypingTest$Bean','name':'joe5','age':5},{'type':'org.apache.fulcrum.json.jackson.JacksonMapperEnabledDefaultTypingTest$Bean','name':'joe6','age':6},{'type':'org.apache.fulcrum.json.jackson.JacksonMapperEnabledDefaultTypingTest$Bean','name':'joe7','age':7},{'type':'org.apache.fulcrum.json.jackson.JacksonMapperEnabledDefaultTypingTest$Bean','name':'joe8','age':8},{'type':'org.apache.fulcrum.json.jackson.JacksonMapperEnabledDefaultTypingTest$Bean','name':'joe9','age':9}]]",
+                "['java.util.ArrayList',[{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe0','age':0},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe1','age':1},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe2','age':2},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe3','age':3},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe4','age':4},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe5','age':5},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe6','age':6},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe7','age':7},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe8','age':8},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe9','age':9}]]",
                 result.replace('"', '\''));
     }
 
@@ -210,7 +210,7 @@ public class JacksonMapperEnabledDefaultTypingTest extends BaseUnitTest {
         
         assertEquals(
                 "Ser filtered Bean failed ",
-                "{\"type\":\"org.apache.fulcrum.json.jackson.JacksonMapperEnabledDefaultTypingTest$Bean\",\"name\":\"joe\"}",
+                "{\"type\":\"org.apache.fulcrum.json.jackson.Bean\",\"name\":\"joe\"}",
                 bean);
     }
     
@@ -224,7 +224,7 @@ public class JacksonMapperEnabledDefaultTypingTest extends BaseUnitTest {
         String bean = sc.serializeOnlyFilter(filteredBean, Bean.class, "profession");
         assertEquals(
                 "Ser filtered Bean failed ",
-                "{\"type\":\"org.apache.fulcrum.json.jackson.JacksonMapperEnabledDefaultTypingTest$Bean\"}",
+                "{\"type\":\"org.apache.fulcrum.json.jackson.Bean\"}",
                 bean);
     }
     
@@ -240,19 +240,18 @@ public class JacksonMapperEnabledDefaultTypingTest extends BaseUnitTest {
         String bean = sc.serializeOnlyFilter(filteredBean, Bean.class, "profession");
         assertEquals(
                 "Ser filtered Bean failed ",
-                "{\"type\":\"org.apache.fulcrum.json.jackson.JacksonMapperEnabledDefaultTypingTest$Bean\",\"profession\":\"\"}",
+                "{\"type\":\"org.apache.fulcrum.json.jackson.Bean\",\"profession\":\"\"}",
                 bean);
     }
 
-    public void testSerializeWithMixinAndFilter2() throws Exception {
+    public void testMultipleSerializingWithMixinAndFilter() throws Exception {
         Rectangle filteredRectangle = new Rectangle(5, 10);
         filteredRectangle.setName("jim");
         //
         sc.addAdapter("M4RMixin2", Rectangle.class,
                 Mixin2.class);
         
-        // if serialization is done this way, filtering has no effect. 
-        // this is may be a bug in Jackson: as mixin modules may be cached..?  
+        // if serialization is done Jackson clean cache
         String rectangle0 = sc.ser(filteredRectangle,Rectangle.class,true);
         assertEquals(
                 "Ser filtered Rectangle failed ",
@@ -285,7 +284,7 @@ public class JacksonMapperEnabledDefaultTypingTest extends BaseUnitTest {
                 .ser(beanList);
         assertEquals(
                 "Serialization of beans failed ",
-                "['java.util.ArrayList',[{'type':'org.apache.fulcrum.json.jackson.JacksonMapperEnabledDefaultTypingTest$Bean','name':'joe0'},{'type':'org.apache.fulcrum.json.jackson.JacksonMapperEnabledDefaultTypingTest$Bean','name':'joe1'},{'type':'org.apache.fulcrum.json.jackson.JacksonMapperEnabledDefaultTypingTest$Bean','name':'joe2'},{'type':'org.apache.fulcrum.json.jackson.JacksonMapperEnabledDefaultTypingTest$Bean','name':'joe3'},{'type':'org.apache.fulcrum.json.jackson.JacksonMapperEnabledDefaultTypingTest$Bean','name':'joe4'},{'type':'org.apache.fulcrum.json.jackson.JacksonMapperEnabledDefaultTypingTest$Bean','name':'joe5'},{'type':'org.apache.fulcrum.json.jackson.JacksonMapperEnabledDefaultTypingTest$Bean','name':'joe6'},{'type':'org.apache.fulcrum.json.jackson.JacksonMapperEnabledDefaultTypingTest$Bean','name':'joe7'},{'type':'org.apache.fulcrum.json.jackson.JacksonMapperEnabledDefaultTypingTest$Bean','name':'joe8'},{'type':'org.apache.fulcrum.json.jackson.JacksonMapperEnabledDefaultTypingTest$Bean','name':'joe9'}]]",
+                "['java.util.ArrayList',[{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe0'},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe1'},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe2'},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe3'},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe4'},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe5'},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe6'},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe7'},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe8'},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe9'}]]",
                 result.replace('"', '\''));
     }
 
@@ -326,38 +325,14 @@ public class JacksonMapperEnabledDefaultTypingTest extends BaseUnitTest {
         String serRect = sc.ser(components);
         assertEquals(
                 "Serialization failed ",
-                "['java.util.ArrayList',[{'type':'org.apache.fulcrum.json.Rectangle','width':25},{'type':'org.apache.fulcrum.json.Rectangle','width':250},{'type':'org.apache.fulcrum.json.jackson.JacksonMapperEnabledDefaultTypingTest$Bean','name':'joe0'},{'type':'org.apache.fulcrum.json.jackson.JacksonMapperEnabledDefaultTypingTest$Bean','name':'joe1'},{'type':'org.apache.fulcrum.json.jackson.JacksonMapperEnabledDefaultTypingTest$Bean','name':'joe2'}]]",
+                "['java.util.ArrayList',[{'type':'org.apache.fulcrum.json.Rectangle','width':25},{'type':'org.apache.fulcrum.json.Rectangle','width':250},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe0'},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe1'},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe2'}]]",
                 serRect.replace('"', '\''));
 
     }
     
 
     // @JsonFilter("myFilter")
-    static class Bean {
-        private String name;
-        private int age;
-        public String profession;
-
-        public Bean() {
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public int getAge() {
-            return age;
-        }
-
-        public void setAge(int age) {
-            this.age = age;
-        }
-    }
-
+   
     public static abstract class Mixin2 {
         void MixIn2(int w, int h) {
         }
@@ -374,18 +349,6 @@ public class JacksonMapperEnabledDefaultTypingTest extends BaseUnitTest {
         abstract String getName();
     }
 
-    public static abstract class BeanMixin {
-        void BeanMixin() {
-        }
-
-        @JsonIgnore
-        abstract int getAge();
-
-        @JsonIgnore
-        String profession; // exclude
-
-        @JsonProperty
-        abstract String getName();//
-    }
+    
 
 }

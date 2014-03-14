@@ -116,6 +116,7 @@ public class DefaultServiceTest extends BaseUnitTest {
                 serJson.matches("\\{\"date\":\"\\d\\d/\\d\\d/\\d{4}\"\\}"));
     }
 
+    // does not seerialize size
     public void testSerializeCollection() throws Exception {
         List<Rectangle> rectList = new ArrayList<Rectangle>();
         for (int i = 0; i < 10; i++) {
@@ -207,14 +208,14 @@ public class DefaultServiceTest extends BaseUnitTest {
         }
     }
     
-    public void testSerializeWithMixinAndFilter2() throws Exception {
+    public void testSerializeWithMixinAndFilter() throws Exception {
         Rectangle filteredRectangle = new Rectangle(5, 10);
         filteredRectangle.setName("jim");
         //
         sc.addAdapter("M4RMixin2", Rectangle.class,
                 TypeAdapterForRectangle.class);
         
-        // as gson adds all kind, we could not easiy use multiple strategies
+        // as gson adds adapters/strategies, we have to be cautious if using multiple strategies
         String rectangle = sc.ser(filteredRectangle);
         assertEquals(
                 "Ser filtered Rectangle failed ",
@@ -222,17 +223,17 @@ public class DefaultServiceTest extends BaseUnitTest {
                 rectangle); 
     }
     
-    public void testSerializeWithMixinAndFilter3() throws Exception {
+    public void testSerializeWithOnlyFilter() throws Exception {
 
         // as gson adds we could not use multiple disjunct exclusion strategies
         String serJson = sc.serializeOnlyFilter(new TestClass("mytest"),
                 (Class) null, "configurationName");
         assertEquals("Serialization failed ",
                 "{\"configurationName\":\"Config.xml\"}",
-                serJson);        
+                serJson);
     }
     
-    public void testSerializeWithMixinAndFilter4() throws Exception {
+    public void testSerializeWithOnlyFilter2() throws Exception {
 
         // as gson adds we could not use multiple disjunct exclusion strategies
         Rectangle filteredRectangle = new Rectangle(5, 10);

@@ -183,8 +183,6 @@ public class DefaultServiceTest extends BaseUnitTest {
             rectList.add(filteredRect);
         }
         String serColl = sc.ser(rectList);
-        //System.out.println("serColl:" +serColl);
-
         TypeReference typeRef = new TypeReference<List<Rectangle>>(){};
         Collection<Rectangle> resultList0 =  sc.deSerCollection(serColl, typeRef, Rectangle.class);
         //System.out.println("resultList0 class:" +resultList0.getClass());
@@ -211,6 +209,37 @@ public class DefaultServiceTest extends BaseUnitTest {
             assertEquals("deser reread size failed", (i * i), resultList0
                     .get(i).getSize());
         }
+    }
+    
+    public void testSerializeWithMixinAndFilter() throws Exception {
+        Bean filteredBean = new Bean();
+        filteredBean.setName("joe");
+        //
+        sc.addAdapter("M4RBeanMixin", Bean.class,
+                BeanMixin.class);
+        // profession was already set to ignore, does not change
+        String bean = sc.serializeOnlyFilter(filteredBean, Bean.class, "profession");
+        assertEquals(
+                "Ser filtered Bean failed ",
+                "{}",
+                bean);
+    }
+    
+    public void testSerializeWithOnlyFilter() throws Exception {
+
+        String serJson = sc.serializeOnlyFilter(new TestClass("mytest"),
+                (Class) null, "configurationName");
+        assertEquals("Serialization failed ",
+                "{\"configurationName\":\"Config.xml\"}",
+                serJson); 
+
+        Rectangle filteredRectangle = new Rectangle(5, 10);
+        filteredRectangle.setName("jim");
+        String rectangle = sc.serializeOnlyFilter(filteredRectangle, (Class) null, "w");
+        assertEquals(
+                "Ser filtered Rectangle failed ",
+                "{\"w\":5}",
+                rectangle);
     }
 
 }
