@@ -99,6 +99,7 @@
         <turbine.scmPubCheckoutDirectory>${turbine.site.cache}/fulcrum/json</turbine.scmPubCheckoutDirectory>
         <turbine.site.cache>${project.build.directory}/turbine-sites</turbine.site.cache>
         <siteContent.path>${project.build.directory}/staging</siteContent.path><!-- default stagingSiteURL -->
+        <gpg.useagent>false</gpg.useagent> <!-- windows problem -->
   </properties> 
     
 </project>
