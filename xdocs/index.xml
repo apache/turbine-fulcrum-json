@@ -28,7 +28,7 @@
   <body>
 
   <section name="Overview">
-    <p>The intent of this  component is to provide a configurable and customized integration of JSON De-/Seriallizers ousing GSON, Jackson 1 and Jackson 2 APIs into Avalon/Turbine. 
+    <p>The intent of this  component is to provide a configurable and customized integration of JSON De-/Serializers using GSON, Jackson 1 and Jackson 2 APIs into Avalon/Turbine. 
     
      It is written for use in Turbine but it can be used in any container compatible
       with Avalon's ECM container. There are three implementations
@@ -45,7 +45,7 @@
     <subsection name="Overview">
     <p>
       This Service serves as a JSON serializer or deserializer using <a href="https://github.com/FasterXML/jackson">Jackson</a> Version 2 or Version 1.
-      The JSON Jackson 2 submodule is the most elaborated of the three sub modules. It provides attribute and class filtering and cache cleaning mechanism.
+      The JSON Jackson 2 sub module is the most elaborated of the three sub modules. It provides attribute and class filtering and cache cleaning mechanism.
     </p>
 
     <p>

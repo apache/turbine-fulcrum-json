@@ -1,0 +1,50 @@
+Publishing Workflow:
+
+Prerequisites
+ // jars
+ mvn deploy -Papache-release
+ // Stage the latest documentation 
+ mvn site site:stage scm-publish:publish-scm -Dscmpublish.dryRun=true
+ mvn clean site site:stage scm-publish:publish-scm -Dusername=<username> -Dpassword=<pw>
+
+More Information
+  https://www.apache.org/dev/publishing-maven-artifacts.html#prepare-poms
+  http://maven.apache.org/developers/website/deploy-component-reference-documentation.html
+  
+Steps
+1) Local Testing
+  // Verify gpg.homedir, gpg.useagent
+  mvn clean install -Papache-release -Dgpg.useagent=false -Dgpg.passphrase=<xx> 
+  mvn release:prepare -DdryRun=true -DautoVersionSubmodules=true -Papache-release 
+
+2) Remote Testing
+  mvn release:clean
+  mvn release:prepare -DautoVersionSubmodules=true -P apache-release -Dusername=<username> -Dpassword=<pw>
+  // Helpful hint from Apache Website: If you're located in Europe then release:prepare may fail with 'Unable to tag SCM' and ' svn: No such revision X '. Wait 10 seconds and run mvn release:prepare again.
+  
+4) Release Preparing
+  // performs an upload to repository.apache.org/service/local/staging/depoly/maven2/org/apache/fulcrum
+  mvn release:perform 
+  
+More Information 
+  http://www.sonatype.com/books/nexus-book/reference/staging.html
+  
+5) Close the staging
+  Login to  and close
+  https://repository.apache.org/index.html#stagingRepositories
+  
+More Information 
+  https://www.apache.org/dev/publishing-maven-artifacts.html#close-stage
+  https://docs.sonatype.org/display/Repository/Closing+a+Staging+Repository
+  
+3) Prepare Voting Information and Voting
+  ....
+  
+5) a) 
+  //Promote / Publish 
+  https://docs.sonatype.org/display/Repository/Releasing+a+Staging+Repository
+   b)
+  //Drop and Restage
+  https://docs.sonatype.org/display/Repository/Dropping+a+Staging+Repository
+   
+  
