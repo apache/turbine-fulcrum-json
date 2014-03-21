@@ -17,9 +17,7 @@
  specific language governing permissions and limitations
  under the License.
 -->
-<project
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-    xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
    <parent>
        <artifactId>turbine-parent</artifactId>
        <groupId>org.apache.turbine</groupId>
@@ -28,14 +26,14 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.apache.fulcrum</groupId>
     <artifactId>fulcrum-json-parent</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <packaging>pom</packaging>
     <name>Fulcrum JSON Master Build</name>
     <url>http://turbine.apache.org/fulcrum/fulcrum-json/</url>
     <scm>
-      <connection>scm:svn:http://svn.apache.org/repos/asf/turbine/fulcrum/trunk/json/</connection>
-      <developerConnection>scm:svn:https://svn.apache.org/repos/asf/turbine/fulcrum/trunk/json/</developerConnection>
-      <url>http://svn.apache.org/viewcvs/turbine/fulcrum/trunk/json/</url>
+      <connection>scm:svn:http://svn.apache.org/repos/asf/turbine/fulcrum/tags/fulcrum-json-1.0.0</connection>
+      <developerConnection>scm:svn:https://svn.apache.org/repos/asf/turbine/fulcrum/tags/fulcrum-json-1.0.0</developerConnection>
+      <url>http://svn.apache.org/viewcvs/turbine/fulcrum/tags/fulcrum-json-1.0.0</url>
     </scm>
     
 
@@ -108,7 +106,7 @@
                       <configuration>
                          <target>
                           <ant antfile="${basedir}/tasks-build-clean-asc.xml" target="tasks">
-                                <property name="build.path" value="${basedir}"/>
+                                <property name="build.path" value="${basedir}" />
                             </ant>
                           </target>
                       </configuration>
