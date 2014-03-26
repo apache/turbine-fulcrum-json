@@ -17,7 +17,9 @@
  specific language governing permissions and limitations
  under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+    xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
    <parent>
        <artifactId>turbine-parent</artifactId>
        <groupId>org.apache.turbine</groupId>
@@ -26,7 +28,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.apache.fulcrum</groupId>
     <artifactId>fulcrum-json-parent</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Fulcrum JSON Master Build</name>
     <url>http://turbine.apache.org/fulcrum/fulcrum-json/</url>
@@ -74,7 +76,8 @@
         <module>api</module>
         <module>gson</module>
         <module>jackson</module>
-         <module>jackson2</module>
+        <module>jackson2</module>
+        <module>dist</module>
     </modules>
 
     <build>
@@ -89,33 +92,6 @@
                 <tryUpdate>false</tryUpdate>
               </configuration>
             </plugin>
-            <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-release-plugin</artifactId>
-              <configuration>
-                <preparationGoals>antrun:run</preparationGoals>
-              </configuration>
-            </plugin>
-            <plugin>
-             <artifactId>maven-antrun-plugin</artifactId>
-              <executions>
-                  <execution>
-                      <id>clean-asc-hashes</id> 
-                      <!--phase>verify</phase--><!-- a lifecycle phase --> 
-                      <inherited>false</inherited>
-                      <configuration>
-                         <target>
-                          <ant antfile="${basedir}/tasks-build-clean-asc.xml" target="tasks">
-                                <property name="build.path" value="${basedir}" />
-                            </ant>
-                          </target>
-                      </configuration>
-                      <goals>
-                        <goal>run</goal>
-                      </goals>
-                  </execution>
-              </executions>
-          </plugin>
         </plugins>
     </build>
     
@@ -124,29 +100,27 @@
             <id>apache-release</id>
             <build>
                 <plugins>
-                    <plugin>
-                        <!-- build the source and binary distribution packages -->
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-assembly-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>fulcrum-source-release-assembly</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>single</goal>
-                                </goals>
-                                <configuration>
-                                    <runOnlyAtExecutionRoot>true</runOnlyAtExecutionRoot>
-                                    <descriptorRefs>
-                                        <descriptorRef>bin</descriptorRef>
-                                        <descriptorRef>project</descriptorRef>
-                                        <descriptorRef>src</descriptorRef>
-                                    </descriptorRefs>
-                                    <tarLongFileFormat>gnu</tarLongFileFormat>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
+                  <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>2.4</version>
+                    <executions>
+                      <execution>
+                        <id>fulcrum-source-release-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                          <goal>single</goal>
+                        </goals>
+                        <configuration>
+                          <runOnlyAtExecutionRoot>true</runOnlyAtExecutionRoot>
+                          <descriptors>
+                            <descriptor>src/assembly/project.xml</descriptor>
+                          </descriptors>
+                          <tarLongFileFormat>gnu</tarLongFileFormat>
+                        </configuration>
+                      </execution>
+                    </executions>
+                  </plugin>  
                 </plugins>
             </build>
         </profile>
