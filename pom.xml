@@ -112,6 +112,7 @@
                           <goal>single</goal>
                         </goals>
                         <configuration>
+                          <goals>site:site</goals>
                           <runOnlyAtExecutionRoot>true</runOnlyAtExecutionRoot>
                           <descriptors>
                             <descriptor>src/assembly/project.xml</descriptor>
@@ -121,6 +122,17 @@
                       </execution>
                     </executions>
                   </plugin>  
+                  <plugin>
+                    <artifactId>maven-site-plugin</artifactId>
+                    <executions>
+                        <execution>
+                          <phase>package</phase>		
+                            <goals>
+                                <goal>site</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                  </plugin>
                 </plugins>
             </build>
         </profile>
