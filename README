@@ -35,13 +35,13 @@ Top level directories
 
 dist/target/                       contains the zipped binary jars *
 gson, jackson, jackson2 /          contains the different JSON implementation project files
-src/                               contains the interface project files
+api/                               contains the interface project files
+src /                              contains project building files
 xdoc   /                           contains the documentation 
 target/                            contains the packaged project files, which allow to build the project **
 
 *  after running mvn install 
 ** after running mvn clean site install -P apache-release, see below
- 
 
 --------------------------------------------------------------------------
 Component Development 
@@ -61,7 +61,7 @@ More Information
   
 Steps
 1) Local Testing
-  // Verify gpg.homedir, gpg.useagent
+  // Verify gpg.homedir, gpg.useagent, gpg.passphrase
   mvn clean site install -Papache-release -Dgpg.useagent=false -Dgpg.passphrase=<xx> 
   mvn release:prepare -DdryRun=true -DautoVersionSubmodules=true -Papache-release 
 
@@ -78,7 +78,7 @@ More Information
   http://www.sonatype.com/books/nexus-book/reference/staging.html
   
 5) Close the staging
-  Login to  and close
+  Login and close
   https://repository.apache.org/index.html#stagingRepositories
   
 More Information 
@@ -96,4 +96,12 @@ More Information
   https://docs.sonatype.org/display/Repository/Dropping+a+Staging+Repository
   - Reverse merge the release prepare, manually delete tag in svn repo and drop staged repository in nexus and start again with step 1.
    
-  
+--------------------------------------------------------------------------
+Licence
+--------------------------------------------------------------------------
+   
+This software is licensed under the Apache 2 license, quoted below.
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use this project except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0.
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.

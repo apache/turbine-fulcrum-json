@@ -28,14 +28,6 @@
   <!--includeSiteDirectory>true</includeSiteDirectory-->
   <fileSets>
     <fileSet>
-      <directory>${project.basedir}</directory>
-      <includes>
-        <include>README*</include>
-        <include>pom.xml</include>
-      </includes>
-      <useDefaultExcludes>true</useDefaultExcludes>
-    </fileSet>
-    <fileSet>
       <directory>${project.build.directory}/maven-shared-archive-resources/META-INF</directory>
       <outputDirectory>/</outputDirectory>
       <includes>
@@ -53,53 +45,15 @@
       </includes>
     </fileSet>
     <fileSet>
-      <directory>${project.basedir}/api</directory>
+      <directory>${project.basedir}</directory>
       <useDefaultExcludes>true</useDefaultExcludes>
        <includes>
-        <include>**/*</include>
+        <include>README*</include>
+        <include>pom.xml</include>
+        <include>%regex[(api|gson|jackson|jackson2|dist)/.*]</include>
       </includes>
       <excludes>
-         <exclude>target/**</exclude>
-      </excludes>
-    </fileSet>
-    <fileSet>
-      <directory>${project.basedir}/gson</directory>
-      <useDefaultExcludes>true</useDefaultExcludes>
-      <includes>
-        <include>**/*</include>
-      </includes>
-      <excludes>
-        <exclude>target/**</exclude>
-      </excludes>
-    </fileSet>
-    <fileSet>
-      <directory>${project.basedir}/jackson</directory>
-      <useDefaultExcludes>true</useDefaultExcludes>
-      <includes>
-        <include>**/*</include>
-      </includes>
-       <excludes>
-         <exclude>target/**</exclude>
-      </excludes>
-    </fileSet>
-    <fileSet>
-      <directory>${project.basedir}/jackson2</directory>
-      <useDefaultExcludes>true</useDefaultExcludes>
-      <includes>
-        <include>**/*</include>
-      </includes>
-       <excludes>
-         <exclude>target/**</exclude>
-      </excludes>
-    </fileSet>
-     <fileSet>
-      <directory>${project.basedir}/dist</directory>
-      <useDefaultExcludes>true</useDefaultExcludes>
-      <includes>
-        <include>**/*</include>
-      </includes>
-       <excludes>
-         <exclude>target/**</exclude>
+         <exclude>%regex[.*/target.*]</exclude>
       </excludes>
     </fileSet>
     <fileSet>
