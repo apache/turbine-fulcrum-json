@@ -71,7 +71,7 @@ Steps
   // Helpful hint from Apache Website: If you're located in Europe then release:prepare may fail with 'Unable to tag SCM' and ' svn: No such revision X '. Wait 10 seconds and run mvn release:prepare again.
   
 4) Release Preparing
-  // performs an upload to repository.apache.org/service/local/staging/depoly/maven2/org/apache/fulcrum
+  // performs an upload to repository.apache.org/service/local/staging/deploy/maven2/
   mvn release:perform 
   
 More Information 
