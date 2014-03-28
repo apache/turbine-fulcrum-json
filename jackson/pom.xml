@@ -19,20 +19,20 @@
     <parent>
         <artifactId>fulcrum-json-parent</artifactId>
         <groupId>org.apache.fulcrum</groupId>
-        <version>1.0.0</version>
+        <version>1.0.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.apache.fulcrum</groupId>
     <artifactId>fulcrum-json-jackson</artifactId>
     <name>Fulcrum JSON Jackson Impl</name>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
     
     <url>http://turbine.apache.org/fulcrum/fulcrum-json/fulcrum-json-jackson</url>
     <scm>
-        <connection>scm:svn:http://svn.apache.org/repos/asf/turbine/fulcrum/tags/fulcrum-json-1.0.0/jackson</connection>
-        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/turbine/fulcrum/tags/fulcrum-json-1.0.0/jackson</developerConnection>
-        <url>http://svn.apache.org/viewcvs/turbine/fulcrum/tags/fulcrum-json-1.0.0/jackson</url>
+        <connection>scm:svn:http://svn.apache.org/repos/asf/turbine/fulcrum/trunk/json/jackson/</connection>
+        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/turbine/fulcrum/trunk/json/jackson/</developerConnection>
+        <url>http://svn.apache.org/viewcvs/turbine/fulcrum/trunk/json/jackson/</url>
     </scm>
 
     <build>
