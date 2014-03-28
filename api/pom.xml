@@ -15,26 +15,26 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <parent>
         <artifactId>fulcrum-json-parent</artifactId>
         <groupId>org.apache.fulcrum</groupId>
-        <version>1.0.0</version>
+        <version>1.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.apache.fulcrum</groupId>
     <artifactId>fulcrum-json-api</artifactId>
     <name>Fulcrum JSON API</name>
-    <version>1.0.0</version>
+    <version>1.0.0-SNAPSHOT</version>
 
     <description>Fulcrum JSON Basic API</description>
     <url>http://turbine.apache.org/fulcrum/fulcrum-json/fulcrum-json-api</url>
 
     <scm>
-        <connection>scm:svn:http://svn.apache.org/repos/asf/turbine/fulcrum/tags/fulcrum-json-1.0.0/api</connection>
-        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/turbine/fulcrum/tags/fulcrum-json-1.0.0/api</developerConnection>
-        <url>http://svn.apache.org/viewcvs/turbine/fulcrum/tags/fulcrum-json-1.0.0/api</url>
+        <connection>scm:svn:http://svn.apache.org/repos/asf/turbine/fulcrum/trunk/json/api/</connection>
+        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/turbine/fulcrum/trunk/json/api/</developerConnection>
+        <url>http://svn.apache.org/viewcvs/turbine/fulcrum/trunk/json/api/</url>
     </scm>
 
     <dependencies>
