@@ -1,4 +1,52 @@
-Publishing Workflow:
+--------------------------------------------------------------------------
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+ 
+ $Id$
+--------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------
+Component Description
+--------------------------------------------------------------------------
+Usage Information
+
+This is the Fulcrum JSON Component. For more information about this component, look at the HTML documentation in the site/ directory or 
+generate the documentation using 
+
+mvn site:site
+
+
+Top level directories
+
+dist/target/                       contains the zipped binary jars *
+gson, jackson, jackson2 /          contains the different JSON implementation project files
+api/                               contains the interface project files
+src /                              contains project building files
+xdoc   /                           contains the documentation 
+target/                            contains the packaged project files, which allow to build the project **
+
+*  after running mvn install 
+** after running mvn clean site install -P apache-release, see below
+
+--------------------------------------------------------------------------
+Component Development 
+--------------------------------------------------------------------------
+Publishing Workflow
 
 Prerequisites
  // jars
@@ -13,8 +61,8 @@ More Information
   
 Steps
 1) Local Testing
-  // Verify gpg.homedir, gpg.useagent
-  mvn clean install -Papache-release -Dgpg.useagent=false -Dgpg.passphrase=<xx> 
+  // Verify gpg.homedir, gpg.useagent, gpg.passphrase
+  mvn clean site install -Papache-release -Dgpg.useagent=false -Dgpg.passphrase=<xx> 
   mvn release:prepare -DdryRun=true -DautoVersionSubmodules=true -Papache-release 
 
 2) Remote Testing
@@ -23,28 +71,37 @@ Steps
   // Helpful hint from Apache Website: If you're located in Europe then release:prepare may fail with 'Unable to tag SCM' and ' svn: No such revision X '. Wait 10 seconds and run mvn release:prepare again.
   
 4) Release Preparing
-  // performs an upload to repository.apache.org/service/local/staging/depoly/maven2/org/apache/fulcrum
+  // performs an upload to repository.apache.org/service/local/staging/deploy/maven2/
   mvn release:perform 
   
 More Information 
   http://www.sonatype.com/books/nexus-book/reference/staging.html
   
 5) Close the staging
-  Login to  and close
+  Login and close
   https://repository.apache.org/index.html#stagingRepositories
   
 More Information 
   https://www.apache.org/dev/publishing-maven-artifacts.html#close-stage
   https://docs.sonatype.org/display/Repository/Closing+a+Staging+Repository
   
-3) Prepare Voting Information and Voting
+6) Prepare Voting Information and Voting
   ....
   
-5) a) 
+7) a) 
   //Promote / Publish 
   https://docs.sonatype.org/display/Repository/Releasing+a+Staging+Repository
    b)
   //Drop and Restage
   https://docs.sonatype.org/display/Repository/Dropping+a+Staging+Repository
+  - Reverse merge the release prepare, manually delete tag in svn repo and drop staged repository in nexus and start again with step 1.
    
-  
+--------------------------------------------------------------------------
+Licence
+--------------------------------------------------------------------------
+   
+This software is licensed under the Apache 2 license, quoted below.
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use this project except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0.
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.

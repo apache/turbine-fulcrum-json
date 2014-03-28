@@ -74,7 +74,8 @@
         <module>api</module>
         <module>gson</module>
         <module>jackson</module>
-         <module>jackson2</module>
+        <module>jackson2</module>
+        <module>dist</module>
     </modules>
 
     <build>
@@ -89,33 +90,6 @@
                 <tryUpdate>false</tryUpdate>
               </configuration>
             </plugin>
-            <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-release-plugin</artifactId>
-              <configuration>
-                <preparationGoals>antrun:run</preparationGoals>
-              </configuration>
-            </plugin>
-            <plugin>
-             <artifactId>maven-antrun-plugin</artifactId>
-              <executions>
-                  <execution>
-                      <id>clean-asc-hashes</id> 
-                      <!--phase>verify</phase--><!-- a lifecycle phase --> 
-                      <inherited>false</inherited>
-                      <configuration>
-                         <target>
-                          <ant antfile="${basedir}/tasks-build-clean-asc.xml" target="tasks">
-                                <property name="build.path" value="${basedir}" />
-                            </ant>
-                          </target>
-                      </configuration>
-                      <goals>
-                        <goal>run</goal>
-                      </goals>
-                  </execution>
-              </executions>
-          </plugin>
         </plugins>
     </build>
     
@@ -124,29 +98,38 @@
             <id>apache-release</id>
             <build>
                 <plugins>
-                    <plugin>
-                        <!-- build the source and binary distribution packages -->
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-assembly-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>fulcrum-source-release-assembly</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>single</goal>
-                                </goals>
-                                <configuration>
-                                    <runOnlyAtExecutionRoot>true</runOnlyAtExecutionRoot>
-                                    <descriptorRefs>
-                                        <descriptorRef>bin</descriptorRef>
-                                        <descriptorRef>project</descriptorRef>
-                                        <descriptorRef>src</descriptorRef>
-                                    </descriptorRefs>
-                                    <tarLongFileFormat>gnu</tarLongFileFormat>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
+                  <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>2.4</version>
+                    <executions>
+                      <execution>
+                        <id>fulcrum-source-release-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                          <goal>single</goal>
+                        </goals>
+                        <configuration>
+                          <runOnlyAtExecutionRoot>true</runOnlyAtExecutionRoot>
+                          <descriptors>
+                            <descriptor>src/assembly/project.xml</descriptor>
+                          </descriptors>
+                          <tarLongFileFormat>gnu</tarLongFileFormat>
+                        </configuration>
+                      </execution>
+                    </executions>
+                  </plugin>  
+                  <plugin>
+                    <artifactId>maven-site-plugin</artifactId>
+                    <executions>
+                        <execution>
+                          <phase>package</phase>		
+                            <goals>
+                                <goal>site</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                  </plugin>
                 </plugins>
             </build>
         </profile>
