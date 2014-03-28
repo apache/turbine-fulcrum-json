@@ -265,7 +265,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
             return ser(src, filter);//mapper.writerWithView(src.getClass()).writeValueAsString(src);
         }
         String res = mapper.writerWithView(Object.class).writeValueAsString(src);
-        if (cleanCache) {
+        if (cleanCache != null && cleanCache) {
             cleanSerializerCache();
         }
         return res;
