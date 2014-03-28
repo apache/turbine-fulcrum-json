@@ -46,6 +46,7 @@ import org.codehaus.jackson.map.SerializationConfig.Feature;
 import org.codehaus.jackson.map.introspect.JacksonAnnotationIntrospector;
 import org.codehaus.jackson.map.module.SimpleModule;
 import org.codehaus.jackson.map.ser.FilterProvider;
+import org.codehaus.jackson.map.ser.StdSerializerProvider;
 import org.codehaus.jackson.map.ser.impl.SimpleBeanPropertyFilter;
 import org.codehaus.jackson.map.ser.impl.SimpleFilterProvider;
 
@@ -120,6 +121,9 @@ public class JacksonMapperService extends AbstractLogEnabled implements
             // Exception("Found registered filter - could not use custom view and custom filter for class:"+
             // src.getClass().getName());
         }
+        if (!cacheFilters || cleanCache) {
+            cleanSerializerCache();
+        }
         return mapper.writer().writeValueAsString(src);
     }
 
@@ -134,6 +138,9 @@ public class JacksonMapperService extends AbstractLogEnabled implements
             // throw new
             // Exception("Found registered filter - could not use custom view and custom filter for class:"+
             // src.getClass().getName());
+        }
+        if (!cacheFilters || cleanCache) {
+            cleanSerializerCache();
         }
         return mapper.writerWithView(type).writeValueAsString(src);
     }
@@ -181,8 +188,10 @@ public class JacksonMapperService extends AbstractLogEnabled implements
             }
         }
         String serialized = ser(src, filter);
-        if (!cacheFilters)
+        if (!cacheFilters || refreshFilter) {
             removeFilterClass(filterClass);
+            cleanSerializerCache();
+        }
         return serialized;
     }
 
@@ -218,8 +227,10 @@ public class JacksonMapperService extends AbstractLogEnabled implements
         }
         String serialized = ser(src, filter);
         getLogger().debug("serialized " + serialized);
-        if (!cacheFilters || refreshFilter)
+        if (!cacheFilters || refreshFilter) {
             removeFilterClass(filterClass);
+            cleanSerializerCache();
+        }
         return serialized;
     }
 
@@ -231,6 +242,20 @@ public class JacksonMapperService extends AbstractLogEnabled implements
             getLogger().debug(
                     "removed from  SimpleFilterProvider filters "
                             + filterClass.getName());
+        }
+    }
+    
+    private void cleanSerializerCache() {
+        if (mapper.getSerializerProvider() instanceof StdSerializerProvider) {
+            int cachedSerProvs = ((StdSerializerProvider) mapper
+                    .getSerializerProvider()).cachedSerializersCount();
+            if (cachedSerProvs > 0) {
+                getLogger()
+                        .debug("flushing cachedSerializersCount:"
+                                + cachedSerProvs);
+                ((StdSerializerProvider) mapper.getSerializerProvider())
+                        .flushCachedSerializers();
+            }
         }
     }
 

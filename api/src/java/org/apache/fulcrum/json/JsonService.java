@@ -44,7 +44,7 @@ public interface JsonService {
      * Serializes a Java object
      * 
      * @param src
-     *            The java object to be serialized.
+     *            the java object to be serialized, not null.
      * 
      * @return JSON string
      * 
@@ -55,8 +55,8 @@ public interface JsonService {
     
     /**
      * @param src
-     *              The java object to be serialized.
-     * @param refreshCache 
+     *              the java object to be serialized, not null.
+     * @param refreshCache a boolean value, not null.
      *              If <code>true</code>, try to refresh cache after serialization
      * 
      */
@@ -66,9 +66,9 @@ public interface JsonService {
      * Serializes a Java object
      * 
      * @param src
-     *            The java object to be serialized
+     *            The Java object to be serialized
      * @param type
-     *            Java Type, which should be used for the provided object .
+     *            the Java Type, which should be used for the provided object .
      * 
      * @return JSON string
      * 
@@ -92,11 +92,11 @@ public interface JsonService {
      * Deserializing a JSON string
      * 
      * @param src
-     *            Tthe JSON string to be deserialized
+     *            the JSON string to be deserialized
      * @param type
-     *            The Java Type to be used as a class
+     *            the Java Type to be used as a class
      * 
-     * @return an object
+     * @return the Java Object
      * 
      * @throws Exception
      *             if JSON deserialization fails
@@ -114,7 +114,7 @@ public interface JsonService {
      *          Cft. implementation tests for more details (GSON). 
      * @param elementType
      *          The element type. This is need in any case to assure the generic checking.
-     * @return
+     * @return the generated Java Collection.
      * @throws Exception
      */
     <T> Collection<T> deSerCollection(String json, Object collectionType, Class<T> elementType) 
@@ -132,15 +132,15 @@ public interface JsonService {
      * Serialize only object properties where filter attributes are provided
      * 
      * @param src
-     *            The Java object to serialize
+     *            the Java object to serialize
      * @param filterClass
-     *            The class to which the filtering should be applied
+     *            the class to which the filtering should be applied
      *            
      * @param cleanFilter
-     *             clean filter (clean cache for this filterClass) if <code>true</code>,  after serialization.
+     *             the Boolean value, not null If it is <code>true</code>, cleans cache and the custom filter after serialization.
      *  
      * @param filterAttr
-     *            The class bean attributes which should be serialized
+     *            the class bean attributes which should be serialized
      * 
      * @return JSON string
      * 
@@ -154,16 +154,16 @@ public interface JsonService {
      * Serialize all object properties excluding provided filters attributes
      * 
      * @param src
-     *            The Java object to serialize
+     *            the Java object to serialize
      * @param filterClass
-     *            The class to which the filtering should be applied. If its the
+     *            the class to which the filtering should be applied. If its the
      *            same class, just the filterAttributes get applied. If not the
      *            class is filtered out, if found as a property type.
      * @param cleanFilter
-     *            clean filter (clean cache for this filterClass) after serialization.      
+     *            clean filter (clean cache and custom filter for this filterClass) after serialization.      
      * 
      * @param filterAttr
-     *            The bean attributes which should not be serialized
+     *            the bean attributes which should not be serialized
      * 
      * @return JSON string
      * 
@@ -187,11 +187,11 @@ public interface JsonService {
      * Cft. to {@link #addAdapter(String, Class, Object)}
      * 
      * @param name
-     *            A name for the adapter
+     *            the name of the adapter
      * @param target
-     *            The target class for this adapter
+     *            the target class for this adapter
      * @param mixin
-     *            The adapter/mixin for the target class
+     *            the adapter/mixin for the target class
      * 
      * @return JsonService
      * 
@@ -208,11 +208,11 @@ public interface JsonService {
      * implementation) 
      * 
      * @param name
-     *            A name for the adapter
+     *            the name of the adapter
      * @param target
-     *            The target class for this adapter
+     *            the target class for this adapter
      * @param mixin
-     *            The adapter/mixin for the target object
+     *            the adapter/mixin for the target object
      *            (module/serializer/deserializer)
      * 
      * @return JsonService
@@ -225,9 +225,9 @@ public interface JsonService {
 
     /**
      * @param df
-     *            The {@link DateFormat} to be used by the JsonService.
+     *            the {@link DateFormat} to be used by the JsonService, not null.
      * 
-     *            It could be provided by component configuration too.
+     * It could be provided by component configuration too.
      * 
      */
     public void setDateFormat(final DateFormat df);
