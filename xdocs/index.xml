@@ -115,15 +115,19 @@
       </table>
     </subsection>
     <subsection name="Component Configuration Example">
+      <p>Jackson Version 2.x</p>
       <source><![CDATA[
 <json>
   <annotationInspectors>
-      	<primary>org.apache.fulcrum.json.jackson.CustomIntrospector</primary>
+      	<primary>org.apache.fulcrum.json.jackson.SimpleNameIntrospector</primary>
         <secondary>com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector</secondary>
         <features>
           <feature value="false" type="com.fasterxml.jackson.databind.SerializationFeature">FAIL_ON_EMPTY_BEANS</feature>
           <feature value="false" type="com.fasterxml.jackson.databind.DeserializationFeature">EAGER_DESERIALIZER_FETCH</feature>
+          <!--  do not fail of only getter is provided -->
+          <feature value="false" type="com.fasterxml.jackson.databind.DeserializationFeature">FAIL_ON_UNKNOWN_PROPERTIES</feature>          
           <feature value="false" type="com.fasterxml.jackson.databind.MapperFeature">ALLOW_FINAL_FIELDS_AS_MUTATORS</feature>
+          <feature value="true"  type="com.fasterxml.jackson.core.JsonParser">ALLOW_UNQUOTED_FIELD_NAMES</feature>
 
           <!-- feature value="true">com.fasterxml.jackson.databind.SerializationFeature.INDENT_OUTPUT</feature-->
         </features>
@@ -131,6 +135,23 @@
    <dateFormat>MM/dd/yyyy</dateFormat>
    <defaultTyping type="NON_FINAL" key="type"/><!-- or e.g.  OBJECT_AND_NON_CONCRETE -->
    <!-- cacheFilters>false</cacheFilters>
+  </json>
+]]></source>
+<p>Jackson Version 1.9.x</p>
+      <source><![CDATA[
+<json>
+  <annotationInspectors>
+      	<primary>org.apache.fulcrum.json.jackson.CustomIntrospector</primary>
+        <secondary>org.codehaus.jackson.xc.JaxbAnnotationIntrospector</secondary>
+        <features>
+        <!--  support up to now only serializing features -->
+          <feature value="false">org.codehaus.jackson.map.SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS</feature> 
+          <!-- feature value="true">org.codehaus.jackson.map.SerializationConfig.Feature.INDENT_OUTPUT</feature-->
+        </features>
+  </annotationInspectors>
+          <dateFormat>MM/dd/yyyy</dateFormat>
+        <!-- defaultTyping type="OBJECT_AND_NON_CONCRETE" key="type"/-->
+        <!-- cacheFilters>false</cacheFilters-->
   </json>
 ]]></source>
     </subsection>
@@ -211,6 +232,18 @@ JsonService jsonService = (JsonService)TurbineServices
   </section>
 
   <section name="JSON Service Component with GSON API">
+    <section name="Overview">
+    <p>
+    This Service serves as a JSON serializer or deserializer using <a href="https://code.google.com/p/google-gson/">GSON</a> Version 2.
+      The GSON sub module provides some include/exclude filtering strategies.
+    </p>
+
+    <p>
+      It is written for use in Turbine but it can be used in any container compatible
+      with Avalon's ECM container.
+    </p>
+  </section>
+    
     <subsection name="Role Configuration">
       <source><![CDATA[
     <role

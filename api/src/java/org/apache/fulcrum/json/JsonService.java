@@ -56,7 +56,7 @@ public interface JsonService {
     /**
      * @param src
      *              the java object to be serialized, not null.
-     * @param refreshCache a boolean value, not null.
+     * @param cleanCache a boolean value, not null.
      *              If <code>true</code>, try to refresh cache after serialization
      * 
      */
@@ -193,7 +193,7 @@ public interface JsonService {
      * @param mixin
      *            the adapter/mixin for the target class
      * 
-     * @return JsonService
+     * @return the JsonService instance
      * 
      * @throws Exception
      *             if adapter registration fails
@@ -215,7 +215,7 @@ public interface JsonService {
      *            the adapter/mixin for the target object
      *            (module/serializer/deserializer)
      * 
-     * @return JsonService
+     * @return a JsonService instance
      * 
      * @throws Exception
      *             if adapter registration fails

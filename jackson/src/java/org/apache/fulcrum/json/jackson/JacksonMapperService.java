@@ -62,7 +62,7 @@ import org.codehaus.jackson.map.ser.impl.SimpleFilterProvider;
  * 
  * 
  * @author gk
- * @version
+ * @version $Id$
  * 
  */
 public class JacksonMapperService extends AbstractLogEnabled implements

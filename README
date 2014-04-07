@@ -72,6 +72,7 @@ Steps
   
 4) Release Preparing
   // performs an upload to repository.apache.org/service/local/staging/deploy/maven2/
+  // Hint: Add -Dgpg.useagent=false helps, if running from a windows machine to avoid hanging while gpg plugin signing process ..
   mvn release:perform 
   
 More Information 
