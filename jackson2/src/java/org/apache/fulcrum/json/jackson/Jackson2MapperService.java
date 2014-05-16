@@ -25,6 +25,7 @@ import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -151,12 +152,37 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
         return reader.readValue(json);
     }
     
-    public <T> Collection<T> deSerCollection2(String json, Class<? extends Collection> collectionClass, Class<T> type)
+    public <T> Collection<T> deSerCollectionWithType(String json, Class<? extends Collection> collectionClass, Class<T> type)
             throws Exception {
         return mapper.readValue(json, mapper.getTypeFactory()
                 .constructCollectionType(collectionClass, type));
     }
     
+    public <T> String serCollectionWithTypeReference(Collection<T> src, TypeReference collectionType, Boolean cleanCache)
+            throws Exception {
+        String res =  mapper.writerWithType(collectionType).writeValueAsString(src);
+        if (cleanCache) {
+            cleanSerializerCache();
+        }
+        return res;
+    }
+    
+    @Override
+    public <T> Collection<T> deSerCollection(String json,
+            Object collectionType, Class<T> elementType) throws Exception {
+        if (collectionType instanceof TypeReference) {
+            return mapper.readValue(json, (TypeReference)collectionType);
+        } else {
+            return mapper.readValue(json, mapper.getTypeFactory()
+                    .constructCollectionType(((Collection<T>)collectionType).getClass(), elementType));            
+        }
+    }
+    
+    
+    public <T> Collection<T> deSerCollectionWithTypeReference(String json,
+            TypeReference collectionType ) throws Exception {
+            return mapper.readValue(json, collectionType);
+    }
 
 
     public void getJsonService() throws InstantiationException {
@@ -262,7 +288,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
             // src.getClass().getName());
             SimpleFilterProvider filter = (SimpleFilterProvider) this.filters.get(src.getClass()
                     .getName());
-            return ser(src, filter);//mapper.writerWithView(src.getClass()).writeValueAsString(src);
+            return ser(src, filter, cleanCache);//mapper.writerWithView(src.getClass()).writeValueAsString(src);
         }
         String res = mapper.writerWithView(Object.class).writeValueAsString(src);
         if (cleanCache != null && cleanCache) {
@@ -302,7 +328,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
                 filterAttr);
         }
         getLogger().info("filtering with filter "+ filter);
-        String serialized = ser(src, filter);
+        String serialized = ser(src, filter, clean);
         if (!cacheFilters || clean) {
             removeFilter(filterClass);
             if (src != null) removeFilter(src.getClass());
@@ -354,7 +380,6 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
                     .get(filterClass.getName());
             smpfilter.removeFilter(filterClass.getName());
             this.filters.remove(filterClass.getName());
-            cleanSerializerCache();
             getLogger().debug(
                     "removed from  SimpleFilterProvider filters "
                             + filterClass.getName());
@@ -703,16 +728,4 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
         if (!cacheFilters)
             mapper.configure(SerializationFeature.FLUSH_AFTER_WRITE_VALUE, true);
     }
-
-    @Override
-    public <T> Collection<T> deSerCollection(String json,
-            Object collectionType, Class<T> elementType) throws Exception {
-        if (collectionType instanceof TypeReference) {
-            return mapper.readValue(json, (TypeReference)collectionType);
-        } else {
-            return mapper.readValue(json, mapper.getTypeFactory()
-                    .constructCollectionType(((Collection<T>)collectionType).getClass(), elementType));            
-        }
-
-    } 
 }
