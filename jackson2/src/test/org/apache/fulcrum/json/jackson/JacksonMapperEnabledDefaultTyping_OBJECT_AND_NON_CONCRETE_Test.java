@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import org.apache.avalon.framework.logger.ConsoleLogger;
 import org.apache.avalon.framework.logger.Logger;
@@ -39,12 +40,12 @@ import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
 
 
 /**
- * Jackson2 JSON Test with EnabledDefaultTyping
+ * Jackson2 JSON Test with EnabledDefaultTyping {@link DefaultTyping#OBJECT_AND_NON_CONCRETE}
  * 
  * cft. http://wiki.fasterxml.com/JacksonPolymorphicDeserialization
  * 
  * @author gk
- * @version $Id: JacksonMapperEnabledDefaultTypingTest.java 1577518 2014-03-14 13:21:39Z gk $
+ * @version $Id$
  */
 public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test extends BaseUnitTest {
     private JsonService sc = null;
@@ -99,12 +100,13 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
         map.put("mydate",Calendar.getInstance().getTime());
         Calendar mydate2 = Calendar.getInstance();
         mydate2.set(1999, 3, 10);
+        mydate2.setTimeZone(TimeZone.getTimeZone("CEST"));
         map.put("mydate2",mydate2.getTime());
         String serJson0 =  sc.ser(map, false);
         String serJson =  sc.ser(map, Map.class, false);
         System.out.println("serJson:"+ serJson0);
         assertEquals(serJson0, serJson);
-        sc.addAdapter("Collection Adapter", Object.class, DateKeyMixin.class);
+        //sc.addAdapter("Collection Adapter", Object.class, DateKeyMixin.class);
         DateKeyMixin serObject =sc.deSer(serJson0, DateKeyMixin.class);
 //        System.out.println("serObject:"+ serObject);
 //        System.out.println("serObject:"+ serObject.mydate.getClass());
