@@ -118,6 +118,6 @@
         </dependency>
     </dependencies>
     <properties>
-        <jackson2.version>2.2.1</jackson2.version>
+        <jackson2.version>2.2.3</jackson2.version>
     </properties>
 </project>
