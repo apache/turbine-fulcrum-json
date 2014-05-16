@@ -136,7 +136,7 @@ public class JacksonMapperTest extends BaseUnitTest {
         String result = sc.serializeOnlyFilter(beanList, Bean.class, "name",
                 "age");
         List<Bean> beanList2 = (List<Bean>) ((Jackson2MapperService) sc)
-                .deSerCollection2(result, List.class, Bean.class);
+                .deSerCollectionWithType(result, List.class, Bean.class);
         assertTrue("DeSer failed ", beanList2.size() == 10);
         for (Bean bean : beanList2) {
             assertEquals("DeSer failed ", Bean.class, bean.getClass());
@@ -222,7 +222,7 @@ public class JacksonMapperTest extends BaseUnitTest {
             rectList.add(filteredRect);
         }
         String serColl = sc.ser(rectList);
-        Collection<Rectangle> resultList0 =  ((Jackson2MapperService) sc) .deSerCollection2(serColl, ArrayList.class, Rectangle.class);
+        Collection<Rectangle> resultList0 =  ((Jackson2MapperService) sc) .deSerCollectionWithType(serColl, ArrayList.class, Rectangle.class);
         
         for (int i = 0; i < 10; i++) {
             assertEquals("deser reread size failed", (i * i), ((List<Rectangle>)resultList0)

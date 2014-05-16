@@ -240,6 +240,33 @@ public class DefaultServiceTest extends BaseUnitTest {
                 "Ser filtered Rectangle failed ",
                 "{\"w\":5}",
                 rectangle);
+
+    }
+    
+    public void testSerializeCollectionWithOnlyFilterAndType() throws Exception {
+        
+        List<TypedRectangle> rectList = new ArrayList<TypedRectangle>();
+        for (int i = 0; i < 2; i++) {
+            TypedRectangle filteredRect = new TypedRectangle(i, i, "rect" + i);
+            rectList.add(filteredRect);
+        }
+        Class clazz = Class.forName("org.apache.fulcrum.json.jackson.TypedRectangle");
+        // no type cft. https://github.com/FasterXML/jackson-databind/issues/303 !!
+        assertTrue("[{\"w\":0},{\"w\":1}]".equals(sc.serializeOnlyFilter(rectList, clazz, true,"w")));
+        // need mixin in object class!
+        sc.addAdapter("Collection Adapter", Object.class, TypedRectangle.Mixins.class);
+        assertTrue("[\"java.util.ArrayList\",[{\"type\":\"org.apache.fulcrum.json.jackson.TypedRectangle\",\"w\":0},{\"type\":\"org.apache.fulcrum.json.jackson.TypedRectangle\",\"w\":1}]]".equals(sc.serializeOnlyFilter(rectList, clazz, true, "w")));
+    }
+    
+    public void testSerializeCollectionWithTypedReference() throws Exception {
+        
+        List<TypedRectangle> rectList = new ArrayList<TypedRectangle>();
+        for (int i = 0; i < 2; i++) {
+            TypedRectangle filteredRect = new TypedRectangle(i, i, "rect" + i);
+            rectList.add(filteredRect);
+        }
+        TypeReference<List<TypedRectangle>> typeRef = new TypeReference<List<TypedRectangle>>(){};
+        System.out.println("aa:" +((Jackson2MapperService)sc).serCollectionWithTypeReference(rectList,typeRef, false));
     }
 
 }
