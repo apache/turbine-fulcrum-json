@@ -20,30 +20,19 @@
 <document>
   <properties>
     <title>Changes</title>
-    <author email="gk@apache.org">Georg Kallidis</author>
+    <author email="georg.kallidis@fu-berlin.de">Georg Kallidis</author>
   </properties>
+
   <body>
     <release version="1.0.0" date="">
-      <action dev="gk" type="add">
-    Renamed refreshFilter to cleanFilter/Cache parameter name and added type to more methods in JsonService.
+    <action type="update" dev="gk">
+      2014/Mar/10: Uploaded to https://repository.apache.org/content/repositories/snapshots/org/apache/fulcrum/ 
       </action>
-      <action dev="gk" type="update">
-    Null-Checking in methods.
-    Deregistering of adapaters (Tests)
-      </action>
-      <action dev="gk" type="add">
-    Added mixin deserializing for collection.
-      </action>
-      <action dev="gk" type="update">
-    Changed from primitive type boolean to Boolean in serialize* methods to avoid errors (ambigous varargs argument handling).
-      </action>
-      <action dev="gk" type="add">
-    Added refreshFilter parameter to serialize* methods
-    Added collectionType deserialization
-    Added method to service interface JsonService to allow for object adapters 
-    More configurable Jackson 2 and GSON service components
+      <action type="update" dev="gk">
+      Checked for var-args correctess in API methods.
       </action>
     </release>
+
   </body>
 </document>
 
