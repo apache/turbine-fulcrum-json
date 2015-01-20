@@ -19,17 +19,18 @@ package org.apache.fulcrum.json.jackson.filters;
  * under the License.
  */
 
-import com.fasterxml.jackson.databind.ser.BeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.PropertyFilter;
 
+@Deprecated
 public class FilterContext {
 
-    BeanPropertyFilter filter;
+    PropertyFilter filter;
 
-    public BeanPropertyFilter getFilter() {
+    public PropertyFilter getFilter() {
         return filter;
     }
 
-    public void setFilter(BeanPropertyFilter bpf) {
+    public void setFilter(PropertyFilter bpf) {
         this.filter = bpf;
     }
 

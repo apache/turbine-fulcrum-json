@@ -41,6 +41,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Jackson2 JSON Test
  * 
+ * Test without type setting 
+ * 
  * @author gk
  * @version $Id$
  */

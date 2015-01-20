@@ -22,6 +22,7 @@ package org.apache.fulcrum.json.jackson;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import com.fasterxml.jackson.databind.introspect.Annotated;
 import com.fasterxml.jackson.databind.introspect.AnnotatedClass;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
@@ -37,6 +38,10 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
  * 
  */
 public class SimpleNameIntrospector extends JacksonAnnotationIntrospector {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
     public List<String> externalFilterClasses = new CopyOnWriteArrayList<String>();
 
     /**
@@ -61,7 +66,7 @@ public class SimpleNameIntrospector extends JacksonAnnotationIntrospector {
      *         filter itself currently is {@link SimpleFilterProvider}.
      */
     @Override
-    public Object findFilterId(AnnotatedClass ac) {
+    public Object findFilterId(Annotated ac) {
         // Let's default to current behavior if annotation is found:
         Object id = super.findFilterId(ac);
         // but use simple class name if not

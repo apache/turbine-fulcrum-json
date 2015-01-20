@@ -25,7 +25,6 @@ import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -36,7 +35,6 @@ import org.apache.avalon.framework.configuration.ConfigurationException;
 import org.apache.avalon.framework.logger.AbstractLogEnabled;
 import org.apache.fulcrum.json.JsonService;
 import org.apache.fulcrum.json.jackson.filters.CustomModuleWrapper;
-import org.apache.fulcrum.json.jackson.filters.FilterContext;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -62,12 +60,12 @@ import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.DefaultSerializerProvider;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
+import com.fasterxml.jackson.databind.ser.PropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 /**
- * Jackson 2 Impl of {@link JsonService}.
  * 
  * 
  * By default multiple serialization of the same object in a single thread is
@@ -76,7 +74,7 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
  * 
  * Note: If using {@link SimpleNameIntrospector}, filters are set by class id, which are cached by default. 
  * By setting {@link #cacheFilters} to <code>false</code> each filter will be unregistered and the cache cleaned.
- * By setting the Boolean parameter clean {@link #filter(Object, Class, FilterContext, Boolean, String...)} 
+ * By setting the Boolean parameter clean {@link #filter(Object, Class, PropertyFilter, Boolean, String...)} 
  * you could filter a class differently for each call.
  * 
  * @author <a href="mailto:gk@apache.org">Georg Kallidis</a>
@@ -253,11 +251,10 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
 
     public synchronized <T> String serializeAllExceptFilter(Object src,
             Class<T> filterClass, Boolean clean, String... filterAttr) throws Exception {
-        FilterContext fc = new FilterContext();
+        PropertyFilter pf = null;
         if (filterAttr != null)
-            fc.setFilter(SimpleBeanPropertyFilter
-                    .serializeAllExcept(filterAttr));
-        return filter(src, filterClass, fc, clean, filterAttr);
+            pf = SimpleBeanPropertyFilter.serializeAllExcept(filterAttr);
+        return filter(src, filterClass, pf, clean, filterAttr);
     }
     
     @Override
@@ -269,12 +266,12 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
     @Override
     public synchronized <T> String serializeOnlyFilter(Object src,
             Class<T> filterClass, Boolean refresh, String... filterAttr) throws Exception {
-        FilterContext fc = new FilterContext();
+        PropertyFilter pf = null;
         if (filterAttr != null && filterAttr.length > 0) {
-            fc.setFilter(SimpleBeanPropertyFilter.filterOutAllExcept(filterAttr));
+            pf = SimpleBeanPropertyFilter.filterOutAllExcept(filterAttr);
             getLogger().debug("setting filteroutAllexcept filter for size of filterAttr: " + filterAttr.length);
         }
-        return filter(src, filterClass, fc, refresh, filterAttr);
+        return filter(src, filterClass, pf, refresh, filterAttr);
     }
     
     @Override
@@ -321,10 +318,10 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
     }  
 
     private <T> String filter(Object src, Class<T> filterClass,
-            FilterContext fc,  Boolean clean, String... filterAttr) throws Exception {
+            PropertyFilter pf,  Boolean clean, String... filterAttr) throws Exception {
         FilterProvider filter = null;
         if (src != null) {
-            filter = checkFilter(fc, src.getClass(), filterClass,
+            filter = checkFilter(pf, src.getClass(), filterClass,
                 filterAttr);
         }
         getLogger().info("filtering with filter "+ filter);
@@ -337,26 +334,27 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
     }
 
     @SuppressWarnings("unchecked")
-    private <T> FilterProvider checkFilter(FilterContext fc,
+    private <T> FilterProvider checkFilter(PropertyFilter pf,
             Class rootFilterClass, Class<T> filterClass, String... filterAttr) {
-        SimpleFilterProvider filter = new SimpleFilterProvider();
+        SimpleFilterProvider filter = null;
         if (filterAttr != null && filterAttr.length > 0
                 && (filterClass == null || !rootFilterClass.equals(filterClass))) {
             // filter attributes in root class
-            filter = retrieveFilter(filter, fc, rootFilterClass, filterAttr);
+            filter = retrieveFilter(pf, rootFilterClass, filterAttr);
         }
         if (filterClass != null) {
-            filter = retrieveFilter(filter, fc, filterClass, filterAttr);
+            filter = retrieveFilter(pf, filterClass, filterAttr);
         }
         return filter;
     }
 
-    private <T> SimpleFilterProvider retrieveFilter(SimpleFilterProvider filter, FilterContext fc,
-            Class<T> filterClass, String... filterAttr) {
+    private <T> SimpleFilterProvider retrieveFilter(PropertyFilter pf, Class<T> filterClass, String... filterAttr) {
+        SimpleFilterProvider filter = new SimpleFilterProvider();
         if (!this.filters.containsKey(filterClass.getName())) {
             getLogger().debug("add filter for class " + filterClass.getName());
-            if (fc.getFilter() != null) {
-                filter.addFilter(filterClass.getName(), fc.getFilter());
+            if (pf != null) {
+                //filter.addFilter(filterClass.getName(), pf);
+                filter.setDefaultFilter(pf);
             }
             setCustomIntrospectorWithExternalFilterId(filterClass); // filter
                                                                     // class
