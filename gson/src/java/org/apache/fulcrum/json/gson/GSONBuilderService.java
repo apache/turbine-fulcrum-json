@@ -138,7 +138,7 @@ public class GSONBuilderService extends AbstractLogEnabled implements
     @Override
     public JsonService addAdapter(String name, Class target, Class adapter)
             throws Exception {
-        gson.registerTypeAdapter(target, adapter.newInstance());
+        gson.registerTypeAdapter(target, adapter.getConstructor().newInstance());
         return null;
     }
 

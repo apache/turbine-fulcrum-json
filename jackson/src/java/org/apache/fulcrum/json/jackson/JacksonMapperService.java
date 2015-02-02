@@ -385,7 +385,7 @@ public class JacksonMapperService extends AbstractLogEnabled implements
             String avClass = annotationInspectors.get(key);
             if (key.equals("primary") && avClass != null) {
                 try {
-                    primary = (AnnotationIntrospector) Class.forName(avClass)
+                    primary = (AnnotationIntrospector) Class.forName(avClass).getConstructor()
                             .newInstance();
                 } catch (Exception e) {
                     throw new Exception(
@@ -394,7 +394,7 @@ public class JacksonMapperService extends AbstractLogEnabled implements
                 }
             } else if (key.equals("secondary") && avClass != null) {
                 try {
-                    secondary = (AnnotationIntrospector) Class.forName(avClass)
+                    secondary = (AnnotationIntrospector) Class.forName(avClass).getConstructor()
                             .newInstance();
                 } catch (Exception e) {
                     throw new Exception(
