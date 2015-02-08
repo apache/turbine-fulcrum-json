@@ -34,7 +34,7 @@
     <scm>
         <connection>scm:svn:http://svn.apache.org/repos/asf/turbine/fulcrum/trunk/json/api/</connection>
         <developerConnection>scm:svn:https://svn.apache.org/repos/asf/turbine/fulcrum/trunk/json/api/</developerConnection>
-        <url>http://svn.apache.org/viewcvs/turbine/fulcrum/trunk/json/api/</url>
+        <url>http://svn.apache.org/viewvc/turbine/fulcrum/trunk/json/api/</url>
     </scm>
 
     <dependencies>

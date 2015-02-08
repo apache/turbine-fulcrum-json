@@ -32,7 +32,7 @@
     <scm>
         <connection>scm:svn:http://svn.apache.org/repos/asf/turbine/fulcrum/trunk/json/jackson/</connection>
         <developerConnection>scm:svn:https://svn.apache.org/repos/asf/turbine/fulcrum/trunk/json/jackson/</developerConnection>
-        <url>http://svn.apache.org/viewcvs/turbine/fulcrum/trunk/json/jackson/</url>
+        <url>http://svn.apache.org/viewvc/turbine/fulcrum/trunk/json/jackson/</url>
     </scm>
 
     <build>
