@@ -24,7 +24,10 @@
   </properties>
 
   <body>
-    <release version="1.0.0" date="">
+    <action type="update" dev="gk">
+        Exclude classes only for exclude Serializing Queries
+      </action>
+    <release version="1.0.0" date="2014-04-01">
     <action type="update" dev="gk">
       2014/Mar/10: Uploaded to https://repository.apache.org/content/repositories/snapshots/org/apache/fulcrum/ 
       </action>

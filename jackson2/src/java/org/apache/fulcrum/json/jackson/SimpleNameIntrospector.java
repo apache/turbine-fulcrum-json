@@ -25,6 +25,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import com.fasterxml.jackson.databind.introspect.Annotated;
 import com.fasterxml.jackson.databind.introspect.AnnotatedClass;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
+import com.fasterxml.jackson.databind.introspect.NopAnnotationIntrospector;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 
 /**
@@ -37,12 +38,13 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
  * @version $Id$
  * 
  */
-public class SimpleNameIntrospector extends JacksonAnnotationIntrospector {
+public class SimpleNameIntrospector extends NopAnnotationIntrospector {
     /**
      * 
      */
     private static final long serialVersionUID = 1L;
     public List<String> externalFilterClasses = new CopyOnWriteArrayList<String>();
+    public List<String> externalFilterExcludeClasses = new CopyOnWriteArrayList<String>();
 
     /**
      * Filtering on method types
@@ -52,14 +54,13 @@ public class SimpleNameIntrospector extends JacksonAnnotationIntrospector {
     public Boolean isIgnorableType(AnnotatedClass ac) {
         Boolean isIgnorable = super.isIgnorableType(ac);
         if (isIgnorable == null || !isIgnorable) {
-            if (!externalFilterClasses.isEmpty()
-                    && externalFilterClasses.contains(ac.getName())) {
+            if (!externalFilterExcludeClasses.isEmpty()
+                    && externalFilterExcludeClasses.contains(ac.getName())) {
                 isIgnorable = true;
             }
         }
         return isIgnorable;
     }
-
     /**
      * @return Object Filtering on properties returns an object, if
      *         {@link #externalFilterClasses} contains the class provided. The
@@ -105,5 +106,21 @@ public class SimpleNameIntrospector extends JacksonAnnotationIntrospector {
                 externalFilterClasses.remove(externalFilterClass.getName());
             }
     }
+    
+    public void setExternalFilterExcludeClasses(Class... classes) {
+
+        for (int i = 0; i < classes.length; i++) {
+            if (!externalFilterExcludeClasses.contains(classes[i].getName())) {
+
+                externalFilterExcludeClasses.add(classes[i].getName());
+            }
+        }
+    }
+    
+    public void removeExternalFilterExcludeClass(Class externalFilterClass) {
+        if (externalFilterExcludeClasses.contains(externalFilterClass.getName())) {
+            externalFilterExcludeClasses.remove(externalFilterClass.getName());
+        }
+}
 
 }
