@@ -54,7 +54,7 @@
     </p>
      </subsection>
       <subsection name="Role Configuration">
-      <p>Jackson Version 2.2.1</p>
+      <p>Jackson Version 2.4.5</p>
       <source><![CDATA[
   <role
         name="org.apache.fulcrum.json.JsonService"
@@ -234,7 +234,7 @@ JsonService jsonService = (JsonService)TurbineServices
   <section name="JSON Service Component with GSON API">
     <section name="Overview">
     <p>
-    This Service serves as a JSON serializer or deserializer using <a href="https://code.google.com/p/google-gson/">GSON</a> Version 2.
+    This Service serves as a JSON serializer or deserializer using <a href="https://code.google.com/p/google-gson/">GSON</a> Version 2.3.1
       The GSON sub module provides some include/exclude filtering strategies.
     </p>
 
