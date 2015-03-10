@@ -23,12 +23,12 @@ import java.text.DateFormat;
 import java.util.Collection;
 
 /**
- * This class defines methods needed to serialize and deserialize and helper
- * methos if needed.
+ * This class defines custom methods needed to serialize and deserialize and helper
+ * methods if needed.
  * 
  * Some methods expect a class parameter.
  * 
- * If you want to call theses methods from an environment, where you could only
+ * If you want to call these methods from an environment, where you could only
  * provide strings (e.g. velocity context), just wrap the method and call
  * <code>Class clazz = Class.forName(className);</code> for the parameter.
  * 
@@ -137,7 +137,7 @@ public interface JsonService {
      *            the class to which the filtering should be applied
      *            
      * @param cleanFilter
-     *             the Boolean value, not null If it is <code>true</code>, cleans cache and the custom filter after serialization.
+     *             the Boolean value, not null. If it is <code>true</code>, cleans cache and the custom filter after serialization.
      *  
      * @param filterAttr
      *            the class bean attributes which should be serialized
@@ -160,7 +160,7 @@ public interface JsonService {
      *            same class, just the filterAttributes get applied. If not the
      *            class is filtered out, if found as a property type.
      * @param cleanFilter
-     *            clean filter (clean cache and custom filter for this filterClass) after serialization.      
+     *            if <code>true </code> cleans filter (clean cache and custom filter for this filterClass) after serialization.      
      * 
      * @param filterAttr
      *            the bean attributes which should not be serialized

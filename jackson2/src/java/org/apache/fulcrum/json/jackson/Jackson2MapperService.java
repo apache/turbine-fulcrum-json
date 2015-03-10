@@ -72,10 +72,11 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
  * not supported (e.g filter + mixin or default + filter for the same bean /
  * object).
  * 
- * Note: If using {@link SimpleNameIntrospector}, filters are set by class id, which are cached by default. 
- * By setting {@link #cacheFilters} to <code>false</code> each filter will be unregistered and the cache cleaned.
- * By setting the Boolean parameter clean {@link #filter(Object, Class, PropertyFilter, Boolean, String...)} 
- * you could filter a class differently for each call.
+ * By default a filter is defined by its {@link Class#getName()}.
+ * 
+ * Note: If using {@link SimpleNameIntrospector}, filter caches are set by class id. Caching is enabled by default, if not (a) by setting {@link #cacheFilters} to <code>false</code>.  
+ * By setting (b) the Boolean parameter clean {@link #serializeAllExceptFilter(Object, Class, Boolean, String...)} or {@link #serializeOnlyFilter(Object, Class, Boolean, String...)} 
+ * you could clean the filter. If caching is disabled each filter will be unregistered and the cache cleaned.
  * 
  * @author <a href="mailto:gk@apache.org">Georg Kallidis</a>
  * @version $Id$
@@ -100,7 +101,10 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
     private Map<String, FilterProvider> filters;
     private String dateFormat;
 
-    final String DEFAULTDATEFORMAT = "MM/dd/yyyy";
+    /**
+     * Default dateformat is <code>MM/dd/yyyy</code>, could be overwritten in {@link #setDateFormat(DateFormat)}.
+     */
+    public final String DEFAULTDATEFORMAT = "MM/dd/yyyy";
 
     final boolean defaultType = false;
     public boolean cacheFilters = true; // true -> this is by default true in jackson, if not using
@@ -465,6 +469,9 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
         module.addDeserializer(type, deSer);
     }
 
+    /**
+     * Defalut Dateformt: {@link #DEFAULTDATEFORMAT}
+     */
     @Override
     public void setDateFormat(final DateFormat df) {
         mapper.setDateFormat(df);

@@ -24,7 +24,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.fasterxml.jackson.databind.introspect.Annotated;
 import com.fasterxml.jackson.databind.introspect.AnnotatedClass;
-import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.databind.introspect.NopAnnotationIntrospector;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 
@@ -47,7 +46,7 @@ public class SimpleNameIntrospector extends NopAnnotationIntrospector {
     public List<String> externalFilterExcludeClasses = new CopyOnWriteArrayList<String>();
 
     /**
-     * Filtering on method types
+     * Filtering on method types, cft. @link 
      * 
      */
     @Override

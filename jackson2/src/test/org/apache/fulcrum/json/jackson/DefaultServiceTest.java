@@ -104,7 +104,8 @@ public class DefaultServiceTest extends BaseUnitTest {
     }
 
     public void testSerializeDate() throws Exception {
-        final SimpleDateFormat MMddyyyy = new SimpleDateFormat("MM/dd/yyyy");
+        // non default date format
+        final SimpleDateFormat MMddyyyy = new SimpleDateFormat("MM-dd-yyyy");
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("date", Calendar.getInstance().getTime());
 
@@ -112,7 +113,7 @@ public class DefaultServiceTest extends BaseUnitTest {
         String serJson = sc.ser(map);
         System.out.println("serJson:" + serJson);
         assertTrue("Serialize with Adapater failed ",
-                serJson.matches("\\{\"date\":\"\\d\\d/\\d\\d/\\d{4}\"\\}"));
+                serJson.matches("\\{\"date\":\"\\d\\d-\\d\\d-\\d{4}\"\\}"));
     }
 
     // jackson serializes size too
