@@ -101,7 +101,22 @@ public class GSONBuilderService extends AbstractLogEnabled implements
         getLogger().debug("collectionType:" + collectionType);
         return  gson.create().fromJson(json, (Type)collectionType);
     }
-    
+
+    @Override
+    public <T> String serializeOnlyFilter(Object src, String... filterAttr)
+            throws Exception {
+        return  gson
+                .addSerializationExclusionStrategy(
+                        include(null,filterAttr)).create().toJson(src);
+    }
+
+    @Override
+    public <T> String serializeOnlyFilter(Object src, Boolean notused,
+            String... filterAttr) throws Exception {
+        return  gson
+                .addSerializationExclusionStrategy(
+                        include(null,filterAttr)).create().toJson(src);
+    }
 
     @Override
     public <T> String serializeOnlyFilter(Object src, Class<T> filterClass,
@@ -154,6 +169,22 @@ public class GSONBuilderService extends AbstractLogEnabled implements
     public <T> String serializeAllExceptFilter(Object src, Class<T> filterClass,
             Boolean clearCache, String... filterAttr) throws Exception {
         throw new Exception("Not yet implemented!");
+    }
+    
+    @Override
+    public <T> String serializeAllExceptFilter(Object src, String... filterAttr)
+            throws Exception {
+        return gson
+                .addSerializationExclusionStrategy(
+                        exclude(null, filterAttr)).create().toJson(src);
+    }
+
+    @Override
+    public <T> String serializeAllExceptFilter(Object src, Boolean notused,
+            String... filterAttr) throws Exception {
+        return gson
+                .addSerializationExclusionStrategy(
+                        exclude(null, filterAttr)).create().toJson(src);
     }
     
     @Override
@@ -337,7 +368,5 @@ public class GSONBuilderService extends AbstractLogEnabled implements
             }
         }.init(clazz, filterAttrs);
     }
-
-    
 
 }

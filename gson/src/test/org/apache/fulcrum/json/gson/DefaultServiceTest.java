@@ -69,7 +69,7 @@ public class DefaultServiceTest extends BaseUnitTest {
 
     public void testSerializeExcludeNothing() throws Exception {
         String serJson = sc.serializeAllExceptFilter(new TestClass("mytest"),
-                (Class) null, (String[]) null);
+                (String[]) null);
         assertEquals(
                 "Serialization failed ",
                 "{\"container\":{\"cf\":\"Config.xml\"},\"configurationName\":\"Config.xml\",\"name\":\"mytest\"}",
@@ -98,7 +98,7 @@ public class DefaultServiceTest extends BaseUnitTest {
     public void testSerializeExcludeField() throws Exception {
 
         String serJson = sc.serializeAllExceptFilter(new TestClass("mytest"),
-                (Class) null, "configurationName");
+                 "configurationName");
         assertEquals("Serialization failed ",
                 "{\"container\":{\"cf\":\"Config.xml\"},\"name\":\"mytest\"}",
                 serJson);
@@ -238,7 +238,7 @@ public class DefaultServiceTest extends BaseUnitTest {
         // as gson adds we could not use multiple disjunct exclusion strategies
         Rectangle filteredRectangle = new Rectangle(5, 10);
         filteredRectangle.setName("jim");
-        String rectangle = sc.serializeOnlyFilter(filteredRectangle, (Class) null, "w");
+        String rectangle = sc.serializeOnlyFilter(filteredRectangle, "w");
         assertEquals(
                 "Ser filtered Rectangle failed ",
                 "{\"w\":5}",

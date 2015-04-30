@@ -120,7 +120,7 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
     public void testSerializeWithCustomFilter() throws Exception {
         Bean filteredBean = new Bean();
         filteredBean.setName("joe");
-        String bean = sc.serializeOnlyFilter(filteredBean, Bean.class, "name");
+        String bean = sc.serializeOnlyFilter(filteredBean, "name");
         assertEquals(
                 "Ser filtered Bean failed ",
                 "{\"name\":\"joe\"}",
@@ -129,7 +129,7 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
         Rectangle filteredRectangle = new Rectangle(5, 10);
         filteredRectangle.setName("jim");
         String rectangle = sc.serializeOnlyFilter(filteredRectangle,
-                Rectangle.class, "w", "name");
+               "w", "name");
         assertEquals("Ser filtered Rectangle failed ",
                 "{\"w\":5,\"name\":\"jim\"}", rectangle);
     }

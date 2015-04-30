@@ -119,11 +119,34 @@ public interface JsonService {
      */
     <T> Collection<T> deSerCollection(String json, Object collectionType, Class<T> elementType) 
             throws Exception;
+    
+    /**
+     * Custom method without caching. Caching is set to <code>false</code> for this method call.
+     * @see #serializeOnlyFilter(Object, Class, Boolean, String...).
+     * 
+     * <code>refreshFilter</code> is set to <code>true</code> for this method call.
+     */
+    public <T> String serializeOnlyFilter(Object src, 
+            String... filterAttr) throws Exception;
+    
+    /**
+     * Custom method. Caching key is derived from param src object class. 
+     * @see #serializeOnlyFilter(Object, Class, Boolean, String...).
+     * 
+     * @param src
+     *            The Java object to serialize
+     * @param cleanFilter
+     *             The Boolean value, not null. If it is <code>true</code>, cleans cache and the custom filter after serialization.
+     * 
+     * <code>refreshFilter</code> is set to <code>true</code> for this method call.
+     */
+    public <T> String serializeOnlyFilter(Object src, Boolean cleanFilter,
+            String... filterAttr) throws Exception;
 
     /**
      * @see #serializeOnlyFilter(Object, Class, Boolean, String...).
      * 
-     * <code>refreshFilter</code> is set to <code>false</code> for this method call.
+     * Caching is set to <code>false</code> for this method call.
      */
     public <T> String serializeOnlyFilter(Object src, Class<T> filterClass,
             String... filterAttr) throws Exception;
@@ -132,20 +155,20 @@ public interface JsonService {
      * Serialize only object properties where filter attributes are provided
      * 
      * @param src
-     *            the Java object to serialize
+     *            The Java object to serialize
      * @param filterClass
-     *            the class to which the filtering should be applied
+     *            By default filterClass is the key in the filter object cached. 
      *            
      * @param cleanFilter
-     *             the Boolean value, not null. If it is <code>true</code>, cleans cache and the custom filter after serialization.
+     *             The Boolean value, not null. If it is <code>true</code>, cleans cache and the custom filter after serialization.
      *  
      * @param filterAttr
-     *            the class bean attributes which should be serialized
+     *            The class bean attributes which should be serialized
      * 
      * @return JSON string
      * 
      * @throws Exception
-     *             if JSON serialization or filter registration fails
+     *             If JSON serialization or filter registration fails
      */
     public <T> String serializeOnlyFilter(Object src, Class<T> filterClass, Boolean cleanFilter,
             String... filterAttr) throws Exception;
@@ -154,32 +177,48 @@ public interface JsonService {
      * Serialize all object properties excluding provided filters attributes
      * 
      * @param src
-     *            the Java object to serialize
+     *            The Java object to serialize
      * @param filterClass
-     *            the class to which the filtering should be applied. If its the
-     *            same class, just the filterAttributes get applied. If not the
-     *            class is filtered out, if found as a property type.
+     *            The class to which the filtering should be applied. If its the
+     *            same class, just the filterAttributes get applied. If not, the
+     *            class is filtered out, if found as a property type. By default filterClass is the key in the filter object cached. 
      * @param cleanFilter
-     *            if <code>true </code> cleans filter (clean cache and custom filter for this filterClass) after serialization.      
-     * 
+     *            If <code>true </code> cleans filter (clean cache and custom filter for this filterClass) after serialization.      
      * @param filterAttr
-     *            the bean attributes which should not be serialized
+     *            The bean attributes which should not be serialized
      * 
      * @return JSON string
      * 
      * @throws Exception
-     *             if JSON serialization or filter registration fails
+     *             If JSON serialization or filter registration fails
      */
     public <T> String serializeAllExceptFilter(Object src,
             Class<T> filterClass, Boolean cleanFilter, String... filterAttr) throws Exception;
     
     /** 
+     *  Class Filter is derived from param src object class.
+     *  <code>refreshFilter</code> is set to <code>false</code> for this method call.
+     *  
      * @see #serializeAllExceptFilter(Object, Class, Boolean, String...)
      * 
      * <code>refreshFilter</code> is <code>false</code>.
      */
     public <T> String serializeAllExceptFilter(Object src,
             Class<T> filterClass, String... filterAttr) throws Exception;
+    
+    /**
+     * Class Filter is derived from param src object class. 
+     * 
+     * @see #serializeAllExceptFilter(Object, Class, Boolean, String...)
+     */
+    public <T> String serializeAllExceptFilter(Object src,
+            Boolean cleanFilter, String... filterAttr) throws Exception;
+    
+    /**
+     *  @see #serializeAllExceptFilter(Object, Class, Boolean, String...)
+     */
+    public <T> String serializeAllExceptFilter(Object src,
+            String... filterAttr) throws Exception;
 
     /**
      * Adds an adapter (mixin, serializer,..) for the target class depending on
@@ -187,16 +226,16 @@ public interface JsonService {
      * Cft. to {@link #addAdapter(String, Class, Object)}
      * 
      * @param name
-     *            the name of the adapter
+     *            The name of the adapter
      * @param target
-     *            the target class for this adapter
+     *            The target class for this adapter
      * @param mixin
-     *            the adapter/mixin for the target class
+     *            The adapter/mixin for the target class
      * 
      * @return the JsonService instance
      * 
      * @throws Exception
-     *             if adapter registration fails
+     *             If adapter registration fails
      */
     public JsonService addAdapter(String name, Class target, Class mixin)
             throws Exception;
@@ -208,14 +247,14 @@ public interface JsonService {
      * implementation) 
      * 
      * @param name
-     *            the name of the adapter
+     *            The name of the adapter
      * @param target
-     *            the target class for this adapter
+     *            The target class for this adapter
      * @param mixin
-     *            the adapter/mixin for the target object
+     *            The adapter/mixin for the target object
      *            (module/serializer/deserializer)
      * 
-     * @return a JsonService instance
+     * @return A JsonService instance
      * 
      * @throws Exception
      *             if adapter registration fails
@@ -225,7 +264,7 @@ public interface JsonService {
 
     /**
      * @param df
-     *            the {@link DateFormat} to be used by the JsonService, not null.
+     *            The {@link DateFormat} to be used by the JsonService, not null.
      * 
      * It could be provided by component configuration too.
      * 

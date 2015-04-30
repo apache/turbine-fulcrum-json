@@ -63,8 +63,7 @@ public class DefaultServiceTest extends BaseUnitTest {
     }
 
     public void testSerializeExcludeNothing() throws Exception {
-        String serJson = sc.serializeAllExceptFilter(new TestClass("mytest"),
-                (Class) null, (String[]) null);
+        String serJson = sc.ser(new TestClass("mytest"));
         assertEquals(
                 "Serialization failed ",
                 "{\"container\":{\"cf\":\"Config.xml\"},\"configurationName\":\"Config.xml\",\"name\":\"mytest\"}",

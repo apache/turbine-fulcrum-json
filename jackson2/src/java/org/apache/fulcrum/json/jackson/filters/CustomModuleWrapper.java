@@ -19,15 +19,14 @@ package org.apache.fulcrum.json.jackson.filters;
  * under the License.
  */
 
-import org.apache.fulcrum.json.jackson.Jackson2MapperService;
-import org.apache.fulcrum.json.jackson.Jackson2MapperService.CustomModule;
+import org.apache.fulcrum.json.jackson.CustomModule;
 
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 /**
- * Used by {@link Jackson2MapperService#addAdapter(String, Class, Object)} to provide a wrapper module as a helper class
- * for the inner class {@link CustomModule}.
+ * Provides a wrapper module as a helper class for the inner class {@link CustomModule}.
+ * 
  * @author gkallidis
  *
  * @param <T>

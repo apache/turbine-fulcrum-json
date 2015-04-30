@@ -163,11 +163,23 @@ public class JacksonMapperService extends AbstractLogEnabled implements
         return mapper.readValue(json, mapper.getTypeFactory()
                 .constructCollectionType(collectionType, type));
     }
+    
+    @Override
+    public <T> String serializeAllExceptFilter(Object src, String... filterAttr)
+            throws Exception {
+        return serializeAllExceptFilter(src, src.getClass(), true, filterAttr);
+    }
+
+    @Override
+    public <T> String serializeAllExceptFilter(Object src, Boolean refresh,
+            String... filterAttr) throws Exception {
+        return serializeAllExceptFilter(src, src.getClass(), refresh, filterAttr);
+    }
 
     @Override
     public synchronized <T> String serializeAllExceptFilter(Object src,
             Class<T> filterClass, String... filterAttr) throws Exception {
-        return serializeAllExceptFilter(src, filterClass, false, filterAttr);
+        return serializeAllExceptFilter(src, filterClass, true, filterAttr);
     }
     
     @Override
@@ -178,7 +190,7 @@ public class JacksonMapperService extends AbstractLogEnabled implements
         FilterProvider filter = null;
         if ( filterClass != null) {
             if (filterAttr != null && filterAttr.length > 0 && 
-                            !this.filters.containsKey(filterClass.getName())) {
+                    (refreshFilter || !this.filters.containsKey(filterClass.getName()))) {
                 filter = new SimpleFilterProvider().addFilter(
                         filterClass.getName(),
                         SimpleBeanPropertyFilter.serializeAllExcept(filterAttr));
@@ -194,11 +206,24 @@ public class JacksonMapperService extends AbstractLogEnabled implements
         }
         return serialized;
     }
+    
+
+    @Override
+    public <T> String serializeOnlyFilter(Object src, String... filterAttr)
+            throws Exception {
+        return serializeOnlyFilter(src, src.getClass(), true, filterAttr);
+    }
+
+    @Override
+    public <T> String serializeOnlyFilter(Object src, Boolean refresh,
+            String... filterAttr) throws Exception {
+        return serializeOnlyFilter(src, src.getClass(), refresh, filterAttr);
+    }
 
     @Override
     public synchronized <T> String serializeOnlyFilter(Object src,
             Class<T> filterClass, String... filterAttr) throws Exception {
-        return serializeOnlyFilter(src, filterClass, false, filterAttr);
+        return serializeOnlyFilter(src, filterClass, true, filterAttr);
     }
     
     @Override
@@ -490,6 +515,5 @@ public class JacksonMapperService extends AbstractLogEnabled implements
             context.setMixInAnnotations(this.clazz, this.mixin);
         }
     }
-
 
 }

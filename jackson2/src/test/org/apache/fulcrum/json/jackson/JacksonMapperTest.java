@@ -34,6 +34,9 @@ import org.apache.fulcrum.json.JsonService;
 import org.apache.fulcrum.json.Rectangle;
 import org.apache.fulcrum.json.TestClass;
 import org.apache.fulcrum.testcontainer.BaseUnitTest;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -60,23 +63,26 @@ public class JacksonMapperTest extends BaseUnitTest {
         super(testName);
     }
 
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         sc = (JsonService) this.lookup(JsonService.ROLE);
         logger = new ConsoleLogger(ConsoleLogger.LEVEL_DEBUG);
     }
 
+    @Test
     public void testSerialize() throws Exception {
         String serJson = sc.ser(new JacksonMapperTest("mytest"));
         assertEquals("Set failed ", "{\"name\":\"mytest\"}", serJson);
     }
 
+    @Ignore
     public void testDeSerialize() throws Exception {
         String serJson = sc.ser(new TestClass("mytest"));
         Object deson = sc.deSer(serJson, TestClass.class);
         assertEquals("DeSer failed ", TestClass.class, deson.getClass());
     }
-
+    @Test
     public void testSerializeDateWithDefaultDateFormat() throws Exception {
         Map<String, Date> map = new HashMap<String, Date>();
         map.put("date", Calendar.getInstance().getTime());
@@ -84,7 +90,7 @@ public class JacksonMapperTest extends BaseUnitTest {
         assertTrue("Serialize with Adapater failed ",
                 serJson.matches("\\{\"date\":\"\\d\\d/\\d\\d/\\d{4}\"\\}"));
     }
-
+    @Test
     public void testDeSerializeDate() throws Exception {
         Map<String, Date> map = new HashMap<String, Date>();
         map.put("date", Calendar.getInstance().getTime());
@@ -108,7 +114,7 @@ public class JacksonMapperTest extends BaseUnitTest {
                 "{\"w\":5,\"name\":\"jim\"}", rectangle);
 
     }
-
+    @Test
     public void testSerializationCollectionWithFilter() throws Exception {
 
         List<Bean> beanList = new ArrayList<Bean>();
@@ -126,6 +132,7 @@ public class JacksonMapperTest extends BaseUnitTest {
                 result.replace('"', '\''));
     }
 
+    @Test
     public void testDeserializationCollectionWithFilter() throws Exception {
 
         List<Bean> beanList = new ArrayList<Bean>();
@@ -145,6 +152,7 @@ public class JacksonMapperTest extends BaseUnitTest {
         }
     }
 
+    @Test
     public void testDeserializationUnTypedCollectionWithFilter()
             throws Exception {
 
@@ -171,6 +179,7 @@ public class JacksonMapperTest extends BaseUnitTest {
 
     }
 
+    @Test
     public void testSerializeWithMixin() throws Exception {
         Rectangle filteredRectangle = new Rectangle(5, 10);
         filteredRectangle.setName("jim");
@@ -193,7 +202,7 @@ public class JacksonMapperTest extends BaseUnitTest {
         String bean = sc.serializeOnlyFilter(filteredBean, Bean.class, "name");
         assertEquals("Ser filtered Bean failed ", "{\"name\":\"joe\"}", bean);
     }
-
+    @Test
     public void testSerializationCollectionWithMixin() throws Exception {
 
         List<Bean> beanList = new ArrayList<Bean>();
@@ -210,7 +219,7 @@ public class JacksonMapperTest extends BaseUnitTest {
                 "[{'name':'joe0'},{'name':'joe1'},{'name':'joe2'},{'name':'joe3'},{'name':'joe4'},{'name':'joe5'},{'name':'joe6'},{'name':'joe7'},{'name':'joe8'},{'name':'joe9'}]",
                 result.replace('"', '\''));
     }
-
+    @Test
     public void testDeSerUnQuotedObject() throws Exception {
         String jsonString = "{name:\"joe\"}";
         Bean result = sc.deSer(jsonString, Bean.class);
@@ -231,7 +240,7 @@ public class JacksonMapperTest extends BaseUnitTest {
                     .get(i).getSize());
         }
     }
-    
+    @Test
     public void testDeSerializationCollectionWithMixin() throws Exception {
 
         List<Bean> beanList = new ArrayList<Bean>();
@@ -256,7 +265,7 @@ public class JacksonMapperTest extends BaseUnitTest {
                             "joe" + i));
         }
     }
-
+    @Test
     public void testCollectionWithMixins() throws Exception {
         List<Object> components = new ArrayList<Object>();
         components.add(new Rectangle(25, 3));

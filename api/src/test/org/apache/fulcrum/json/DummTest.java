@@ -1,9 +1,11 @@
 package org.apache.fulcrum.json;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class DummTest extends TestCase {
 
+public class DummTest  {
+
+    @Test
     public void testDummy() {
 
     }

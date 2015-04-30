@@ -21,6 +21,7 @@ package org.apache.fulcrum.json.jackson;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.fasterxml.jackson.databind.introspect.Annotated;
 import com.fasterxml.jackson.databind.introspect.AnnotatedClass;
@@ -30,7 +31,8 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 /**
  * The intent of this custom introspector is to provide filtering capabilities
  * by using String parameters (properties and class types), which could be
- * adjusted e.g. from a scriptable context (velocity template).
+ * adjusted e.g. from a scriptable context (velocity template). 
+ * Class Type Filtering currently not supported except for Exclude Filter: {@link Jackson2MapperService#serializeAllExceptFilter(Object, Class, Boolean, String...)}.
  * 
  * 
  * @author gk
@@ -42,20 +44,35 @@ public class SimpleNameIntrospector extends NopAnnotationIntrospector {
      * 
      */
     private static final long serialVersionUID = 1L;
-    public List<String> externalFilterClasses = new CopyOnWriteArrayList<String>();
-    public List<String> externalFilterExcludeClasses = new CopyOnWriteArrayList<String>();
+    private List<String> externalFilterClasses = new CopyOnWriteArrayList<String>();
+    private List<String> externalFilterExcludeClasses = new CopyOnWriteArrayList<String>();
+    private List<String> externalFilterIncludeClasses = new CopyOnWriteArrayList<String>();
+    private AtomicBoolean isExludeType = new AtomicBoolean(false);
 
     /**
-     * Filtering on method types, cft. @link 
+     * Filtering on method types.
      * 
      */
     @Override
     public Boolean isIgnorableType(AnnotatedClass ac) {
         Boolean isIgnorable = super.isIgnorableType(ac);
         if (isIgnorable == null || !isIgnorable) {
-            if (!externalFilterExcludeClasses.isEmpty()
-                    && externalFilterExcludeClasses.contains(ac.getName())) {
-                isIgnorable = true;
+            if (getIsExludeType()) { // could be removed, if cleaning after call ?
+                if (!externalFilterExcludeClasses.isEmpty()
+                        && externalFilterExcludeClasses.contains(ac.getName())) {
+                    isIgnorable = true;
+                }
+            } else {
+                // not yet used
+                if (!externalFilterIncludeClasses.isEmpty()
+                        && !externalFilterIncludeClasses.contains(ac.getName())) {
+                        try {
+                            Class.forName(ac.getName());
+                            isIgnorable = true;
+                        } catch (ClassNotFoundException e) {
+                            // no clazz ignore, could NOT ignore as no filterable clazz
+                        }
+                }
             }
         }
         return isIgnorable;
@@ -67,8 +84,9 @@ public class SimpleNameIntrospector extends NopAnnotationIntrospector {
      */
     @Override
     public Object findFilterId(Annotated ac) {
-        // Let's default to current behavior if annotation is found:
         Object id = super.findFilterId(ac);
+        // Let's default to current behavior if annotation is found:
+        //Object id = super.findFilterId(ac);
         // but use simple class name if not
         if (id == null) {
             String name = ac.getName();
@@ -120,6 +138,29 @@ public class SimpleNameIntrospector extends NopAnnotationIntrospector {
         if (externalFilterExcludeClasses.contains(externalFilterClass.getName())) {
             externalFilterExcludeClasses.remove(externalFilterClass.getName());
         }
-}
+    }
+    
+    public void setExternalFilterIncludeClasses(Class... classes) {
+
+        for (int i = 0; i < classes.length; i++) {
+            if (!externalFilterIncludeClasses.contains(classes[i].getName())) {
+
+                externalFilterIncludeClasses.add(classes[i].getName());
+            }
+        }
+    }
+    
+    public void removeExternalFilterIncludeClasses(Class externalFilterClass) {
+        if (externalFilterIncludeClasses.contains(externalFilterClass.getName())) {
+            externalFilterIncludeClasses.remove(externalFilterClass.getName());
+        }
+    }
+    
+    public boolean getIsExludeType() {
+        return isExludeType.get();
+    }
+    public void setIsExludeType(boolean isExludeType) {
+        this.isExludeType.getAndSet(isExludeType);
+    }
 
 }
