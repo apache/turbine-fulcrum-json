@@ -95,7 +95,7 @@ public class DefaultServiceTest extends BaseUnitTest {
                new Class[] { Map.class, String.class} , "configurationName", "name");
         assertEquals("Serialization failed ", "{}", serJson);
         serJson = ((Jackson2MapperService)sc).serializeAllExceptFilter(new TestClass("mytest"),
-                (Class)null , "configurationName", "name");
+                "configurationName", "name");
          assertEquals("Serialization failed ", "{}", serJson);
     }
 
@@ -141,7 +141,7 @@ public class DefaultServiceTest extends BaseUnitTest {
             Integer integer = new Integer(i*i);
             intList.add(integer);
         }
-        String result = sc.serializeOnlyFilter(intList, Integer.class, null);
+        String result = sc.serializeOnlyFilter(intList, Integer.class);
         assertEquals(
                 "Serialization of beans failed ",
                 "[0,1,4,9,16,25,36,49,64,81]",
@@ -244,7 +244,11 @@ public class DefaultServiceTest extends BaseUnitTest {
                 "Ser filtered Rectangle failed ",
                 "{\"w\":5}",
                 rectangle);
-
+        rectangle = sc.serializeOnlyFilter(filteredRectangle, true, "w");
+        assertEquals(
+                "Ser filtered Rectangle failed ",
+                "{\"w\":5}",
+                rectangle);
     }
     
     public void testSerializeAllExceptaANDWithOnlyFilter2() throws Exception {
@@ -266,8 +270,32 @@ public class DefaultServiceTest extends BaseUnitTest {
                 "Ser filtered Rectangle failed ",
                 "{\"w\":5}",
                 rectangle);
-
     }
+    
+    public void testSerializeCollectionWithOnlyFilterAndParentClass() throws Exception {
+        
+        List<Bean> beanList = new ArrayList<Bean>();
+        for (int i = 0; i < 3; i++) {
+            Bean bean = new BeanChild();
+            bean.setAge(i);bean.setName("bean"+i);
+            beanList.add(bean);
+        }
+        assertEquals("[{\"name\":\"bean0\"},{\"name\":\"bean1\"},{\"name\":\"bean2\"}]",sc.serializeOnlyFilter(beanList, Bean.class, true,"name"));
+        //assertEquals("[{\"type\":\"\"},{\"type\":\"\"},{\"type\":\"\"}]",sc.serializeOnlyFilter(beanList, BeanChild.class, true,"type"));
+    }
+    
+    public void testSerializeCollectionWithOnlyFilterAndExactClass() throws Exception {
+        
+        List<Bean> beanList = new ArrayList<Bean>();
+        for (int i = 0; i < 3; i++) {
+            Bean bean = new BeanChild();
+            bean.setAge(i);bean.setName("bean"+i);
+            beanList.add(bean);
+        }
+        assertEquals("[{\"name\":\"bean0\"},{\"name\":\"bean1\"},{\"name\":\"bean2\"}]",sc.serializeOnlyFilter(beanList, BeanChild.class, true,"name"));
+        //assertEquals("[{\"type\":\"\"},{\"type\":\"\"},{\"type\":\"\"}]",sc.serializeOnlyFilter(beanList, BeanChild.class, true,"type"));
+    }
+    
     
     public void testSerializeCollectionWithOnlyFilterAndType() throws Exception {
         
@@ -276,10 +304,19 @@ public class DefaultServiceTest extends BaseUnitTest {
             TypedRectangle filteredRect = new TypedRectangle(i, i, "rect" + i);
             rectList.add(filteredRect);
         }
-        Class clazz = Class.forName("org.apache.fulcrum.json.jackson.TypedRectangle");
+        Class<?> clazz = Class.forName("org.apache.fulcrum.json.jackson.TypedRectangle");
         // no type cft. https://github.com/FasterXML/jackson-databind/issues/303 !!
         assertEquals("[{\"w\":0},{\"w\":1}]",sc.serializeOnlyFilter(rectList, clazz, true,"w"));
-        // need mixin in object class!
+    }
+    
+    public void testSerializeCollectionWithOnlyFilterAndMixin() throws Exception {
+        
+        List<TypedRectangle> rectList = new ArrayList<TypedRectangle>();
+        for (int i = 0; i < 2; i++) {
+            TypedRectangle filteredRect = new TypedRectangle(i, i, "rect" + i);
+            rectList.add(filteredRect);
+        }
+        Class<?> clazz = Class.forName("org.apache.fulcrum.json.jackson.TypedRectangle");
         sc.addAdapter("Collection Adapter", Object.class, TypedRectangle.Mixins.class);
         assertEquals("[\"java.util.ArrayList\",[{\"type\":\"org.apache.fulcrum.json.jackson.TypedRectangle\",\"w\":0},{\"type\":\"org.apache.fulcrum.json.jackson.TypedRectangle\",\"w\":1}]]",
                 sc.serializeOnlyFilter(rectList, clazz, true, "w"));

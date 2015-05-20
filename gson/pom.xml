@@ -19,14 +19,14 @@
     <parent>
         <artifactId>fulcrum-json-parent</artifactId>
         <groupId>org.apache.fulcrum</groupId>
-        <version>1.0.1-SNAPSHOT</version>
+        <version>1.1.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.apache.fulcrum</groupId>
     <artifactId>fulcrum-json-gson</artifactId>
     <name>Fulcrum JSON GSON Impl</name>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.1.0-SNAPSHOT</version>
     
     <url>http://turbine.apache.org/fulcrum/fulcrum-json/fulcrum-json-gson</url>
     <scm>

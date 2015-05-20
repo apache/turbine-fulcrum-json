@@ -430,29 +430,29 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
         return  retrieveFilter(pf,  filterClasses[0], filterClasses, excludeType );
     }
 
+    /**
+     * <li>Adding the classes  in externalFilterIs to {@link SimpleNameIntrospector#setFilteredClass(Class)} enables the filtering process.
+     * <li>If <code>excludeType</code> is <code>true</code>, externalFilterIs are added to {@link SimpleNameIntrospector#setExternalFilterExcludeClasses(Class...)}.
+     *  
+     * @param externalFilterIds
+     * @param excludeType
+     */
     private <T> void setCustomIntrospectorWithExternalFilterId(
             Class<T>[] externalFilterIds, boolean excludeType) {
         if (primary instanceof SimpleNameIntrospector) {
             if (externalFilterIds != null) {
                 ((SimpleNameIntrospector) primary).setIsExludeType(excludeType);
-                if (excludeType) {
-                    // first one is required that we get to the PropertyFilter 
-                    ((SimpleNameIntrospector) primary)
-                    .setExternalFilterClasses(externalFilterIds);
-            getLogger()
-                    .debug("added class for filters "
-                            + externalFilterIds);
-            ((SimpleNameIntrospector) primary)
-            .setExternalFilterExcludeClasses(externalFilterIds);
-    getLogger()
-            .debug("added exclude class for filters "
-                    + externalFilterIds);
+                // first one is required that we get to the PropertyFilter 
+                ((SimpleNameIntrospector) primary)
+                .setFilteredClasses(externalFilterIds);
+                for (Class<T> filterClazz : externalFilterIds) {
+                    getLogger().debug("added class for filters "
+                            + filterClazz);                    
+                }
+                if (excludeType) { 
+                    ((SimpleNameIntrospector) primary).setExternalFilterExcludeClasses(externalFilterIds);
+                    getLogger().debug("added exclude class for filters " + externalFilterIds);
                 } else {
-                    ((SimpleNameIntrospector) primary)
-                    .setExternalFilterClasses(externalFilterIds);
-            getLogger()
-                    .debug("added class for filters "
-                            + externalFilterIds);
             // too cumbersome
 //                ((SimpleNameIntrospector) primary)
 //                .setExternalFilterIncludeClasses(externalFilterId);
@@ -480,7 +480,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
     }
 
     /**
-     * Defalut Dateformt: {@link #DEFAULTDATEFORMAT}
+     * Default Dateformat: {@link #DEFAULTDATEFORMAT}
      */
     @Override
     public void setDateFormat(final DateFormat df) {

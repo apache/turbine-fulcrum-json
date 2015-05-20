@@ -35,7 +35,7 @@ public class CacheService {
         if (primary instanceof SimpleNameIntrospector) {
             if (externalFilterId != null) {
                 ((SimpleNameIntrospector) primary)
-                        .removeExternalFilterClass(externalFilterId);
+                        .removeFilteredClass(externalFilterId);
                 if (excludeType) {
                     ((SimpleNameIntrospector) primary)
                     .removeExternalFilterExcludeClass(externalFilterId);

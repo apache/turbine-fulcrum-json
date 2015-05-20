@@ -44,7 +44,8 @@ public class SimpleNameIntrospector extends NopAnnotationIntrospector {
      * 
      */
     private static final long serialVersionUID = 1L;
-    private List<String> externalFilterClasses = new CopyOnWriteArrayList<String>();
+    
+    private List<Class<?>> filteredClasses = new CopyOnWriteArrayList<Class<?>>();
     private List<String> externalFilterExcludeClasses = new CopyOnWriteArrayList<String>();
     private List<String> externalFilterIncludeClasses = new CopyOnWriteArrayList<String>();
     private AtomicBoolean isExludeType = new AtomicBoolean(false);
@@ -79,7 +80,7 @@ public class SimpleNameIntrospector extends NopAnnotationIntrospector {
     }
     /**
      * @return Object Filtering on properties returns an object, if
-     *         {@link #externalFilterClasses} contains the class provided. The
+     *         {@link #filteredClasses} contains the class provided. The
      *         filter itself currently is {@link SimpleFilterProvider}.
      */
     @Override
@@ -90,41 +91,58 @@ public class SimpleNameIntrospector extends NopAnnotationIntrospector {
         // but use simple class name if not
         if (id == null) {
             String name = ac.getName();
-            if (!externalFilterClasses.isEmpty()
-                    && externalFilterClasses.contains(name)) {
+            Class<?> targetClazz = ac.getRawType();
+            if (!filteredClasses.isEmpty()
+                    && filteredClasses.contains(targetClazz)
+                    ) {
                 id = name;
+            } else {
+                // check if target class is a child from filter class -> apply filter 
+                for (Class<?> filterClazz : filteredClasses) {
+                    // the currently checked class /targetClazz could be child to the filter class /filterClazz -> positive filter 
+                    if (filterClazz.isAssignableFrom(targetClazz)) {
+                        id = name;
+                        break;
+                    }
+                    // the current clazz could be parent to the filter
+                }
             }
         }
         return id;
     }
 
-    public List<String> getExternalFilterClasses() {
-        return externalFilterClasses;
+    public List<Class<?>> getFilteredClasses() {
+        return filteredClasses;
     }
 
-    public void setExternalFilterClass(Class externalFilterClass) {
-        if (!externalFilterClasses.contains(externalFilterClass.getName())) {
-            externalFilterClasses.add(externalFilterClass.getName());
+    public void setFilteredClass(Class<?> filteredClass) {
+        if (!filteredClasses.contains(filteredClass)) {
+            filteredClasses.add(filteredClass);
         }
     }
 
-    public void setExternalFilterClasses(Class... classes) {
+    public void setFilteredClasses(Class<?>... classes) {
 
         for (int i = 0; i < classes.length; i++) {
-            if (!externalFilterClasses.contains(classes[i].getName())) {
-
-                externalFilterClasses.add(classes[i].getName());
+            if (!filteredClasses.contains(classes[i])) {
+                filteredClasses.add(classes[i]);
             }
+//            if (classes[i].getSuperclass() != null) {
+//                Class superClazz = classes[i].getSuperclass();
+//                if (!externalFilterClasses.contains(superClazz)) {
+//                    externalFilterClasses.add(superClazz);
+//                }  
+//            }
         }
     }
 
-    public void removeExternalFilterClass(Class externalFilterClass) {
-            if (externalFilterClasses.contains(externalFilterClass.getName())) {
-                externalFilterClasses.remove(externalFilterClass.getName());
+    public void removeFilteredClass(Class<?> filteredClass) {
+            if (filteredClasses.contains(filteredClass)) {
+                filteredClasses.remove(filteredClass);
             }
     }
     
-    public void setExternalFilterExcludeClasses(Class... classes) {
+    public void setExternalFilterExcludeClasses(Class<?>... classes) {
 
         for (int i = 0; i < classes.length; i++) {
             if (!externalFilterExcludeClasses.contains(classes[i].getName())) {
@@ -134,13 +152,13 @@ public class SimpleNameIntrospector extends NopAnnotationIntrospector {
         }
     }
     
-    public void removeExternalFilterExcludeClass(Class externalFilterClass) {
+    public void removeExternalFilterExcludeClass(Class<?> externalFilterClass) {
         if (externalFilterExcludeClasses.contains(externalFilterClass.getName())) {
             externalFilterExcludeClasses.remove(externalFilterClass.getName());
         }
     }
     
-    public void setExternalFilterIncludeClasses(Class... classes) {
+    public void setExternalFilterIncludeClasses(Class<?>... classes) {
 
         for (int i = 0; i < classes.length; i++) {
             if (!externalFilterIncludeClasses.contains(classes[i].getName())) {
@@ -150,7 +168,7 @@ public class SimpleNameIntrospector extends NopAnnotationIntrospector {
         }
     }
     
-    public void removeExternalFilterIncludeClasses(Class externalFilterClass) {
+    public void removeExternalFilterIncludeClasses(Class<?> externalFilterClass) {
         if (externalFilterIncludeClasses.contains(externalFilterClass.getName())) {
             externalFilterIncludeClasses.remove(externalFilterClass.getName());
         }

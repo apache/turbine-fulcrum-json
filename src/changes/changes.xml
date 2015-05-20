@@ -24,6 +24,16 @@
   </properties>
 
   <body>
+  <release version="1.1.0" date="in Subversion">
+   <action type="update" dev="gk">
+        Jackson 2: Allow parent class to match filter. Update version from not released version 1.0.1 to 1.1.0.
+      </action>
+    <action type="update" dev="gk">
+        Adding custom methods to interface to avoid null argument method calls. Cleaned up Jackson 2 Service. 
+      </action>
+   <action type="update" dev="gk">
+        Jackson 2: Serialization of Exclude Filter Queries was fixed, which could before interfere with other filters.
+      </action>
     <action type="update" dev="gk">
         Update to versions : GSON: 2.3.1, Jackson 2: 2.4.5. Jackson 1 remains with stable build 1.9.13.
       </action>
