@@ -99,8 +99,13 @@ public class SimpleNameIntrospector extends NopAnnotationIntrospector {
             } else {
                 // check if target class is a child from filter class -> apply filter 
                 for (Class<?> filterClazz : filteredClasses) {
-                    // the currently checked class /targetClazz could be child to the filter class /filterClazz -> positive filter 
+                    // the currently checked class /targetClazz could be child to the filter class /filterClazz ->  filter child 
                     if (filterClazz.isAssignableFrom(targetClazz)) {
+                        id = name;
+                        break;
+                    }
+                 // the currently checked class /targetClazz could be parent to the filter class /filterClazz -> filter parent
+                    if (targetClazz.isAssignableFrom(filterClazz)) {
                         id = name;
                         break;
                     }

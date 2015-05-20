@@ -274,9 +274,9 @@ public class DefaultServiceTest extends BaseUnitTest {
     
     public void testSerializeCollectionWithOnlyFilterAndParentClass() throws Exception {
         
-        List<Bean> beanList = new ArrayList<Bean>();
+        List<BeanChild> beanList = new ArrayList<BeanChild>();
         for (int i = 0; i < 3; i++) {
-            Bean bean = new BeanChild();
+            BeanChild bean = new BeanChild();
             bean.setAge(i);bean.setName("bean"+i);
             beanList.add(bean);
         }
@@ -289,6 +289,18 @@ public class DefaultServiceTest extends BaseUnitTest {
         List<Bean> beanList = new ArrayList<Bean>();
         for (int i = 0; i < 3; i++) {
             Bean bean = new BeanChild();
+            bean.setAge(i);bean.setName("bean"+i);
+            beanList.add(bean);
+        }
+        assertEquals("[{\"name\":\"bean0\"},{\"name\":\"bean1\"},{\"name\":\"bean2\"}]",sc.serializeOnlyFilter(beanList, BeanChild.class, true,"name"));
+        //assertEquals("[{\"type\":\"\"},{\"type\":\"\"},{\"type\":\"\"}]",sc.serializeOnlyFilter(beanList, BeanChild.class, true,"type"));
+    }
+    
+    public void testSerializeCollectionWithOnlyFilterWithChildClass() throws Exception {
+        
+        List<Bean> beanList = new ArrayList<Bean>();
+        for (int i = 0; i < 3; i++) {
+            Bean bean = new Bean();
             bean.setAge(i);bean.setName("bean"+i);
             beanList.add(bean);
         }
