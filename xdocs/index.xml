@@ -69,7 +69,7 @@
         default-class="org.apache.fulcrum.json.jackson.JacksonMapperService"/>
 ]]></source>
     </subsection>
-     <subsection name="Component Configuration">
+     <subsection name="Component Configuration" id="compconf">
       <table>
         <tr>
           <th>Item</th>
@@ -82,7 +82,7 @@
           <td>Complex</td>
           <td>[0|1]</td>
           <td>
-            If empty <code>com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector</code> is set as annotation introspector. You could otherwise provide a primary and (optionally) a secondary introspector. Setting the special introspector <code>org.apache.fulcrum.json.jackson.SimpleNameIntrospector</code> yields property and class name based filtering. See the configuration example below and in <a href="#velocity">section</a>. Features could be set to <code>false</code> or <code>true</code> by setting the attribute <b>value</b> of the sub element feature. The feature attribute <b>type</b> should be the class name of any sub interface of <code>com.fasterxml.jackson.databind.cfg.ConfigFeature</code>. The element content itself defines any feature (enum value) for this feature. Cft. the configuration example below.
+            If empty <code>com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector</code> is set as annotation introspector. You could otherwise provide a primary and (optionally) a secondary introspector. Setting the special introspector <code>org.apache.fulcrum.json.jackson.SimpleNameIntrospector</code> yields property and class name based filtering. See the configuration example below and in <a href="#velocity">section Usage in Velocity Template</a>. Features could be set to <code>false</code> or <code>true</code> by setting the attribute <b>value</b> of the sub element feature. The feature attribute <b>type</b> should be the class name of any sub interface of <code>com.fasterxml.jackson.databind.cfg.ConfigFeature</code>. The element content itself defines any feature (enum value) for this feature. Cft. the configuration example below.
           </td>
         </tr>
         <tr>
@@ -196,11 +196,11 @@ JsonService jsonService = (JsonService)TurbineServices
     
     ## parse json in javascript ....
 ]]></source>
-     What you get is the JSON data populated with all the fields you need (depending on serialization parameters the format may vary).
+     What you get is the JSON data populated with all fields you provided (starting with the fourth parameter). Th result format may the vary depending on serialization parameters. The third parameter being true will cache not the result, but the call characteristics i.e. the  parameters used for the serialization of the provided class.
     
     <h4>Configuration Requirements</h4>
     <p>
-    Add <code>org.apache.fulcrum.json.jackson.SimpleNameIntrospector</code> to the annotation inspectors as primary or secondary inspector. Of course annotations are still valid, as the Introspector extends JacksonAnnotationIntrospector and additionally calls the super class methods in its overwritten methods.
+    Add <code>org.apache.fulcrum.json.jackson.SimpleNameIntrospector</code> to the annotation inspectors as primary or secondary inspector. <strong>[CHANGE in Version 1.0.1]</strong> SimpleNameIntrospector now extends from <a href="https://github.com/FasterXML/jackson-databind/blob/master/src/main/java/com/fasterxml/jackson/databind/introspect/NopAnnotationIntrospector.java">NopAnnotationIntrospector</a> to cleary divide responsibilities. Default introspector e.g. JacksonAnnotationIntrospector could be provided as a primary/secondary introspector in <a href="#compconf">Component Configuration</a>.
     </p>
    </subsection>
 

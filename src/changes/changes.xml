@@ -38,8 +38,9 @@
         Update to versions : GSON: 2.3.1, Jackson 2: 2.4.5. Jackson 1 remains with stable build 1.9.13.
       </action>
     <action type="update" dev="gk">
-        Exclude classes only for exclude Serializing Queries
+        Jackson 2: Exclude classes only for Exclude Serializing Queries
       </action>
+    </release>  
     <release version="1.0.0" date="2014-04-01">
     <action type="update" dev="gk">
       2014/Mar/10: Uploaded to https://repository.apache.org/content/repositories/snapshots/org/apache/fulcrum/ 
