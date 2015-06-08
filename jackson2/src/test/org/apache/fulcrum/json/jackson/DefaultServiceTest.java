@@ -68,7 +68,7 @@ public class DefaultServiceTest extends BaseUnitTest {
     //@Test
     // the default test class: one String field, one Map  
     public void testSerializeExcludeNothing() throws Exception {
-        String serJson = sc.serializeAllExceptFilter(new TestClass("mytest"), (String[]) null);
+        String serJson = sc.serializeAllExceptFilter(new TestClass("mytest"));
         assertEquals(
                 "Serialization failed ",
                 "{\"container\":{\"cf\":\"Config.xml\"},\"configurationName\":\"Config.xml\",\"name\":\"mytest\"}",
@@ -78,11 +78,11 @@ public class DefaultServiceTest extends BaseUnitTest {
     // jackson does not deep exclusion of class types (by default?)
     public void testSerializeExcludeClass() throws Exception {
         String serJson = sc.serializeAllExceptFilter(new TestClass("mytest"),
-                String.class, (String[]) null);
+                String.class);
         assertEquals("Serialization failed ",
                 "{\"container\":{\"cf\":\"Config.xml\"}}", serJson);
     }
-
+    
     public void testSerializeExcludeClassAndField() throws Exception {
         String serJson = ((Jackson2MapperService)sc).serializeAllExceptFilter(new TestClass("mytest"),
                new Class[] { TestClass.class, String.class} , "container");

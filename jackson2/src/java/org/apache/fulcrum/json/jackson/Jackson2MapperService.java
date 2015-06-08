@@ -273,8 +273,8 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
         PropertyFilter pf = null;
         if (filterAttr != null)
             pf = SimpleBeanPropertyFilter.serializeAllExcept(filterAttr);
-        else 
-            pf = SimpleBeanPropertyFilter.serializeAllExcept("dummy");
+        else if (filterClasses == null) //no filter
+            return ser(src, clean);
         return filter(src, filterClasses, pf, clean, true);
     }
     
@@ -301,13 +301,15 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
         return serializeOnlyFilter(src, new Class[]{ filterClass }, refresh, filterAttr);
     }
     
+    
     public synchronized <T> String serializeOnlyFilter(Object src,
             Class<T>[] filterClasses, Boolean refresh, String... filterAttr) throws Exception {
         PropertyFilter pf = null;
-        if (filterAttr != null && filterAttr.length > 0) {
+        if (filterAttr != null && filterAttr.length > 0 && filterAttr[0] != "") {
             pf = SimpleBeanPropertyFilter.filterOutAllExcept(filterAttr);
             getLogger().debug("setting filteroutAllexcept filter for size of filterAttr: " + filterAttr.length);
         } else {
+            getLogger().warn("no filter attributes set!");
             pf = SimpleBeanPropertyFilter.filterOutAllExcept("dummy");
         }
         return filter(src, filterClasses, pf, refresh, false);

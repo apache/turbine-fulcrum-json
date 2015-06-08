@@ -152,7 +152,7 @@ public interface JsonService {
             String... filterAttr) throws Exception;
     
     /**
-     * Serialize only object properties where filter attributes are provided
+     * Serialize only object properties where filter attributes are provided. If no filter is set, no attributes should be returned.
      * 
      * @param src
      *            The Java object to serialize
@@ -174,7 +174,7 @@ public interface JsonService {
             String... filterAttr) throws Exception;
 
     /**
-     * Serialize all object properties excluding provided filters attributes
+     * Serialize all object properties excluding provided filters attributes. If no filter is set, all attributes should be returned.
      * 
      * @param src
      *            The Java object to serialize
