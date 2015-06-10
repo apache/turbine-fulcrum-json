@@ -103,13 +103,13 @@ public class SimpleNameIntrospector extends NopAnnotationIntrospector implements
             } else {
                 // check if target class is a child from filter class -> apply filter 
                 for (Class<?> filterClazz : filteredClasses) {
-                    // the currently checked class /targetClazz could be child to the filter class /filterClazz ->  filter child 
+                    // the currently checked instance of type targetClazz is a child of the filter class filterClazz ->  filter child 
                     if (filterClazz.isAssignableFrom(targetClazz)) {
                         logger.debug("filter applying to parent " +filterClazz +" matching child class "+name );
                         id = name;
                         break;
                     }
-                 // the currently checked class /targetClazz could be parent to the filter class /filterClazz -> filter parent
+                 // the currently checked instance of type targetClazz is a parent of the filter class filterClazz -> filter parent
                     if (targetClazz.isAssignableFrom(filterClazz)) {
                         logger.debug("filter applying to child " +filterClazz+" matching parent class "+name);
                         id = name;

@@ -169,7 +169,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
     public <T> Collection<T> deSerCollection(String json,
             Object collectionType, Class<T> elementType) throws Exception {
         if (collectionType instanceof TypeReference) {
-            return mapper.readValue(json, (TypeReference)collectionType);
+            return mapper.readValue(json, (TypeReference<T>)collectionType);
         } else {
             return mapper.readValue(json, mapper.getTypeFactory()
                     .constructCollectionType(((Collection<T>)collectionType).getClass(), elementType));            
@@ -177,7 +177,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
     }
     
     public <T> Collection<T> deSerCollectionWithTypeReference(String json,
-            TypeReference collectionType ) throws Exception {
+            TypeReference<T> collectionType ) throws Exception {
             return mapper.readValue(json, collectionType);
     }
 
@@ -276,7 +276,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
             pf = SimpleBeanPropertyFilter.serializeAllExcept(filterAttr);
         else if (filterClasses == null) //no filter
             return ser(src, clean);
-        return filter(src, filterClasses, pf, clean, true);
+        return filter(src, new Class<?>[] { src.getClass() }, filterClasses, pf, clean);
     }
     
     @Override
@@ -313,7 +313,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
             getLogger().warn("no filter attributes set!");
             pf = SimpleBeanPropertyFilter.filterOutAllExcept("dummy");
         }
-        return filter(src, filterClasses, pf, refresh, false);
+        return filter(src, filterClasses, null, pf, refresh);
     }
     
     @Override
@@ -363,52 +363,32 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
      * 
      * @param src The source Object to be filtered.
      * @param filterClass This Class array contains at least one element. If no class is provided it is the class type of the source object. 
-     * Setting a class filter explicitely should only used as a filter in {@link #serializeAllExceptFilter(Object, Class, String...)}. 
-     * In any case the filterClass is to become the key in the filter object cache.
-     * This is because, no use case was found to include just one class in a filter, e.g. in @link {@link #serializeOnlyFilter(Object, Class, Boolean, String...)}, i.e. just serializing only a provided filter class. 
+     * The filterClass is to become the key of the filter object cache.
+     * @param excludeClasses The classes to be excluded, optionally used onlz for methods like {@link #serializeAllExceptFilter(Object, Class[], String...)}.
      * @param pf Expecting a property filter from e.g @link {@link SimpleBeanPropertyFilter}.
-     * @param clean if <code>true</code> does not reuse the filter object (no cashing).
-     * @param excludeType Is set to  <code>true</code> in {@link #serializeAllExceptFilter(Object, Class, String...)}, otherweise <code>false</code>.  
-     * @return The Serialized Object as String 
+     * @param clean if <code>true</code> does not reuse the filter object (no cashing).  
+     * @return The serialized Object as String 
      * @throws Exception
      */
-    private <T> String filter(Object src, Class<T>[] filterClasses,
-            PropertyFilter pf,  Boolean clean, Boolean excludeType) throws Exception {
+    private <T> String filter(Object src, Class<?>[] filterClasses, Class<T>[] excludeClasses,
+            PropertyFilter pf,  Boolean clean) throws Exception {
         FilterProvider filter = null;
-        if (src != null) {
-            filter = checkFilter(pf, src.getClass(), filterClasses, excludeType);
-        }
+        if (filterClasses.length >0) {
+            filter = retrieveFilter(pf, filterClasses[0], excludeClasses);
+        } 
         getLogger().info("filtering with filter "+ filter);
         String serialized = ser(src, filter, clean);
         if (!cacheFilters || clean) {
-            if (src != null) {
-                cacheService.removeFilter(src.getClass(), excludeType);// reset required, just use filteredClasses[0]?
-            } else if (filterClasses.length >0) {
-                cacheService.removeFilter(filterClasses[0], excludeType);
-            }
+            if (filterClasses.length >0) {
+                boolean exclude = (excludeClasses !=null)? true:false;
+                cacheService.removeFilter(filterClasses[0],exclude);
+            }  
         }
         return serialized;
     }
-
-    @SuppressWarnings("unchecked")
-    private <T> FilterProvider checkFilter(PropertyFilter pf,
-            Class rootFilterClass, Class<T>[] filterClasses,  Boolean excludeType) {
-        SimpleFilterProvider filter = null;
-        if (filterClasses == null ) { // never happens actually
-            filter = retrieveFilter(pf, new Class[]{ rootFilterClass }, excludeType);
-        } else {
-            // this is the case if we have no explicit class filter
-            if (filterClasses.length > 0 && !rootFilterClass.equals(filterClasses[0])) {
-                filter = retrieveFilter(pf,  rootFilterClass, filterClasses, excludeType );
-            } else {
-                filter = retrieveFilter(pf, filterClasses, excludeType);
-            }
-        }
-        return filter;
-    }
     
-    private <T> SimpleFilterProvider retrieveFilter(PropertyFilter pf, Class<T> cachefilterClass, 
-            Class<T>[] filterClasses, Boolean excludeType ) {
+    private <T> SimpleFilterProvider retrieveFilter(PropertyFilter pf, Class<?> cachefilterClass, 
+            Class<T>[] excludeClasses ) {
         SimpleFilterProvider filter = null;
         if (pf != null) {
             filter = new SimpleFilterProvider();
@@ -416,9 +396,9 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
         }
         if (!cacheService.getFilters().containsKey(cachefilterClass.getName())) {
             getLogger().debug("add filter for cache filter Class " + cachefilterClass.getName());
-            if (filterClasses != null && filterClasses.length > 0 && filterClasses[0] != null) {
-                getLogger().debug("filter classes l:" + filterClasses.length + " first el:"+ filterClasses[0]);
-                setCustomIntrospectorWithExternalFilterId(filterClasses, excludeType); // filter class
+            if (cachefilterClass != null) {
+                getLogger().debug("filter classe:" + cachefilterClass);
+                setCustomIntrospectorWithExternalFilterId(cachefilterClass, excludeClasses); // filter class
             }
             if (pf != null)  {
                 cacheService.getFilters().put(cachefilterClass.getName(), (FilterProvider) filter);    
@@ -433,40 +413,23 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
         return filter; 
     }
 
-    private <T> SimpleFilterProvider retrieveFilter(PropertyFilter pf, Class<T>[] filterClasses, Boolean excludeType ) {
-        return  retrieveFilter(pf,  filterClasses[0], filterClasses, excludeType );
-    }
-
     /**
-     * <li>Adding the classes  in externalFilterIs to {@link SimpleNameIntrospector#setFilteredClass(Class)} enables the filtering process.
-     * <li>If <code>excludeType</code> is <code>true</code>, externalFilterIs are added to {@link SimpleNameIntrospector#setExternalFilterExcludeClasses(Class...)}.
-     *  
-     * @param externalFilterIds
-     * @param excludeType
+     * @param filterClass <li>Adding filterClass into {@link SimpleNameIntrospector#setFilteredClass(Class)} enables the filtering process.
+     * @param externalFilterIds <li>Adding externalFilterIs to {@link SimpleNameIntrospector#setExternalFilterExcludeClasses(Class...)} excludes these classes.
      */
-    private <T> void setCustomIntrospectorWithExternalFilterId(
-            Class<T>[] externalFilterIds, boolean excludeType) {
+    private <T> void setCustomIntrospectorWithExternalFilterId(Class<?> filterClass,
+            Class<T>[] externalFilterClassIds) {
         if (primary instanceof SimpleNameIntrospector) {
-            if (externalFilterIds != null) {
-                ((SimpleNameIntrospector) primary).setIsExludeType(excludeType);
-                // first one is required that we get to the PropertyFilter 
-                ((SimpleNameIntrospector) primary)
-                .setFilteredClasses(externalFilterIds);
-                for (Class<T> filterClazz : externalFilterIds) {
+            // first one is required that we get to the PropertyFilter 
+            ((SimpleNameIntrospector) primary).setFilteredClasses(filterClass);
+            if (externalFilterClassIds != null) {
+                ((SimpleNameIntrospector) primary).setIsExludeType(true);
+                for (Class<T> filterClazz : externalFilterClassIds) {
                     getLogger().debug("added class for filters "
                             + filterClazz);                    
                 }
-                if (excludeType) { 
-                    ((SimpleNameIntrospector) primary).setExternalFilterExcludeClasses(externalFilterIds);
-                    getLogger().debug("added exclude class for filters " + externalFilterIds);
-                } else {
-            // too cumbersome
-//                ((SimpleNameIntrospector) primary)
-//                .setExternalFilterIncludeClasses(externalFilterId);
-//        getLogger()
-//                .debug("added include class for filters "
-//                        + externalFilterId.getName());
-                }
+                ((SimpleNameIntrospector) primary).setExternalFilterExcludeClasses(externalFilterClassIds);
+                getLogger().debug("added exclude class(es) for filters " + externalFilterClassIds);
             }
         }
     }
@@ -606,7 +569,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
             ((LogEnabled)secondary).enableLogging(getLogger().getChildLogger(secondary.getClass().getSimpleName()));
             getLogger().info(
                     "setting secondary introspector logger: "
-                            + primary.getClass().getSimpleName());
+                            + secondary.getClass().getSimpleName());
         }
 
         if (features != null) {
@@ -616,7 +579,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
                                                                  // FAIL_ON_EMPTY_BEANS
                 Boolean featureValue = features.get(featureKey); // e.g.false
                 String featureType = featureTypes.get(featureKey);
-                Class configFeature = null;
+                Class<?> configFeature = null;
                 try {
                     getLogger().debug(
                             "initializing featureType:  " + featureType);
@@ -740,6 +703,13 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
                     }
                 });
         cacheService = new CacheService(primary);
+        if (cacheService instanceof LogEnabled)
+        {
+            ((LogEnabled)cacheService).enableLogging(getLogger().getChildLogger(cacheService.getClass().getSimpleName()));
+            getLogger().info(
+                    "setting cacheService logger: "
+                            + cacheService.getClass().getSimpleName());
+        }
     }
 
     public ObjectMapper getMapper() {

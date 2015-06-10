@@ -96,9 +96,9 @@ public class DefaultServiceTest extends BaseUnitTest {
         String serJson = ((Jackson2MapperService)sc).serializeAllExceptFilter(new TestClass("mytest"),
                new Class[] { Map.class, String.class} , "configurationName", "name");
         assertEquals("Serialization failed ", "{}", serJson);
-        serJson = ((Jackson2MapperService)sc).serializeAllExceptFilter(new TestClass("mytest"),
-                "configurationName", "name");
-         assertEquals("Serialization failed ", "{}", serJson);
+        String serJson2 = ((Jackson2MapperService)sc).serializeAllExceptFilter(new TestClass("mytest"),
+                true, "configurationName", "name");
+         assertEquals("Serialization failed ", "{}", serJson2);
     }
 
     public void testSerializeExcludeField() throws Exception {
@@ -280,12 +280,13 @@ public class DefaultServiceTest extends BaseUnitTest {
         assertEquals("{\"name\":\"bean1\"}",sc.serializeOnlyFilter(bean, true,"name"));
         assertEquals("{\"name\":\"bean1\"}",sc.serializeOnlyFilter(bean, Bean.class, true,"name")); // parent filter
         assertEquals("{\"name\":\"bean1\"}",sc.serializeOnlyFilter(bean, BeanChild.class, true,"name"));
+        assertEquals("{\"name\":\"bean1\"}",sc.serializeOnlyFilter(bean, Object.class, true,"name"));
         bean = new Bean();
         bean.setAge(0);bean.setName("bean0");
         assertEquals("{\"name\":\"bean0\"}",sc.serializeOnlyFilter(bean, true,"name"));
         assertEquals("{\"name\":\"bean0\"}",sc.serializeOnlyFilter(bean, Bean.class, true,"name"));
         assertEquals("{\"name\":\"bean0\"}",sc.serializeOnlyFilter(bean, BeanChild.class, true,"name"));// child filter
-        
+        assertEquals("{\"name\":\"bean0\"}",sc.serializeOnlyFilter(bean, Object.class, true,"name"));   
     }
     
     public void testSerializeCollectionWithOnlyFilterAndParentClass() throws Exception {
