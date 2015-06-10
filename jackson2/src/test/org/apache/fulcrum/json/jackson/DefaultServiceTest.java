@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.avalon.framework.logger.ConsoleLogger;
 import org.apache.fulcrum.json.JsonService;
 import org.apache.fulcrum.json.Rectangle;
 import org.apache.fulcrum.json.TestClass;
@@ -56,6 +57,7 @@ public class DefaultServiceTest extends BaseUnitTest {
     }
 
     public void setUp() throws Exception {
+        setLogLevel(ConsoleLogger.LEVEL_DEBUG);
         super.setUp();
         sc = (JsonService) this.lookup(JsonService.ROLE);
     }
@@ -251,7 +253,7 @@ public class DefaultServiceTest extends BaseUnitTest {
                 rectangle);
     }
     
-    public void testSerializeAllExceptaANDWithOnlyFilter2() throws Exception {
+    public void testSerializeAllExceptANDWithOnlyFilter2() throws Exception {
         
         String serJson = sc.serializeAllExceptFilter(new TestClass("mytest"),"configurationName");
         assertEquals("Serialization failed ",
@@ -270,6 +272,20 @@ public class DefaultServiceTest extends BaseUnitTest {
                 "Ser filtered Rectangle failed ",
                 "{\"w\":5}",
                 rectangle);
+    }
+    
+    public void testSerializeBeanWithOnlyFilter() throws Exception {
+        Bean bean = new BeanChild();
+        bean.setAge(1);bean.setName("bean1");
+        assertEquals("{\"name\":\"bean1\"}",sc.serializeOnlyFilter(bean, true,"name"));
+        assertEquals("{\"name\":\"bean1\"}",sc.serializeOnlyFilter(bean, Bean.class, true,"name")); // parent filter
+        assertEquals("{\"name\":\"bean1\"}",sc.serializeOnlyFilter(bean, BeanChild.class, true,"name"));
+        bean = new Bean();
+        bean.setAge(0);bean.setName("bean0");
+        assertEquals("{\"name\":\"bean0\"}",sc.serializeOnlyFilter(bean, true,"name"));
+        assertEquals("{\"name\":\"bean0\"}",sc.serializeOnlyFilter(bean, Bean.class, true,"name"));
+        assertEquals("{\"name\":\"bean0\"}",sc.serializeOnlyFilter(bean, BeanChild.class, true,"name"));// child filter
+        
     }
     
     public void testSerializeCollectionWithOnlyFilterAndParentClass() throws Exception {

@@ -23,6 +23,9 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.avalon.framework.logger.LogEnabled;
+import org.apache.avalon.framework.logger.Logger;
+
 import com.fasterxml.jackson.databind.introspect.Annotated;
 import com.fasterxml.jackson.databind.introspect.AnnotatedClass;
 import com.fasterxml.jackson.databind.introspect.NopAnnotationIntrospector;
@@ -39,7 +42,7 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
  * @version $Id$
  * 
  */
-public class SimpleNameIntrospector extends NopAnnotationIntrospector {
+public class SimpleNameIntrospector extends NopAnnotationIntrospector implements LogEnabled {
     /**
      * 
      */
@@ -49,12 +52,13 @@ public class SimpleNameIntrospector extends NopAnnotationIntrospector {
     private List<String> externalFilterExcludeClasses = new CopyOnWriteArrayList<String>();
     private List<String> externalFilterIncludeClasses = new CopyOnWriteArrayList<String>();
     private AtomicBoolean isExludeType = new AtomicBoolean(false);
+    
+    private Logger logger;
 
     /**
      * Filtering on method types.
      * 
      */
-    @Override
     public Boolean isIgnorableType(AnnotatedClass ac) {
         Boolean isIgnorable = super.isIgnorableType(ac);
         if (isIgnorable == null || !isIgnorable) {
@@ -83,7 +87,6 @@ public class SimpleNameIntrospector extends NopAnnotationIntrospector {
      *         {@link #filteredClasses} contains the class provided. The
      *         filter itself currently is {@link SimpleFilterProvider}.
      */
-    @Override
     public Object findFilterId(Annotated ac) {
         Object id = super.findFilterId(ac);
         // Let's default to current behavior if annotation is found:
@@ -95,17 +98,20 @@ public class SimpleNameIntrospector extends NopAnnotationIntrospector {
             if (!filteredClasses.isEmpty()
                     && filteredClasses.contains(targetClazz)
                     ) {
+                logger.debug("filter applying to " +name);
                 id = name;
             } else {
                 // check if target class is a child from filter class -> apply filter 
                 for (Class<?> filterClazz : filteredClasses) {
                     // the currently checked class /targetClazz could be child to the filter class /filterClazz ->  filter child 
                     if (filterClazz.isAssignableFrom(targetClazz)) {
+                        logger.debug("filter applying to parent " +filterClazz +" matching child class "+name );
                         id = name;
                         break;
                     }
                  // the currently checked class /targetClazz could be parent to the filter class /filterClazz -> filter parent
                     if (targetClazz.isAssignableFrom(filterClazz)) {
+                        logger.debug("filter applying to child " +filterClazz+" matching parent class "+name);
                         id = name;
                         break;
                     }
@@ -184,6 +190,10 @@ public class SimpleNameIntrospector extends NopAnnotationIntrospector {
     }
     public void setIsExludeType(boolean isExludeType) {
         this.isExludeType.getAndSet(isExludeType);
+    }
+    @Override
+    public void enableLogging(Logger logger) {
+        this.logger = logger;        
     }
 
 }

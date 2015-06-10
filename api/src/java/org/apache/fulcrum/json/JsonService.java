@@ -157,7 +157,7 @@ public interface JsonService {
      * @param src
      *            The Java object to serialize
      * @param filterClass
-     *            By default filterClass is the key in the filter object cached. 
+     *            By default filterClass is a) the class to be filtered (required for filtering list elements) b) the key in the filter object cached. 
      *            
      * @param cleanFilter
      *             The Boolean value, not null. If it is <code>true</code>, cleans cache and the custom filter after serialization.

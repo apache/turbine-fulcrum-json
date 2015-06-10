@@ -31,6 +31,7 @@ import org.apache.avalon.framework.configuration.Configurable;
 import org.apache.avalon.framework.configuration.Configuration;
 import org.apache.avalon.framework.configuration.ConfigurationException;
 import org.apache.avalon.framework.logger.AbstractLogEnabled;
+import org.apache.avalon.framework.logger.LogEnabled;
 import org.apache.fulcrum.json.JsonService;
 import org.apache.fulcrum.json.jackson.filters.CustomModuleWrapper;
 
@@ -361,7 +362,9 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
     /**
      * 
      * @param src The source Object to be filtered.
-     * @param filterClass Explicit class as a class filter, which is only used as a filter in {@link #serializeAllExceptFilter(Object, Class, String...)}. In all other cases this is set to src objects´s source class to become the key in the filter object cache.
+     * @param filterClass This Class array contains at least one element. If no class is provided it is the class type of the source object. 
+     * Setting a class filter explicitely should only used as a filter in {@link #serializeAllExceptFilter(Object, Class, String...)}. 
+     * In any case the filterClass is to become the key in the filter object cache.
      * This is because, no use case was found to include just one class in a filter, e.g. in @link {@link #serializeOnlyFilter(Object, Class, Boolean, String...)}, i.e. just serializing only a provided filter class. 
      * @param pf Expecting a property filter from e.g @link {@link SimpleBeanPropertyFilter}.
      * @param clean if <code>true</code> does not reuse the filter object (no cashing).
@@ -379,7 +382,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
         String serialized = ser(src, filter, clean);
         if (!cacheFilters || clean) {
             if (src != null) {
-                cacheService.removeFilter(src.getClass(), excludeType);
+                cacheService.removeFilter(src.getClass(), excludeType);// reset required, just use filteredClasses[0]?
             } else if (filterClasses.length >0) {
                 cacheService.removeFilter(filterClasses[0], excludeType);
             }
@@ -391,9 +394,10 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
     private <T> FilterProvider checkFilter(PropertyFilter pf,
             Class rootFilterClass, Class<T>[] filterClasses,  Boolean excludeType) {
         SimpleFilterProvider filter = null;
-        if (filterClasses == null ) {
+        if (filterClasses == null ) { // never happens actually
             filter = retrieveFilter(pf, new Class[]{ rootFilterClass }, excludeType);
         } else {
+            // this is the case if we have no explicit class filter
             if (filterClasses.length > 0 && !rootFilterClass.equals(filterClasses[0])) {
                 filter = retrieveFilter(pf,  rootFilterClass, filterClasses, excludeType );
             } else {
@@ -403,7 +407,8 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
         return filter;
     }
     
-    private <T> SimpleFilterProvider retrieveFilter(PropertyFilter pf, Class<T> cachefilterClass, Class<T>[] filterClasses, Boolean excludeType ) {
+    private <T> SimpleFilterProvider retrieveFilter(PropertyFilter pf, Class<T> cachefilterClass, 
+            Class<T>[] filterClasses, Boolean excludeType ) {
         SimpleFilterProvider filter = null;
         if (pf != null) {
             filter = new SimpleFilterProvider();
@@ -587,6 +592,21 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
             mapper.setAnnotationIntrospector(pair);
         } else {
             mapper.setAnnotationIntrospector(primary);
+        }
+        
+        if (primary instanceof LogEnabled)
+        {
+            ((LogEnabled)primary).enableLogging(getLogger().getChildLogger(primary.getClass().getSimpleName()));
+            getLogger().info(
+                    "setting primary introspector logger: "
+                            + primary.getClass().getSimpleName());
+        }
+        if (secondary instanceof LogEnabled)
+        {
+            ((LogEnabled)secondary).enableLogging(getLogger().getChildLogger(secondary.getClass().getSimpleName()));
+            getLogger().info(
+                    "setting secondary introspector logger: "
+                            + primary.getClass().getSimpleName());
         }
 
         if (features != null) {
