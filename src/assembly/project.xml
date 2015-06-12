@@ -53,7 +53,7 @@
         <include>%regex[(api|gson|jackson|jackson2|dist)/.*]</include>
       </includes>
       <excludes>
-         <exclude>%regex[.*/target.*]</exclude>
+         <exclude>%regex[.*/target.*|.*/\..*]</exclude>
       </excludes>
     </fileSet>
     <fileSet>

@@ -81,7 +81,7 @@ public interface JsonService {
      * 
      * @param src
      * @param type
-     * @param refreshCache 
+     * @param cleanCache  
      *          If <code>true</code>, try to clean cache after serialization
      * 
      * For other attributes @see {@link #ser(Object, Class)}
@@ -243,7 +243,7 @@ public interface JsonService {
     /**
      * Add an adapter (mixin, serializer,..) for the target class depending on
      * the JsonService implementation. Adapters could by default not deregistered. If you want
-     * to get rid of them, you have to (@see {@link #reInitService()} (or overwrite with the same target type, depending on
+     * to get rid of them, you may try to reinit the service (or overwrite with the same target type, depending on
      * implementation) 
      * 
      * @param name

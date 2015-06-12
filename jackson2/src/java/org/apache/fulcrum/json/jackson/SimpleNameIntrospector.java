@@ -53,7 +53,7 @@ public class SimpleNameIntrospector extends NopAnnotationIntrospector implements
     private List<String> externalFilterIncludeClasses = new CopyOnWriteArrayList<String>();
     private AtomicBoolean isExludeType = new AtomicBoolean(false);
     
-    private Logger logger;
+    private static Logger logger;
 
     /**
      * Filtering on method types.

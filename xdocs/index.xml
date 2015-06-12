@@ -200,7 +200,7 @@ JsonService jsonService = (JsonService)TurbineServices
     
     <h4>Configuration Requirements</h4>
     <p>
-    Add <code>org.apache.fulcrum.json.jackson.SimpleNameIntrospector</code> to the annotation inspectors as primary or secondary inspector. <strong>[CHANGE in Version 1.0.1]</strong> SimpleNameIntrospector now extends from <a href="https://github.com/FasterXML/jackson-databind/blob/master/src/main/java/com/fasterxml/jackson/databind/introspect/NopAnnotationIntrospector.java">NopAnnotationIntrospector</a> to cleary divide responsibilities. Default introspector e.g. JacksonAnnotationIntrospector could be provided as a primary/secondary introspector in <a href="#compconf">Component Configuration</a>.
+    Add <code>org.apache.fulcrum.json.jackson.SimpleNameIntrospector</code> to the annotation inspectors as primary or secondary inspector. <strong>[CHANGE in Version 1.1.0]</strong> SimpleNameIntrospector now extends from <a href="https://github.com/FasterXML/jackson-databind/blob/master/src/main/java/com/fasterxml/jackson/databind/introspect/NopAnnotationIntrospector.java">NopAnnotationIntrospector</a> to cleary divide responsibilities. Default introspector e.g. JacksonAnnotationIntrospector could be provided as a primary/secondary introspector in <a href="#compconf">Component Configuration</a>.
     </p>
    </subsection>
 

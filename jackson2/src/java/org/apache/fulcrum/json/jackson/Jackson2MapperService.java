@@ -313,6 +313,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
             getLogger().warn("no filter attributes set!");
             pf = SimpleBeanPropertyFilter.filterOutAllExcept("dummy");
         }
+        if (filterClasses == null) throw new Exception("You have to provide some class to apply the filtering!");
         return filter(src, filterClasses, null, pf, refresh);
     }
     
@@ -387,24 +388,21 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
         return serialized;
     }
     
-    private <T> SimpleFilterProvider retrieveFilter(PropertyFilter pf, Class<?> cachefilterClass, 
+    private <T> SimpleFilterProvider retrieveFilter(PropertyFilter pf, Class<?> filterClass, 
             Class<T>[] excludeClasses ) {
         SimpleFilterProvider filter = null;
         if (pf != null) {
             filter = new SimpleFilterProvider();
             filter.setDefaultFilter(pf);
         }
-        if (!cacheService.getFilters().containsKey(cachefilterClass.getName())) {
-            getLogger().debug("add filter for cache filter Class " + cachefilterClass.getName());
-            if (cachefilterClass != null) {
-                getLogger().debug("filter classe:" + cachefilterClass);
-                setCustomIntrospectorWithExternalFilterId(cachefilterClass, excludeClasses); // filter class
-            }
+        if (!cacheService.getFilters().containsKey(filterClass.getName())) {
+            getLogger().debug("add filter for cache filter Class " + filterClass.getName());
+            setCustomIntrospectorWithExternalFilterId(filterClass, excludeClasses); // filter class
             if (pf != null)  {
-                cacheService.getFilters().put(cachefilterClass.getName(), (FilterProvider) filter);    
+                cacheService.getFilters().put(filterClass.getName(), (FilterProvider) filter);    
             } 
         } else {
-            filter = (SimpleFilterProvider)cacheService.getFilters().get(cachefilterClass
+            filter = (SimpleFilterProvider)cacheService.getFilters().get(filterClass
                     .getName());
             //setCustomIntrospectorWithExternalFilterId(filterClass); // filter
             // class

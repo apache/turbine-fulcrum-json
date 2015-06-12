@@ -70,7 +70,9 @@
             </goals>
             <configuration>
               <descriptors>
+                <!-- binaries -->
                 <descriptor>src/assembly/dist.xml</descriptor>
+                <!-- sources -->
                 <descriptor>src/assembly/src.xml</descriptor>
               </descriptors>
             </configuration>

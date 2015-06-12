@@ -17,7 +17,7 @@ public class CacheService implements LogEnabled {
     AnnotationIntrospector primary;
     Map<String, FilterProvider> filters =  new ConcurrentHashMap<String, FilterProvider>();;
     
-    private Logger logger;
+    private static Logger logger;
     
     public CacheService(AnnotationIntrospector primary) {
         this.primary = primary;
