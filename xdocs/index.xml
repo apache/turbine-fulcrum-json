@@ -168,7 +168,7 @@ JsonService jsonService = (JsonService)TurbineServices
     <p>
     </p>
   </subsection>
-  <subsection name="Usage in Velocity Template" id="velocity">
+  <subsection name="Usage in Velocity Template: Serialization Example" id="velocity">
     <p>
     A lot of client data is nowadays provided by javascript and usage of Model-View-View Model (MVVM) frameworks is very popular. Having the required data in JSON format would be of some help.
     Velocity provides the integration of Java objects into templates (HTML). To generate in this context
@@ -189,14 +189,14 @@ JsonService jsonService = (JsonService)TurbineServices
         return result;        
     }
 ]]></source>
-     You could then call the json method from this tool in a velocity template like this:
+     You could then call the JSON method from this tool in a velocity template like this:
      
      <source><![CDATA[
     #set ($json =   $!pullTool.getJson($items, "x.y.z.Item", true, "prop1", "prop2", "prop3" ) )
     
     ## parse json in javascript ....
 ]]></source>
-     What you get is the JSON data populated with all fields you provided (starting with the fourth parameter). Th result format may the vary depending on serialization parameters. The third parameter being true will cache not the result, but the call characteristics i.e. the  parameters used for the serialization of the provided class.
+     What you get is the JSON data populated with all fields you provided (starting with the fourth parameter). Th result format may vary depending on the serialization parameters. The third parameter being true will cache not the result, but the call characteristics i.e. the  parameters used for the serialization of the provided class.
     
     <h4>Configuration Requirements</h4>
     <p>

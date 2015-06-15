@@ -177,11 +177,9 @@ public interface JsonService {
      * Serialize all object properties excluding provided filters attributes. If no filter is set, all attributes should be returned.
      * 
      * @param src
-     *            The Java object to serialize
+     *            The Java object to serialize. By default the filtering is applied for this class. By default the class of the src object is the key for the filter object cached.
      * @param filterClass
-     *            The class to which the filtering should be applied. If its the
-     *            same class, just the filterAttributes get applied. If not, the
-     *            class is filtered out, if found as a property type. By default filterClass is the key in the filter object cached. 
+     *            The class, which should be filtered out, if found as a property type.  
      * @param cleanFilter
      *            If <code>true </code> cleans filter (clean cache and custom filter for this filterClass) after serialization.      
      * @param filterAttr
