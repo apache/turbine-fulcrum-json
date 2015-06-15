@@ -57,7 +57,7 @@ public class DefaultServiceTest extends BaseUnitTest {
     }
 
     public void setUp() throws Exception {
-        setLogLevel(ConsoleLogger.LEVEL_DEBUG);
+        //setLogLevel(ConsoleLogger.LEVEL_DEBUG);
         super.setUp();
         sc = (JsonService) this.lookup(JsonService.ROLE);
     }
