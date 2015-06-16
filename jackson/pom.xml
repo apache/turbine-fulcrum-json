@@ -77,13 +77,6 @@
         </dependency>
         <dependency>
             <groupId>org.apache.fulcrum</groupId>
-            <artifactId>fulcrum-json-api</artifactId>
-            <version>${project.version}</version>
-            <type>test-jar</type>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.fulcrum</groupId>
             <artifactId>fulcrum-yaafi</artifactId>
             <version>1.0.6</version>
             <scope>test</scope>
