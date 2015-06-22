@@ -51,9 +51,6 @@ Publishing Workflow
 Prerequisites
  // jars
  mvn deploy -Papache-release
- // Stage the latest documentation 
- mvn site site:stage scm-publish:publish-scm -Dscmpublish.dryRun=true
- mvn clean site site:stage scm-publish:publish-scm -Dusername=<username> -Dpassword=<pw>
 
 More Information
   https://www.apache.org/dev/publishing-maven-artifacts.html#prepare-poms
@@ -84,18 +81,22 @@ More Information
   
 More Information 
   https://www.apache.org/dev/publishing-maven-artifacts.html#close-stage
-  https://docs.sonatype.org/display/Repository/Closing+a+Staging+Repository
   
 6) Prepare Voting Information and Voting
   ....
   
 7) a) 
   //Promote / Publish 
-  https://docs.sonatype.org/display/Repository/Releasing+a+Staging+Repository
+  http://www.apache.org/dev/publishing-maven-artifacts.html#promote
    b)
   //Drop and Restage
-  https://docs.sonatype.org/display/Repository/Dropping+a+Staging+Repository
+  http://www.apache.org/dev/publishing-maven-artifacts.html#drop
   - Reverse merge the release prepare, manually delete tag in svn repo and drop staged repository in nexus and start again with step 1.
+  
+8)  // Stage the latest documentation 
+ // http://maven.apache.org/developers/website/deploy-component-reference-documentation.html
+ mvn site site:stage scm-publish:publish-scm -Dscmpublish.dryRun=true
+ mvn clean site site:stage scm-publish:publish-scm -Dusername=<username> -Dpassword=<pw>
    
 --------------------------------------------------------------------------
 Licence
