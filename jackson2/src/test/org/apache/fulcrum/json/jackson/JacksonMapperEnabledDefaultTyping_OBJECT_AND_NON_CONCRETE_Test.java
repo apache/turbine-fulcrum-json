@@ -19,6 +19,9 @@ package org.apache.fulcrum.json.jackson;
  * under the License.
  */
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -32,7 +35,9 @@ import org.apache.avalon.framework.logger.Logger;
 import org.apache.fulcrum.json.JsonService;
 import org.apache.fulcrum.json.Rectangle;
 import org.apache.fulcrum.json.TestClass;
-import org.apache.fulcrum.testcontainer.BaseUnitTest;
+import org.apache.fulcrum.testcontainer.BaseUnit4Test;
+import org.junit.Before;
+import org.junit.Test;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -47,43 +52,32 @@ import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
  * @author gk
  * @version $Id$
  */
-public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test extends BaseUnitTest {
+public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test extends BaseUnit4Test {
     private JsonService sc = null;
+    private final String preDefinedOutput = "{\"container\":{\"type\":\"java.util.HashMap\",\"cf\":\"Config.xml\"},\"configurationName\":\"Config.xml\",\"name\":\"mytest\"}";
     Logger logger;
 
-    /**
-     * Constructor for test.
-     * 
-     * @param testName
-     *            name of the test being executed
-     */
-    public JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test(String testName) {
-        super(testName);
-    }
-
+    @Before
     public void setUp() throws Exception {
-        super.setUp();
         sc = (JsonService) this.lookup(JsonService.ROLE);
         logger = new ConsoleLogger(ConsoleLogger.LEVEL_DEBUG);
         ((Jackson2MapperService) sc).getMapper().enableDefaultTypingAsProperty(
                 DefaultTyping.OBJECT_AND_NON_CONCRETE, "type");
     }
-
+    
+    @Test
     public void testSerialize() throws Exception {
-        String serJson = sc.ser(new JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test(
-                "mytest"));
-        assertEquals(
-                "Set failed ",
-                "{\"name\":\"mytest\"}",
-                serJson);
+        String serJson = sc.ser(new TestClass("mytest"));
+        assertEquals("Serialization failed ", preDefinedOutput, serJson);
     }
 
+    @Test
     public void testDeSerialize() throws Exception {
         String serJson = sc.ser(new TestClass("mytest"));
         Object deson = sc.deSer(serJson, TestClass.class);
         assertEquals("DeSer failed ", TestClass.class, deson.getClass());
     }
-
+    @Test
     public void testSerializeDateWithDefaultDateFormat() throws Exception {
 
         Map<String, Date> map = new HashMap<String, Date>();
@@ -94,7 +88,7 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
                 "Serialize with Adapater failed ",
                 serJson.matches(".*\"java.util.Date\",\"\\d\\d/\\d\\d/\\d{4}\".*"));
     }
-
+    @Test
     public void testDeSerializeDate() throws Exception {
         Map<String, Date> map = new HashMap<String, Date>();
         map.put("mydate",Calendar.getInstance().getTime());
@@ -116,7 +110,7 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
 //        System.out.println("serObject:"+ ((Date)serObject.mydate));
 //        System.out.println("serObject:"+ ((Date)serObject.mydate2));
     }
-
+    @Test
     public void testSerializeWithCustomFilter() throws Exception {
         Bean filteredBean = new Bean();
         filteredBean.setName("joe");
@@ -125,7 +119,6 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
                 "Ser filtered Bean failed ",
                 "{\"name\":\"joe\"}",
                 bean);
-
         Rectangle filteredRectangle = new Rectangle(5, 10);
         filteredRectangle.setName("jim");
         String rectangle = sc.serializeOnlyFilter(filteredRectangle,
@@ -133,7 +126,7 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
         assertEquals("Ser filtered Rectangle failed ",
                 "{\"w\":5,\"name\":\"jim\"}", rectangle);
     }
-
+    @Test
     public void testSerializationCollectionWithFilter() throws Exception {
 
         List<Bean> beanList = new ArrayList<Bean>();
@@ -150,9 +143,8 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
                 "[{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe0','age':0},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe1','age':1},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe2','age':2},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe3','age':3},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe4','age':4},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe5','age':5},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe6','age':6},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe7','age':7},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe8','age':8},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe9','age':9}]",
                 result.replace('"', '\''));
     }
-
+    @Test
     public void testDeserializationCollectionWithFilter() throws Exception {
-
         List<Bean> beanList = new ArrayList<Bean>();
         for (int i = 0; i < 10; i++) {
             Bean filteredBean = new Bean();
@@ -175,10 +167,9 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
             assertEquals("DeSer failed ", Bean.class, bean.getClass());
         }
     }
-
+    @Test
     public void testDeserializationUnTypedCollectionWithFilter()
             throws Exception {
-
         List<Bean> beanList = new ArrayList<Bean>();
         for (int i = 0; i < 10; i++) {
             Bean filteredBean = new Bean();
@@ -204,7 +195,7 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
 
         }
     }
-
+    @Test
     public void testSerializeWithMixin() throws Exception {
         Rectangle filteredRectangle = new Rectangle(5, 10);
         filteredRectangle.setName("jim");
@@ -213,7 +204,7 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
                         filteredRectangle);
         assertEquals("Ser failed ", "{\"width\":5}", serRect);
     }
-
+    @Test
     public void testSerializeWith2Mixins() throws Exception {
         Bean filteredBean = new Bean();
         filteredBean.setName("joe");
@@ -223,7 +214,6 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
        String serRect =  sc.addAdapter("M4RMixin2", Rectangle.class,
                 Mixin2.class).ser(filteredRectangle);
         assertEquals("Ser failed ", "{\"name\":\"jim\",\"width\":5}", serRect);
-
         //
         String bean = sc.addAdapter("M4RBeanMixin", Bean.class,
                 BeanMixin.class).ser(filteredBean);;
@@ -233,11 +223,10 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
                 "{\"name\":\"joe\"}",
                 bean);
     }
-    
+    @Test
     public void testSerializeWithMixinAndFilter() throws Exception {
         Bean filteredBean = new Bean();
         filteredBean.setName("joe");
-        //
         sc.addAdapter("M4RBeanMixin", Bean.class,
                 BeanMixin.class);
         // profession was already set to ignore, does not change
@@ -247,11 +236,10 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
                 "{}",
                 bean);
     }
-    
+    @Test
     public void testSerializeWithUnregisteredMixinAndFilter() throws Exception {
         Bean filteredBean = new Bean();
         filteredBean.setName("joe");
-        //
         sc.addAdapter("M4RBeanMixin", Bean.class,
                 BeanMixin.class)
         .addAdapter("M4RBeanMixin", Bean.class,
@@ -263,14 +251,12 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
                 "{\"profession\":\"\"}",
                 bean);
     }
-
+    @Test
     public void testMultipleSerializingWithMixinAndFilter() throws Exception {
         Rectangle filteredRectangle = new Rectangle(5, 10);
         filteredRectangle.setName("jim");
-        //
         sc.addAdapter("M4RMixin2", Rectangle.class,
                 Mixin2.class);
-        
         // if serialization is done Jackson clean cache
         String rectangle0 = sc.ser(filteredRectangle,Rectangle.class,true);
         assertEquals(
@@ -290,9 +276,8 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
               "{\"name\":\"jim\",\"width\":5}",
               rectangle1);
     }
-
+    @Test
     public void testSerializationCollectionWithMixin() throws Exception {
-
         List<Bean> beanList = new ArrayList<Bean>();
         for (int i = 0; i < 10; i++) {
             Bean filteredBean = new Bean();
@@ -307,9 +292,8 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
                 "[{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe0'},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe1'},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe2'},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe3'},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe4'},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe5'},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe6'},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe7'},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe8'},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe9'}]",
                 result.replace('"', '\''));
     }
-
+    @Test
     public void testDeSerializationCollectionWithMixin() throws Exception {
-
         List<Bean> beanList = new ArrayList<Bean>();
         for (int i = 0; i < 10; i++) {
             Bean filteredBean = new Bean();
@@ -330,7 +314,7 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
             assertEquals("DeSer failed ", Bean.class, bean.getClass());
         }
     }
-
+    @Test
     public void testSerializationCollectionWithMixins() throws Exception {
         List components = new ArrayList<Object>();
         components.add(new Rectangle(25, 3));
@@ -341,7 +325,6 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
             filteredBean.setAge(i);
             components.add(filteredBean);
         }
-
         // property w->width, BeanMixin:  name ignore other properties
         sc.addAdapter("M4RMixin", Rectangle.class, Mixin.class).addAdapter(
                 "M4BeanRMixin", Bean.class, BeanMixin.class);
@@ -351,7 +334,7 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
                 "[{'type':'org.apache.fulcrum.json.Rectangle','width':25},{'type':'org.apache.fulcrum.json.Rectangle','width':250},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe0'},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe1'},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe2'}]",
                 serRect.replace('"', '\''));
     }
-    
+    @Test
     public void testSerializeCollectionWithOnlyFilter() throws Exception {
         
         List<TypedRectangle> rectList = new ArrayList<TypedRectangle>();
@@ -367,16 +350,12 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
     public static abstract class Mixin2 {
         void MixIn2(int w, int h) {
         }
-
         @JsonProperty("width")
         abstract int getW(); // rename property
-
         @JsonIgnore
         abstract int getH();
-
         @JsonIgnore
         abstract int getSize(); // exclude
-
         abstract String getName();
     }
     
@@ -389,7 +368,4 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
         public Object mydate;
         public Object mydate2;
     }
-    
-    
-
 }

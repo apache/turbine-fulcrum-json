@@ -19,6 +19,8 @@ package org.apache.fulcrum.json.jackson;
  * under the License.
  */
 
+import static org.junit.Assert.*;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -33,6 +35,7 @@ import org.apache.avalon.framework.logger.Logger;
 import org.apache.fulcrum.json.JsonService;
 import org.apache.fulcrum.json.Rectangle;
 import org.apache.fulcrum.json.TestClass;
+import org.apache.fulcrum.testcontainer.BaseUnit4Test;
 import org.apache.fulcrum.testcontainer.BaseUnitTest;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -49,31 +52,21 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author gk
  * @version $Id$
  */
-public class JacksonMapperTest extends BaseUnitTest {
+public class JacksonMapperTest extends BaseUnit4Test {
+    private final String preDefinedOutput = "{\"container\":{\"cf\":\"Config.xml\"},\"configurationName\":\"Config.xml\",\"name\":\"mytest\"}";
     private JsonService sc = null;
     Logger logger;
 
-    /**
-     * Constructor for test.
-     * 
-     * @param testName
-     *            name of the test being executed
-     */
-    public JacksonMapperTest(String testName) {
-        super(testName);
-    }
-
     @Before
     public void setUp() throws Exception {
-        super.setUp();
         sc = (JsonService) this.lookup(JsonService.ROLE);
         logger = new ConsoleLogger(ConsoleLogger.LEVEL_DEBUG);
     }
 
     @Test
     public void testSerialize() throws Exception {
-        String serJson = sc.ser(new JacksonMapperTest("mytest"));
-        assertEquals("Set failed ", "{\"name\":\"mytest\"}", serJson);
+        String serJson = sc.ser(new TestClass("mytest"));
+        assertEquals("Serialization failed ", preDefinedOutput, serJson);
     }
 
     @Ignore
@@ -99,7 +92,7 @@ public class JacksonMapperTest extends BaseUnitTest {
         assertEquals("Date DeSer failed ", String.class, serDate.get("date")
                 .getClass());
     }
-
+    @Test
     public void testSerializeWithCustomFilter() throws Exception {
         Bean filteredBean = new Bean();
         filteredBean.setName("joe");
@@ -151,7 +144,6 @@ public class JacksonMapperTest extends BaseUnitTest {
             assertEquals("DeSer failed ", Bean.class, bean.getClass());
         }
     }
-
     @Test
     public void testDeserializationUnTypedCollectionWithFilter()
             throws Exception {
@@ -178,7 +170,6 @@ public class JacksonMapperTest extends BaseUnitTest {
         }
 
     }
-
     @Test
     public void testSerializeWithMixin() throws Exception {
         Rectangle filteredRectangle = new Rectangle(5, 10);
@@ -188,7 +179,7 @@ public class JacksonMapperTest extends BaseUnitTest {
                         filteredRectangle);
         assertEquals("Ser failed ", "{\"width\":5}", serRect);
     }
-
+    @Test
     public void testSerializeWith2Mixins() throws Exception {
         Bean filteredBean = new Bean();
         filteredBean.setName("joe");

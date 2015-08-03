@@ -306,7 +306,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
     public synchronized <T> String serializeOnlyFilter(Object src,
             Class<T>[] filterClasses, Boolean refresh, String... filterAttr) throws Exception {
         PropertyFilter pf = null;
-        if (filterAttr != null && filterAttr.length > 0 && filterAttr[0] != "") {
+        if (filterAttr != null && filterAttr.length > 0 && ! "".equals(filterAttr[0]) ) {
             pf = SimpleBeanPropertyFilter.filterOutAllExcept(filterAttr);
             getLogger().debug("setting filteroutAllexcept filter for size of filterAttr: " + filterAttr.length);
         } else {
@@ -427,7 +427,6 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
                             + filterClazz);                    
                 }
                 ((SimpleNameIntrospector) primary).setExternalFilterExcludeClasses(externalFilterClassIds);
-                getLogger().debug("added exclude class(es) for filters " + externalFilterClassIds);
             }
         }
     }
@@ -570,7 +569,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
                             + secondary.getClass().getSimpleName());
         }
 
-        if (features != null) {
+        if (features != null && !features.isEmpty()) {
             Enumeration<String> enumFeatureKey = features.keys();
             while (enumFeatureKey.hasMoreElements()) {
                 String featureKey = enumFeatureKey.nextElement();// e.g.
