@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.avalon.framework.logger.ConsoleLogger;
 import org.apache.fulcrum.json.JsonService;
 import org.apache.fulcrum.json.Rectangle;
 import org.apache.fulcrum.json.TestClass;
@@ -38,6 +39,7 @@ import org.apache.fulcrum.testcontainer.BaseUnit4Test;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.fasterxml.jackson.core.io.CharacterEscapes;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 /**
@@ -52,7 +54,7 @@ public class DefaultServiceTest extends BaseUnit4Test {
 
     @Before
     public void setUp() throws Exception {
-        //setLogLevel(ConsoleLogger.LEVEL_DEBUG);
+        setLogLevel(ConsoleLogger.LEVEL_DEBUG);
         sc = (JsonService) this.lookup(JsonService.ROLE);
     }
 
@@ -352,6 +354,18 @@ public class DefaultServiceTest extends BaseUnit4Test {
         }
         TypeReference<List<TypedRectangle>> typeRef = new TypeReference<List<TypedRectangle>>(){};
         System.out.println("aa:" +((Jackson2MapperService)sc).serCollectionWithTypeReference(rectList,typeRef, false));
+    }
+    @Test
+    // jackson dies not escape anything, except double quotes and backslash, you could provide 
+    public void testSerializeHTMLEscape() throws Exception {
+        Rectangle filteredRect = new Rectangle(2, 3, "rectÜber<strong>StockundStein &iuml;</strong></script><script>alert('xss')</script>" + 0);
+        String adapterSer = sc.ser(filteredRect);
+        System.out.println(adapterSer);
+        assertEquals("html entities ser",
+                "{'w':2,'h':3,'name':'rectÜber\\u003Cstrong\\u003EStockundStein \\u0026iuml;\\u003C/strong\\u003E\\u003C/script\\u003E\\u003Cscript\\u003Ealert(\\u0027xss\\u0027)\\u003C/script\\u003E0','size':6}",
+                adapterSer.replace('"', '\''));
+        // you could set your own escapes here in class esc extending from CharacterEscapes. 
+        //((Jackson2MapperService)sc).getMapper().getFactory().setCharacterEscapes(esc ) );
     }
 
 }

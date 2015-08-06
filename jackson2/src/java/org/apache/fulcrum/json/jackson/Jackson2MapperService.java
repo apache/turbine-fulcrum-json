@@ -39,6 +39,8 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonParser.Feature;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.SerializableString;
+import com.fasterxml.jackson.core.io.CharacterEscapes;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.AnnotationIntrospector;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -83,6 +85,8 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
     private static final String DEFAULT_TYPING = "defaultTyping";
     private static final String CACHE_FILTERS = "cacheFilters";
     private static final String DATE_FORMAT = "dateFormat";
+    private static final String ESCAPE_CHARS = "escapeCharsGlobal";
+    private static final String ESCAPE_CHAR_CLASS = "escapeCharsClass";
     ObjectMapper mapper;
     AnnotationIntrospector primary; // support default
     AnnotationIntrospector secondary;
@@ -105,6 +109,8 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
                                         // multiple serialization in one thread
     String[] defaultTypeDefs = null;
     private CacheService cacheService;
+    private boolean escapeCharsGlobal = false; // to be backward compatible, but should be true, then escaping to avoid XSS payload by default
+    private String escapeCharsClass = null;
 
     @Override
     public String ser(Object src) throws Exception {
@@ -503,6 +509,17 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
         if (configuredKeepFilter != null) {
             this.cacheFilters = configuredKeepFilter.getValueAsBoolean();
         }
+        final Configuration configuredEscapeChars = conf.getChild(ESCAPE_CHARS,
+                false);
+        if (configuredEscapeChars != null) {
+            this.escapeCharsGlobal  = configuredEscapeChars.getValueAsBoolean();
+        }
+        final Configuration configuredEscapeCharClass = conf.getChild(ESCAPE_CHAR_CLASS,
+                false);
+        if (configuredEscapeCharClass != null) {
+            this.escapeCharsClass  = configuredEscapeCharClass.getValue();
+        }
+        
         final Configuration configuredDefaultType = conf.getChild(
                 DEFAULT_TYPING, false);
         if (configuredDefaultType != null) {
@@ -685,6 +702,20 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
         }
 
         mapper.setDateFormat(new SimpleDateFormat(dateFormat));
+        
+        if (escapeCharsGlobal) {
+            mapper.getFactory().setCharacterEscapes(characterEscapes);
+        }
+        if (escapeCharsClass != null) {
+            try {
+                characterEscapes = (CharacterEscapes) Class.forName(escapeCharsClass).getConstructor()
+                        .newInstance();
+            } catch (Exception e) {
+                throw new Exception(
+                        "JsonMapperService: Error instantiating " + escapeCharsClass
+                                + " for " + ESCAPE_CHAR_CLASS );
+            }
+        }
 
         getLogger().debug("initialized mapper:" + mapper);
 
@@ -726,4 +757,31 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
         if (!cacheFilters)
             mapper.configure(SerializationFeature.FLUSH_AFTER_WRITE_VALUE, true);
     }
+    
+    static CharacterEscapes characterEscapes = new CharacterEscapes() {
+        private static final long serialVersionUID = 1L;
+        private final int[] asciiEscapes;
+         { // instance init
+            int[] esc = standardAsciiEscapesForJSON();
+            // this avoids to get evaluated immediately
+            esc['<'] = CharacterEscapes.ESCAPE_STANDARD;
+            esc['>'] = CharacterEscapes.ESCAPE_STANDARD;
+            esc['&'] = CharacterEscapes.ESCAPE_STANDARD;
+            esc['\''] = CharacterEscapes.ESCAPE_STANDARD;
+            //esc['/'] = '/'; //CharacterEscapes.ESCAPE_CUSTOM;
+            asciiEscapes = esc;
+        }
+        @Override
+        public int[] getEscapeCodesForAscii() {
+            return asciiEscapes;
+        }
+        @Override
+        public SerializableString getEscapeSequence(final int ch) {
+//            if ( ch == '/') { 
+//                return new SerializedString("\\\\/");
+//            } else {
+                return null;
+//            }
+        }
+    };
 }

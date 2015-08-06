@@ -28,7 +28,7 @@
   <body>
 
   <section name="Overview">
-    <p>The intent of this  component is to provide a configurable and customized integration of JSON De-/Serializers using GSON, Jackson 1 and Jackson 2 APIs into Avalon/Turbine. 
+    <p>The intent of this  component is to provide a configurable and customized integration of JSON De-/Serializers using GSON, Jackson 1 and Jackson 2 APIs into Avalon/Turbine. It is a common pattern with client-side MVC applications to embed data for a base set of objects in a page instead of making a separate AJAX request to load them.
     
      It is written for use in Turbine but it can be used in any container compatible
       with Avalon's ECM container. There are three implementations

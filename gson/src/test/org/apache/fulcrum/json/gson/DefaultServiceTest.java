@@ -19,6 +19,9 @@ package org.apache.fulcrum.json.gson;
  * under the License.
  */
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -32,7 +35,9 @@ import org.apache.avalon.framework.activity.Initializable;
 import org.apache.fulcrum.json.JsonService;
 import org.apache.fulcrum.json.Rectangle;
 import org.apache.fulcrum.json.TestClass;
-import org.apache.fulcrum.testcontainer.BaseUnitTest;
+import org.apache.fulcrum.testcontainer.BaseUnit4Test;
+import org.junit.Before;
+import org.junit.Test;
 
 import com.google.gson.reflect.TypeToken;
 
@@ -42,31 +47,21 @@ import com.google.gson.reflect.TypeToken;
  * @author gk
  * @version $Id$
  */
-public class DefaultServiceTest extends BaseUnitTest {
+public class DefaultServiceTest extends BaseUnit4Test {
     private JsonService sc = null;
     private final String preDefinedOutput = "{\"container\":{\"cf\":\"Config.xml\"},\"configurationName\":\"Config.xml\",\"name\":\"mytest\"}";
-
-    /**
-     * Constructor for test.
-     * 
-     * @param testName
-     *            name of the test being executed
-     */
-    public DefaultServiceTest(String testName) {
-        super(testName);
+    @Before
+    public void setUp() throws Exception
+    {
+        sc = (JsonService) this.lookup( JsonService.ROLE );
     }
 
-    public void setUp() throws Exception {
-        super.setUp();
-        sc = (JsonService) this.lookup(JsonService.ROLE);
-
-    }
-
+    @Test
     public void testSerialize() throws Exception {
         String serJson = sc.ser(new TestClass("mytest"));
         assertEquals("Serialization failed ", preDefinedOutput, serJson);
     }
-
+    @Test
     public void testSerializeExcludeNothing() throws Exception {
         String serJson = sc.serializeAllExceptFilter(new TestClass("mytest"),
                 (String[]) null);
@@ -75,47 +70,45 @@ public class DefaultServiceTest extends BaseUnitTest {
                 "{\"container\":{\"cf\":\"Config.xml\"},\"configurationName\":\"Config.xml\",\"name\":\"mytest\"}",
                 serJson);
     }
-
+    @Test
     // deep exclude?!
     public void testSerializeExcludeClass() throws Exception {
         String serJson = sc.serializeAllExceptFilter(new TestClass("mytest"),
                 String.class, (String[]) null);
         assertEquals("Serialization failed ", "{\"container\":{}}", serJson);
     }
-
+    @Test
     public void testSerializeExcludeClassAndField() throws Exception {
         String serJson = sc.serializeAllExceptFilter(new TestClass("mytest"),
                 String.class, "container");
         assertEquals("Serialization failed ", "{}", serJson);
     }
-
+    @Test
     public void testSerializeExcludeClassAndFields() throws Exception {
         String serJson = sc.serializeAllExceptFilter(new TestClass("mytest"),
                 Map.class, "configurationName", "name");
         assertEquals("Serialization failed ", "{}", serJson);
     }
-
+    @Test
     public void testSerializeExcludeField() throws Exception {
-
         String serJson = sc.serializeAllExceptFilter(new TestClass("mytest"),
                  "configurationName");
         assertEquals("Serialization failed ",
                 "{\"container\":{\"cf\":\"Config.xml\"},\"name\":\"mytest\"}",
                 serJson);
     }
-
+    @Test
     public void testSerializeDate() throws Exception {
         final SimpleDateFormat MMddyyyy = new SimpleDateFormat("MM/dd/yyyy");
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("date", Calendar.getInstance().getTime());
-
         sc.setDateFormat(MMddyyyy);
         String serJson = sc.ser(map);
         System.out.println("serJson:" + serJson);
         assertTrue("Serialize with Adapater failed ",
                 serJson.matches("\\{\"date\":\"\\d\\d/\\d\\d/\\d{4}\"\\}"));
     }
-
+    @Test
     // does not seerialize size
     public void testSerializeCollection() throws Exception {
         List<Rectangle> rectList = new ArrayList<Rectangle>();
@@ -129,7 +122,7 @@ public class DefaultServiceTest extends BaseUnitTest {
                 "[{'w':0,'h':0,'name':'rect0'},{'w':1,'h':1,'name':'rect1'},{'w':2,'h':2,'name':'rect2'},{'w':3,'h':3,'name':'rect3'},{'w':4,'h':4,'name':'rect4'},{'w':5,'h':5,'name':'rect5'},{'w':6,'h':6,'name':'rect6'},{'w':7,'h':7,'name':'rect7'},{'w':8,'h':8,'name':'rect8'},{'w':9,'h':9,'name':'rect9'}]",
                 adapterSer.replace('"', '\''));
     }
-    
+    @Test
     public void testSerializationCollectioPrimitiveWrapper() throws Exception {
 
         List<Integer> intList = new ArrayList<Integer>();
@@ -143,7 +136,7 @@ public class DefaultServiceTest extends BaseUnitTest {
                 "[0,1,4,9,16,25,36,49,64,81]",
                 result);
     }
-
+    @Test
     public void testSerializeTypeAdapterForCollection() throws Exception {
         sc.addAdapter("Collection Adapter", ArrayList.class,
                 new TypeAdapterForCollection());
@@ -158,7 +151,7 @@ public class DefaultServiceTest extends BaseUnitTest {
                 "{'rect0':0,'rect1':1,'rect2':4,'rect3':9,'rect4':16,'rect5':25,'rect6':36,'rect7':49,'rect8':64,'rect9':81}",
                 adapterSer.replace('"', '\''));
     }
-    
+    @Test
     public void testMixinAdapter() throws Exception {
         sc.addAdapter("Test Adapter", TestClass.class, new TestJsonSerializer());
         String adapterSer = sc.ser(new TestClass("mytest"));
@@ -170,13 +163,13 @@ public class DefaultServiceTest extends BaseUnitTest {
         assertEquals("failed adapter serialization:",
                 "{\"container\":{\"cf\":\"Config.xml\"},\"configurationName\":\"Config.xml\",\"name\":\"mytest\"}", defaultSer);
     }
-    
+    @Test 
     public void testDeSerialize() throws Exception {
         String serJson = sc.ser(new TestClass("mytest"));
         Object deson = sc.deSer(serJson, TestClass.class);
         assertEquals("Serialization failed ", TestClass.class, deson.getClass());
     }
-   
+    @Test
     public void testDeserializationCollection() throws Exception {
         List<Rectangle> rectList = new ArrayList<Rectangle>();
         for (int i = 0; i < 10; i++) {
@@ -191,7 +184,7 @@ public class DefaultServiceTest extends BaseUnitTest {
                     .get(i).getSize());
         }
     }
-
+    @Test
     public void testDeserializationTypeAdapterForCollection() throws Exception {
         sc.addAdapter("Collection Adapter", ArrayList.class,
                 TypeAdapterForCollection.class);
@@ -207,7 +200,7 @@ public class DefaultServiceTest extends BaseUnitTest {
                     .get(i).getSize());
         }
     }
-    
+    @Test
     public void testSerializeWithMixinAndFilter() throws Exception {
         Rectangle filteredRectangle = new Rectangle(5, 10);
         filteredRectangle.setName("jim");
@@ -222,7 +215,7 @@ public class DefaultServiceTest extends BaseUnitTest {
                 "{\"name\":\"jim\",\"width\":5}",
                 rectangle); 
     }
-    
+    @Test
     public void testSerializeWithOnlyFilter() throws Exception {
 
         // as gson adds we could not use multiple disjunct exclusion strategies
@@ -232,7 +225,7 @@ public class DefaultServiceTest extends BaseUnitTest {
                 "{\"configurationName\":\"Config.xml\"}",
                 serJson);
     }
-    
+    @Test
     public void testSerializeWithOnlyFilter2() throws Exception {
 
         // as gson adds we could not use multiple disjunct exclusion strategies
@@ -243,7 +236,6 @@ public class DefaultServiceTest extends BaseUnitTest {
                 "Ser filtered Rectangle failed ",
                 "{\"w\":5}",
                 rectangle);
-        
     }
 
 

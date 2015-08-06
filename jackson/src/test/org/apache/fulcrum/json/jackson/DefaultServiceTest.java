@@ -19,6 +19,8 @@ package org.apache.fulcrum.json.jackson;
  * under the License.
  */
 
+import static org.junit.Assert.*;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -29,7 +31,10 @@ import java.util.Map;
 
 import org.apache.fulcrum.json.JsonService;
 import org.apache.fulcrum.json.TestClass;
+import org.apache.fulcrum.testcontainer.BaseUnit4Test;
 import org.apache.fulcrum.testcontainer.BaseUnitTest;
+import org.junit.Before;
+import org.junit.Test;
 
 
 /**
@@ -38,30 +43,20 @@ import org.apache.fulcrum.testcontainer.BaseUnitTest;
  * @author gk
  * @version $Id$
  */
-public class DefaultServiceTest extends BaseUnitTest {
+public class DefaultServiceTest extends BaseUnit4Test {
     private JsonService sc = null;
     private final String preDefinedOutput = "{\"container\":{\"cf\":\"Config.xml\"},\"configurationName\":\"Config.xml\",\"name\":\"mytest\"}";
 
-    /**
-     * Constructor for test.
-     * 
-     * @param testName
-     *            name of the test being executed
-     */
-    public DefaultServiceTest(String testName) {
-        super(testName);
-    }
-
+    @Before
     public void setUp() throws Exception {
-        super.setUp();
         sc = (JsonService) this.lookup(JsonService.ROLE);
     }
-
+    @Test
     public void testSerialize() throws Exception {
         String serJson = sc.ser(new TestClass("mytest"));
         assertEquals("Serialization failed ", preDefinedOutput, serJson);
     }
-
+    @Test
     public void testSerializeExcludeNothing() throws Exception {
         String serJson = sc.ser(new TestClass("mytest"));
         assertEquals(
@@ -69,8 +64,7 @@ public class DefaultServiceTest extends BaseUnitTest {
                 "{\"container\":{\"cf\":\"Config.xml\"},\"configurationName\":\"Config.xml\",\"name\":\"mytest\"}",
                 serJson);
     }
-
-
+    @Test
     public void ignoreTestSerializeExcludeClass() throws Exception {
         // jackson 1 could yet not exclude classes 
     }
@@ -87,7 +81,7 @@ public class DefaultServiceTest extends BaseUnitTest {
 
         // no deep ignore??
     }
-
+    @Test
     public void testSerializeDate() throws Exception {
         final SimpleDateFormat MMddyyyy = new SimpleDateFormat("MM/dd/yyyy");
         Map<String, Object> map = new HashMap<String, Object>();
@@ -99,7 +93,7 @@ public class DefaultServiceTest extends BaseUnitTest {
         assertTrue("Serialize with Adapter failed ",
                 serJson.matches("\\{\"date\":\"\\d\\d/\\d\\d/\\d{4}\"\\}"));
     }
-
+    @Test
     // jackson serializes size too
     public void testSerializeCollection() throws Exception {
         List<org.apache.fulcrum.json.Rectangle> rectList = new ArrayList<org.apache.fulcrum.json.Rectangle>();
@@ -113,9 +107,8 @@ public class DefaultServiceTest extends BaseUnitTest {
                 "[{'w':0,'h':0,'name':'rect0','size':0},{'w':1,'h':1,'name':'rect1','size':1},{'w':2,'h':2,'name':'rect2','size':4},{'w':3,'h':3,'name':'rect3','size':9},{'w':4,'h':4,'name':'rect4','size':16},{'w':5,'h':5,'name':'rect5','size':25},{'w':6,'h':6,'name':'rect6','size':36},{'w':7,'h':7,'name':'rect7','size':49},{'w':8,'h':8,'name':'rect8','size':64},{'w':9,'h':9,'name':'rect9','size':81}]",
                 adapterSer.replace('"', '\''));
     }
-    
+    @Test
     public void testSerializationCollectioPrimitiveWrapper() throws Exception {
-
         List<Integer> intList = new ArrayList<Integer>();
         for (int i = 0; i < 10; i++) {
             Integer integer = new Integer(i*i);
@@ -153,14 +146,14 @@ public class DefaultServiceTest extends BaseUnitTest {
 //        assertEquals("failed adapter serialization:",
 //                "{\"n\":\"mytest\",\"p\":\"Config.xml\",\"c\":[]}", adapterSer);
 //    }
-    
+    @Test
     public void testDeSerialize() throws Exception {
         String serJson = sc.ser(new TestClass("mytest"));
         Object deson = sc.deSer(serJson, TestClass.class);
         assertEquals("Serialization failed ", TestClass.class, deson.getClass());
     }
 
-    
+    @Test
     public void testDeserializationCollection() throws Exception {
         List<Rectangle> rectList = new ArrayList<Rectangle>(); 
         for (int i = 0; i < 10; i++) {
@@ -180,7 +173,7 @@ public class DefaultServiceTest extends BaseUnitTest {
     public void testDeserializationTypeAdapterForCollection() throws Exception {
         // not implemented
     }
-    
+    @Test
     public void testSerializeWithMixinAndFilter() throws Exception {
         Bean filteredBean = new Bean();
         filteredBean.setName("joe");
@@ -194,7 +187,7 @@ public class DefaultServiceTest extends BaseUnitTest {
                 "{}",
                 bean);
     }
-      
+    @Test
     public void testSerializeWithOnlyFilter() throws Exception {
         // no deep include ??
         Bean filteredBean = new Bean();

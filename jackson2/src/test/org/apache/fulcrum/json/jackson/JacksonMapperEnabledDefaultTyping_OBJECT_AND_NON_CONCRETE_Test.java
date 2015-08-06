@@ -83,7 +83,7 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
         Map<String, Date> map = new HashMap<String, Date>();
         map.put("date", Calendar.getInstance().getTime());
         String serJson = sc.ser(map);
-        //System.out.println("serJson:" +serJson);
+        System.out.println("serJson:" +serJson);
         assertTrue(
                 "Serialize with Adapater failed ",
                 serJson.matches(".*\"java.util.Date\",\"\\d\\d/\\d\\d/\\d{4}\".*"));

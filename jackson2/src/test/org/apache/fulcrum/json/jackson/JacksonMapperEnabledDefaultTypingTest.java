@@ -78,13 +78,12 @@ public class JacksonMapperEnabledDefaultTypingTest extends BaseUnit4Test {
     }
     @Test
     public void testSerializeDateWithDefaultDateFormat() throws Exception {
-
         Map<String, Date> map = new HashMap<String, Date>();
         map.put("date", Calendar.getInstance().getTime());
         String serJson = sc.ser(map);
-        //System.out.println("serJson:" +serJson);
-        assertTrue(
-                "Serialize with Adapater failed ",
+        System.out.println("serJson:" +serJson);
+        assertEquals(
+                "Serialize with Adapater failed ",true,
                 serJson.matches(".*\"java.util.Date\",\"\\d\\d/\\d\\d/\\d{4}\".*"));
     }
     @Test

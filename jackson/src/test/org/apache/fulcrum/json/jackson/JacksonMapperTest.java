@@ -19,9 +19,11 @@ package org.apache.fulcrum.json.jackson;
  * under the License.
  */
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -32,9 +34,11 @@ import org.apache.avalon.framework.logger.Logger;
 import org.apache.fulcrum.json.JsonService;
 import org.apache.fulcrum.json.Rectangle;
 import org.apache.fulcrum.json.TestClass;
-import org.apache.fulcrum.testcontainer.BaseUnitTest;
+import org.apache.fulcrum.testcontainer.BaseUnit4Test;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * Jackson1 JSON Test
@@ -42,33 +46,23 @@ import org.codehaus.jackson.annotate.JsonProperty;
  * @author gk
  * @version $Id$
  */
-public class JacksonMapperTest extends BaseUnitTest {
+public class JacksonMapperTest extends BaseUnit4Test {
     private JsonService sc = null;
+    private final String preDefinedOutput = "{\"container\":{\"cf\":\"Config.xml\"},\"configurationName\":\"Config.xml\",\"name\":\"mytest\"}";
     Logger logger;
 
-    /**
-     * Constructor for test.
-     * 
-     * @param testName
-     *            name of the test being executed
-     */
-    public JacksonMapperTest(String testName) {
-        super(testName);
-    }
-
+    @Before
     public void setUp() throws Exception {
-        super.setUp();
         sc = (JsonService) this.lookup(JsonService.ROLE);
         logger = new ConsoleLogger(ConsoleLogger.LEVEL_DEBUG);
     }
-
+    @Test
     public void testSerialize() throws Exception {
-        String serJson = sc.ser(new JacksonMapperTest("mytest"));
-        assertEquals("Set failed ", "{\"name\":\"mytest\"}", serJson);
+        String serJson = sc.ser(new TestClass("mytest"));
+        assertEquals("Serialization failed ", preDefinedOutput, serJson);
     }
-
+    @Test
     public void testSerializeDateWithDefaultDateFormat() throws Exception {
-
         Map<String, Date> map = new HashMap<String, Date>();
         map.put("date", Calendar.getInstance().getTime());
         String serJson = sc.ser(map);
@@ -76,7 +70,7 @@ public class JacksonMapperTest extends BaseUnitTest {
                 serJson.matches("\\{\"date\":\"\\d\\d/\\d\\d/\\d{4}\"\\}"));
 
     }
-
+    @Test
     public void testDeSerialize1() throws Exception {
 
         Map<String, Integer> map = new HashMap<String, Integer>();
@@ -85,14 +79,14 @@ public class JacksonMapperTest extends BaseUnitTest {
         assertEquals("Integer DeSer failed ", 5001, deserMap.get("name"));
 
     }
-
+    @Test
     public void testSerializeSingleObjectExcludeWithMixins() throws Exception {
         sc.addAdapter("M4RMixin", Rectangle.class, Mixin.class);
         String serRect = sc.ser(new Rectangle(25, 3));
         assertEquals("DeSer failed ", "{\"width\":25}", serRect);
 
     }
-
+    @Test
     public void testSerializeTwoObjectsIncludeOnlyAnnotationCustomFilterId()
             throws Exception {
         Bean filteredBean = new Bean();
@@ -110,7 +104,7 @@ public class JacksonMapperTest extends BaseUnitTest {
         logger.debug("rectangle: " + rectangle);
 
     }
-
+    @Test
     public void testDeSerialize() throws Exception {
         String serJson = sc.ser(new TestClass("mytest"));
         Object deson = sc.deSer(serJson, TestClass.class);
@@ -134,7 +128,7 @@ public class JacksonMapperTest extends BaseUnitTest {
 //                    .get(i).getW());
 //        }
 //    }
-    
+    @Test
     public void testMixins() throws Exception {
 
         Rectangle filteredRectangle = new Rectangle(5, 10);
@@ -144,7 +138,7 @@ public class JacksonMapperTest extends BaseUnitTest {
                         filteredRectangle);
         assertEquals("Ser failed ", "{\"width\":5}", serRect);
     }
-
+    @Test
     public void testMixis2() throws Exception {
         Bean filteredBean = new Bean();
         filteredBean.setName("joe");
@@ -158,9 +152,8 @@ public class JacksonMapperTest extends BaseUnitTest {
         String bean = sc.serializeOnlyFilter(filteredBean, Bean.class, "name");
         assertEquals("Ser filtered Bean failed ", "{\"name\":\"joe\"}", bean);
     }
-
+    @Test
     public void testFilteredCollectionOfBeans() throws Exception {
-
         List<Bean> beanList = new ArrayList<Bean>();
         for (int i = 0; i < 10; i++) {
             Bean filteredBean = new Bean();
@@ -180,11 +173,9 @@ public class JacksonMapperTest extends BaseUnitTest {
             logger.debug("deser bean: " + bean.getName() + " is "
                     + bean.getAge());
         }
-
     }
-
+    @Test
     public void testMixinCollectionOfBeans() throws Exception {
-
         List<Bean> beanList = new ArrayList<Bean>();
         for (int i = 0; i < 10; i++) {
             Bean filteredBean = new Bean();
@@ -204,7 +195,6 @@ public class JacksonMapperTest extends BaseUnitTest {
             logger.debug("deser bean: " + bean.getName() + " is "
                     + bean.getAge());
         }
-
     }
 
     // @JsonFilter("myFilter")
