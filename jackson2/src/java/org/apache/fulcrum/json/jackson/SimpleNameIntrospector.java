@@ -59,6 +59,7 @@ public class SimpleNameIntrospector extends NopAnnotationIntrospector implements
      * Filtering on method types.
      * 
      */
+    @Override
     public Boolean isIgnorableType(AnnotatedClass ac) {
         Boolean isIgnorable = super.isIgnorableType(ac);
         if (isIgnorable == null || !isIgnorable) {
@@ -87,6 +88,7 @@ public class SimpleNameIntrospector extends NopAnnotationIntrospector implements
      *         {@link #filteredClasses} contains the class provided. The
      *         filter itself currently is {@link SimpleFilterProvider}.
      */
+    @Override
     public Object findFilterId(Annotated ac) {
         Object id = super.findFilterId(ac);
         // Let's default to current behavior if annotation is found:
@@ -109,13 +111,12 @@ public class SimpleNameIntrospector extends NopAnnotationIntrospector implements
                         id = name;
                         break;
                     }
-                 // the currently checked instance of type targetClazz is a parent of the filter class filterClazz -> filter parent
+                    // the currently checked instance of type targetClazz is a parent of the filter class filterClazz -> filter parent
                     if (targetClazz.isAssignableFrom(filterClazz)) {
                         logger.debug("filter applying to child " +filterClazz+" matching parent class "+name);
                         id = name;
                         break;
                     }
-                    // the current clazz could be parent to the filter
                 }
             }
         }
@@ -193,7 +194,7 @@ public class SimpleNameIntrospector extends NopAnnotationIntrospector implements
     }
     @Override
     public void enableLogging(Logger logger) {
-        this.logger = logger;        
+        SimpleNameIntrospector.logger = logger;        
     }
 
 }

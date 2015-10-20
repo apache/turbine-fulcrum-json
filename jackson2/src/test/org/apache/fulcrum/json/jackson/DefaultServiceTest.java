@@ -39,7 +39,7 @@ import org.apache.fulcrum.testcontainer.BaseUnit4Test;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.fasterxml.jackson.core.io.CharacterEscapes;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 /**
@@ -72,7 +72,13 @@ public class DefaultServiceTest extends BaseUnit4Test {
                 "Serialization failed ",
                 "{\"container\":{\"cf\":\"Config.xml\"},\"configurationName\":\"Config.xml\",\"name\":\"mytest\"}",
                 serJson);
+
+      // test round trip
+      TestClass result2 = checkDeserialization(serJson,TestClass.class, TextClassMixin.class);     
+      assertTrue(result2.getContainer() == null); // mixin set to ignore
+      assertTrue(result2.getConfigurationName().equals("Config.xml")); 
     }
+    
     @Test
     // jackson does not deep exclusion of class types (by default?)
     public void testSerializeExcludeClass() throws Exception {
@@ -80,12 +86,16 @@ public class DefaultServiceTest extends BaseUnit4Test {
                 String.class);
         assertEquals("Serialization failed ",
                 "{\"container\":{\"cf\":\"Config.xml\"}}", serJson);
+        TestClass result2 = checkDeserialization(serJson,TestClass.class, TextClassMixin.class);
+        assertTrue(result2.getContainer() == null); 
     }
     @Test
     public void testSerializeExcludeClassAndField() throws Exception {
         String serJson = ((Jackson2MapperService)sc).serializeAllExceptFilter(new TestClass("mytest"),
                new Class[] { TestClass.class, String.class} , "container");
         assertEquals("Serialization failed ", "{}", serJson);
+        TestClass result2 =  checkDeserialization(serJson,TestClass.class, TextClassMixin.class);
+        assertTrue(result2.getContainer() == null); 
     }
     @Test
     // adding  expected result to be consistent
@@ -93,10 +103,18 @@ public class DefaultServiceTest extends BaseUnit4Test {
         String serJson = ((Jackson2MapperService)sc).serializeAllExceptFilter(new TestClass("mytest"),
                new Class[] { Map.class, String.class} , "configurationName", "name");
         assertEquals("Serialization failed ", "{}", serJson);
+        checkDeserialization(serJson,TestClass.class, TextClassMixin.class); 
         String serJson2 = ((Jackson2MapperService)sc).serializeAllExceptFilter(new TestClass("mytest"),
                 true, "configurationName", "name");
          assertEquals("Serialization failed ", "{}", serJson2);
+         checkDeserialization(serJson2,TestClass.class, TextClassMixin.class); 
     }
+    /**
+     * Overwriting mixin 
+     * @see com.fasterxml.jackson.databind.Module.SetupContext#setMixInAnnotations(Class, Class)
+     * 
+     * @throws Exception
+     */
     @Test
     public void testSerializeExcludeField() throws Exception {
 
@@ -104,6 +122,11 @@ public class DefaultServiceTest extends BaseUnit4Test {
         assertEquals("Serialization failed ",
                 "{\"container\":{\"cf\":\"Config.xml\"},\"name\":\"mytest\"}",
                 serJson);
+        sc.addAdapter("Mixin Adapter", TestClass.class, TextClassMixin.class);
+        // overwriting mixin with null: container is included
+        TestClass result2 =checkDeserialization(serJson,TestClass.class, null);
+        assertTrue(result2.getContainer() != null && result2.getContainer() instanceof Map);
+        assertTrue(result2.getName() != null); 
     }
     @Test
     public void testSerializeDate() throws Exception {
@@ -134,7 +157,6 @@ public class DefaultServiceTest extends BaseUnit4Test {
     }
     @Test
     public void testSerializationCollectioPrimitiveWrapper() throws Exception {
-
         List<Integer> intList = new ArrayList<Integer>();
         for (int i = 0; i < 10; i++) {
             Integer integer = new Integer(i*i);
@@ -145,11 +167,16 @@ public class DefaultServiceTest extends BaseUnit4Test {
                 "Serialization of beans failed ",
                 "[0,1,4,9,16,25,36,49,64,81]",
                 result);
+        // primitives could be deserialzed without type
+        Collection<Integer> result2 = checkDeserCollection(result, List.class, Integer.class);
+        assertTrue("expect at least one entry ", !result2.isEmpty()); 
+        assertTrue("result entry instance check", result2.iterator().next().getClass().isAssignableFrom(Integer.class));
     }
     @Test
     public void testSerializeTypeAdapterForCollection() throws Exception {
         TestSerializer tser = new TestSerializer();
-        CustomModuleWrapper<List> cmw = new CustomModuleWrapper(tser, null);
+        TestDeserializer tdeSer = new TestDeserializer();
+        CustomModuleWrapper<List<Rectangle>> cmw = new CustomModuleWrapper<List<Rectangle>>(tser, tdeSer);
         sc.addAdapter("Collection Adapter", ArrayList.class, cmw);
         List<Rectangle> rectList = new ArrayList<Rectangle>();
         for (int i = 0; i < 10; i++) {
@@ -161,6 +188,11 @@ public class DefaultServiceTest extends BaseUnit4Test {
                 "collect ser",
                 "{'rect0':0,'rect1':1,'rect2':4,'rect3':9,'rect4':16,'rect5':25,'rect6':36,'rect7':49,'rect8':64,'rect9':81}",
                 adapterSer.replace('"', '\''));
+        // can only deserialize with type deserializer, adapter already added above
+        List<Rectangle> result = sc.deSer(adapterSer,ArrayList.class);
+        assertTrue("result:" +result.size(),result.size() == 10);
+        int nr = 3; //new Random().nextInt(10);
+        assertTrue("result ("+nr+"):" +result.get(nr).getName(),result.get(nr).getName().equals("rect"+nr) );
     }
     @Test
     public void testMixinAdapter() throws Exception {
@@ -186,7 +218,7 @@ public class DefaultServiceTest extends BaseUnit4Test {
             rectList.add(filteredRect);
         }
         String serColl = sc.ser(rectList);
-        TypeReference typeRef = new TypeReference<List<Rectangle>>(){};
+        TypeReference<List<Rectangle>> typeRef = new TypeReference<List<Rectangle>>(){};
         Collection<Rectangle> resultList0 =  sc.deSerCollection(serColl, typeRef, Rectangle.class);
         //System.out.println("resultList0 class:" +resultList0.getClass());
         for (int i = 0; i < 10; i++) {
@@ -198,7 +230,7 @@ public class DefaultServiceTest extends BaseUnit4Test {
     public void testDeserializationTypeAdapterForCollection() throws Exception {
         TestSerializer tser = new TestSerializer();
         TestDeserializer tdeSer = new TestDeserializer();
-        CustomModuleWrapper<List> cmw = new CustomModuleWrapper(tser, tdeSer);
+        CustomModuleWrapper<List<Rectangle>> cmw = new CustomModuleWrapper<List<Rectangle>>(tser, tdeSer);
         sc.addAdapter("Collection Adapter", ArrayList.class, cmw);
         List<Rectangle> rectList = new ArrayList<Rectangle>();
         for (int i = 0; i < 10; i++) {
@@ -286,27 +318,34 @@ public class DefaultServiceTest extends BaseUnit4Test {
     }
     @Test
     public void testSerializeCollectionWithOnlyFilterAndParentClass() throws Exception {
-        
         List<BeanChild> beanList = new ArrayList<BeanChild>();
         for (int i = 0; i < 3; i++) {
             BeanChild bean = new BeanChild();
             bean.setAge(i);bean.setName("bean"+i);
             beanList.add(bean);
         }
-        assertEquals("[{\"name\":\"bean0\"},{\"name\":\"bean1\"},{\"name\":\"bean2\"}]",sc.serializeOnlyFilter(beanList, Bean.class, true,"name"));
+        String jsonResult = sc.serializeOnlyFilter(beanList, Bean.class, true,"name");
+        assertEquals("[{\"name\":\"bean0\"},{\"name\":\"bean1\"},{\"name\":\"bean2\"}]",jsonResult);
         //assertEquals("[{\"type\":\"\"},{\"type\":\"\"},{\"type\":\"\"}]",sc.serializeOnlyFilter(beanList, BeanChild.class, true,"type"));
+
+        Collection<BeanChild> result2 =checkDeserCollection(jsonResult, List.class, BeanChild.class);
+        assertTrue("expect at least one entry ", !result2.isEmpty()); 
+        assertTrue("result entry instance check", result2.iterator().next().getClass().isAssignableFrom(BeanChild.class));
     }
     @Test
-    public void testSerializeCollectionWithOnlyFilterAndExactClass() throws Exception {
-        
+    public void testSerializeCollectionWithOnlyFilterAndExactClass() throws Exception {    
         List<Bean> beanList = new ArrayList<Bean>();
         for (int i = 0; i < 3; i++) {
             Bean bean = new BeanChild();
             bean.setAge(i);bean.setName("bean"+i);
             beanList.add(bean);
         }
-        assertEquals("[{\"name\":\"bean0\"},{\"name\":\"bean1\"},{\"name\":\"bean2\"}]",sc.serializeOnlyFilter(beanList, BeanChild.class, true,"name"));
-        //assertEquals("[{\"type\":\"\"},{\"type\":\"\"},{\"type\":\"\"}]",sc.serializeOnlyFilter(beanList, BeanChild.class, true,"type"));
+        String jsonResult = sc.serializeOnlyFilter(beanList, BeanChild.class, true,"name");
+        assertEquals("[{\"name\":\"bean0\"},{\"name\":\"bean1\"},{\"name\":\"bean2\"}]",jsonResult);
+        //assertEquals("[{\"type\":\"\"},{\"type\":\"\"},{\"type\":\"\"}]",sc.serializeOnlyFilter(beanList, BeanChild.class, true,"type"));   
+        Collection<Bean> result2 =checkDeserCollection(jsonResult, List.class, Bean.class);
+        assertTrue("expect at least one entry ", !result2.isEmpty()); 
+        assertTrue("result entry instance check", result2.iterator().next().getClass().isAssignableFrom(Bean.class));
     }
     @Test
     public void testSerializeCollectionWithOnlyFilterWithChildClass() throws Exception {
@@ -316,8 +355,12 @@ public class DefaultServiceTest extends BaseUnit4Test {
             bean.setAge(i);bean.setName("bean"+i);
             beanList.add(bean);
         }
-        assertEquals("[{\"name\":\"bean0\"},{\"name\":\"bean1\"},{\"name\":\"bean2\"}]",sc.serializeOnlyFilter(beanList, BeanChild.class, true,"name"));
+        String jsonResult = sc.serializeOnlyFilter(beanList, BeanChild.class, true,"name");
+        assertEquals("[{\"name\":\"bean0\"},{\"name\":\"bean1\"},{\"name\":\"bean2\"}]",jsonResult);
         //assertEquals("[{\"type\":\"\"},{\"type\":\"\"},{\"type\":\"\"}]",sc.serializeOnlyFilter(beanList, BeanChild.class, true,"type"));
+        Collection<Bean> result2 =checkDeserCollection(jsonResult, List.class, Bean.class);
+        assertTrue("expect at least one entry ", !result2.isEmpty()); 
+        assertTrue("result entry instance check", result2.iterator().next().getClass().isAssignableFrom(Bean.class));    
     }
     @Test
     public void testSerializeCollectionWithOnlyFilterAndType() throws Exception {
@@ -329,7 +372,9 @@ public class DefaultServiceTest extends BaseUnit4Test {
         }
         Class<?> clazz = Class.forName("org.apache.fulcrum.json.jackson.TypedRectangle");
         // no type cft. https://github.com/FasterXML/jackson-databind/issues/303 !!
-        assertEquals("[{\"w\":0},{\"w\":1}]",sc.serializeOnlyFilter(rectList, clazz, true,"w"));
+        String jsonResult = sc.serializeOnlyFilter(rectList, clazz, true,"w");
+        assertEquals("[{\"w\":0},{\"w\":1}]",jsonResult);
+        // could not deserialize easily with missing property type        
     }
     @Test
     public void testSerializeCollectionWithOnlyFilterAndMixin() throws Exception {
@@ -353,10 +398,16 @@ public class DefaultServiceTest extends BaseUnit4Test {
             rectList.add(filteredRect);
         }
         TypeReference<List<TypedRectangle>> typeRef = new TypeReference<List<TypedRectangle>>(){};
-        System.out.println("aa:" +((Jackson2MapperService)sc).serCollectionWithTypeReference(rectList,typeRef, false));
+        String jsonResult = ((Jackson2MapperService)sc).serCollectionWithTypeReference(rectList,typeRef, false);
+        System.out.println("aa:" +jsonResult);
+        // could deserialize with type information 
+        Collection<TypedRectangle> result2 =checkDeserCollection(jsonResult, List.class, TypedRectangle.class);
+        assertTrue("expect at least one entry ", !result2.isEmpty()); 
+        assertTrue("result entry instance check", result2.iterator().next().getClass().isAssignableFrom(TypedRectangle.class));
+        
     }
     @Test
-    // jackson dies not escape anything, except double quotes and backslash, you could provide 
+    // jackson does not escape anything, except double quotes and backslash, you could provide 
     public void testSerializeHTMLEscape() throws Exception {
         Rectangle filteredRect = new Rectangle(2, 3, "rectÜber<strong>StockundStein &iuml;</strong></script><script>alert('xss')</script>" + 0);
         String adapterSer = sc.ser(filteredRect);
@@ -367,5 +418,24 @@ public class DefaultServiceTest extends BaseUnit4Test {
         // you could set your own escapes here in class esc extending from CharacterEscapes. 
         //((Jackson2MapperService)sc).getMapper().getFactory().setCharacterEscapes(esc ) );
     }
+    
+    private <T> T checkDeserialization(String serJson, Class<T> target, Class mixin) throws Exception {
+        sc.addAdapter("Mixin Adapter", target, mixin);
+        T result = sc.deSer(serJson,target);
+        assertTrue("Result Instance Check", target.isAssignableFrom(result.getClass()));
+        return result;
+    }
+    private <U> Collection<U> checkDeserCollection(String serJson,Class<? extends Collection> collClass, Class<U> entryClass) throws Exception {
+          Collection<U> result = ((Jackson2MapperService) sc).deSerCollectionWithType(serJson, collClass, entryClass);
+          //System.out.println("result:"+ result + " is of type: "+ result.getClass() + "and assignable from "+ collClass);
+          assertTrue("Result Instance Check failed for result class "+ result.getClass() + " and target class: "+ collClass, 
+                  collClass.isAssignableFrom(result.getClass()));
+          return result;
+    }
+}
 
+
+abstract class TextClassMixin {
+
+    @JsonIgnore abstract Map<String, Object> getContainer();
 }

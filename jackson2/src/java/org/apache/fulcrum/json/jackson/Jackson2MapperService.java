@@ -253,6 +253,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
         return serializeAllExceptFilter(src, src.getClass(), true, filterAttr);
     }
     
+    @Override
     public synchronized <T> String serializeAllExceptFilter(Object src, Boolean cache, String... filterAttr) throws Exception {
         return serializeAllExceptFilter(src, src.getClass(), cache, filterAttr);
     }
@@ -291,6 +292,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
         return serializeOnlyFilter(src, src.getClass(), true, filterAttrs);
     }
     
+    @Override
     public synchronized <T> String serializeOnlyFilter(Object src,
              Boolean cache, String... filterAttr) throws Exception {
         return serializeOnlyFilter(src, src.getClass(), cache, filterAttr);
@@ -405,7 +407,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
             getLogger().debug("add filter for cache filter Class " + filterClass.getName());
             setCustomIntrospectorWithExternalFilterId(filterClass, excludeClasses); // filter class
             if (pf != null)  {
-                cacheService.getFilters().put(filterClass.getName(), (FilterProvider) filter);    
+                cacheService.getFilters().put(filterClass.getName(), filter);    
             } 
         } else {
             filter = (SimpleFilterProvider)cacheService.getFilters().get(filterClass

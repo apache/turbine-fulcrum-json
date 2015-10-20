@@ -25,6 +25,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -94,10 +95,9 @@ public class JacksonMapperEnabledDefaultTypingTest extends BaseUnit4Test {
         System.out.println("serJson0:"+ serJson0);
         String serJson =  sc.ser(map, Map.class);
         System.out.println("serJsonwithmap:"+ serJson);
-        Map<String, Date> serDate = (Map<String, Date>) sc.deSer(serJson,
-                Map.class);
+        Map<String, Date> serDate = sc.deSer(serJson, Map.class);
         assertEquals("Date DeSer failed ", Date.class, serDate.get("date")
-                .getClass());
+                .getClass());   
     }
     @Test
     public void testSerializeWithCustomFilter() throws Exception {
@@ -132,7 +132,25 @@ public class JacksonMapperEnabledDefaultTypingTest extends BaseUnit4Test {
                 "Serialization of beans failed ",
                 "['java.util.ArrayList',[{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe0','age':0},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe1','age':1},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe2','age':2},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe3','age':3},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe4','age':4},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe5','age':5},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe6','age':6},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe7','age':7},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe8','age':8},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe9','age':9}]]",
                 result.replace('"', '\''));
+        
+        Collection<Rectangle> resultDeSer = checkDeserCollection(result, List.class, Rectangle.class);
     }
+    
+    private <T> T checkDeserialization(String serJson, Class<T> target, Class mixin) throws Exception {
+        sc.addAdapter("TestClass Adapter", target, mixin);
+        T result = sc.deSer(serJson,target);
+        //System.out.println("result:"+ result + " is of type "+ target.getName());
+        assertTrue("result instance check", target.isAssignableFrom(result.getClass()));
+        return result;
+     }
+    
+    private <U> Collection<U> checkDeserCollection(String serJson,Class<? extends Collection> collClass, Class entryClass) throws Exception {
+          Collection<U> result = ((Jackson2MapperService) sc).deSerCollectionWithType(serJson, collClass, entryClass);
+          assertTrue("result instance check failed for result class "+ result.getClass() + " and target class: "+ collClass, 
+                  collClass.isAssignableFrom(result.getClass()));
+          return result;
+    }
+  
     @Test
     public void testDeserializationCollectionWithFilter() throws Exception {
 

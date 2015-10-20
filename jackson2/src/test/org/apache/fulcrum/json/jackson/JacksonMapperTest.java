@@ -36,7 +36,6 @@ import org.apache.fulcrum.json.JsonService;
 import org.apache.fulcrum.json.Rectangle;
 import org.apache.fulcrum.json.TestClass;
 import org.apache.fulcrum.testcontainer.BaseUnit4Test;
-import org.apache.fulcrum.testcontainer.BaseUnitTest;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -88,7 +87,7 @@ public class JacksonMapperTest extends BaseUnit4Test {
         Map<String, Date> map = new HashMap<String, Date>();
         map.put("date", Calendar.getInstance().getTime());
         String serJson = ((Jackson2MapperService) sc).ser(map, Map.class);
-        Map serDate = (Map) sc.deSer(serJson, Map.class);
+        Map serDate = sc.deSer(serJson, Map.class);
         assertEquals("Date DeSer failed ", String.class, serDate.get("date")
                 .getClass());
     }
