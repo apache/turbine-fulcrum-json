@@ -201,9 +201,8 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
     @Override
     public JsonService addAdapter(String name, Class target, Class mixin)
             throws Exception {
-        Module mx = new MixinModule(name, target, mixin);
         getLogger().debug("registering unversioned simple mixin module named " + name + " of type " + mixin + "  for: " + target);
-        mapper.registerModule(mx);
+        mapper.addMixIn(target, mixin);
         return this;
     }
 

@@ -76,9 +76,10 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.fulcrum</groupId>
+            <!--groupId>org.apache.fulcrum</groupId-->
+            <groupId>org.apache.turbine</groupId>
             <artifactId>fulcrum-yaafi</artifactId>
-            <version>1.0.6</version>
+            <version>1.0.7</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -98,6 +99,6 @@
         </dependency>
     </dependencies>
     <properties>
-        <jackson2.version>2.4.5</jackson2.version>
+        <jackson2.version>2.6.1</jackson2.version>
     </properties>
 </project>
