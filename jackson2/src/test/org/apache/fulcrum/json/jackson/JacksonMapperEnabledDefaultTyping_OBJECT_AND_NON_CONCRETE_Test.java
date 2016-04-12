@@ -64,6 +64,7 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
         ((Jackson2MapperService) sc).getMapper().enableDefaultTypingAsProperty(
                 DefaultTyping.OBJECT_AND_NON_CONCRETE, "type");
     }
+   
     
     @Test
     public void testSerialize() throws Exception {

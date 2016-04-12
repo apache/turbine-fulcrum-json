@@ -19,7 +19,8 @@ package org.apache.fulcrum.json.jackson;
  * under the License.
  */
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -36,12 +37,16 @@ import org.apache.fulcrum.json.JsonService;
 import org.apache.fulcrum.json.Rectangle;
 import org.apache.fulcrum.json.TestClass;
 import org.apache.fulcrum.testcontainer.BaseUnit4Test;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
 
 /**
  * Jackson2 JSON Test
@@ -167,8 +172,57 @@ public class JacksonMapperTest extends BaseUnit4Test {
                     ((Map) ((List) beanList2).get(i)).get("name").equals(
                             "joe" + i));
         }
-
     }
+    
+    // support for org.json mapping 
+    @Test
+    public void testDeSerToORGJSONCollectionObject() throws Exception {
+        // test array
+         List<Bean> beanResults = new ArrayList<Bean> ( );
+         Bean tu = new Bean();
+         tu.setName("jim jar");
+         beanResults.add(tu);
+         Bean tu2 = new Bean();
+         tu2.setName("jim2 jar2");
+         tu2.setAge(45);
+         beanResults.add(tu2);
+         
+         String[] filterAttr = {"name", "age" };   
+         String filteredSerList = sc.serializeOnlyFilter(beanResults, Bean.class, filterAttr);
+         logger.debug("serList: "+ filteredSerList);
+   
+         sc.addAdapter(null, null,new JsonOrgModule());
+         //((Jackson2MapperService)sc).registerModule(new JsonOrgModule());
+         
+         JSONArray jsonOrgResult = sc.deSer(filteredSerList, JSONArray.class);//readValue(serList, JSONArray.class);
+         logger.debug("jsonOrgResult: "+ jsonOrgResult.toString(2));
+         assertEquals("DeSer failed ", "jim jar", ((JSONObject)(jsonOrgResult.get(0))).get("name") );
+         assertEquals("DeSer failed ", 45, ((JSONObject)(jsonOrgResult.get(1))).get("age") );      
+    }
+    
+    // support for org.json mapping 
+    @Test
+    public void testSerToORGJSONCollectionObject() throws Exception {
+  
+        // test array
+         List<Bean> userResults = new ArrayList<Bean> ( );
+         Bean tu = new Bean();
+         tu.setName("jim jar");
+         userResults.add(tu);
+         Bean tu2 = new Bean();
+         tu2.setName("jim2 jar2");
+         tu2.setAge(45);
+         userResults.add(tu2);
+         
+         String[] filterAttr = {"name", "age" };
+         
+         sc.addAdapter(null, null,new JsonOrgModule());
+         //((Jackson2MapperService)sc).registerModule(new JsonOrgModule());
+         String filteredSerList = sc.serializeOnlyFilter(userResults, Bean.class, filterAttr);
+         logger.debug("serList: "+ filteredSerList);
+         
+    }
+    
     @Test
     public void testSerializeWithMixin() throws Exception {
         Rectangle filteredRectangle = new Rectangle(5, 10);

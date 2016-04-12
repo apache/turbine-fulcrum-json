@@ -39,6 +39,8 @@ import java.util.Collection;
 public interface JsonService {
     /** Avalon Identifier **/
     String ROLE = JsonService.class.getName();
+    
+    String SERVICE_NAME = ROLE;
 
     /**
      * Serializes a Java object

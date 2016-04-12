@@ -25,6 +25,8 @@ import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.avalon.framework.activity.Initializable;
 import org.apache.avalon.framework.configuration.Configurable;
@@ -137,7 +139,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
             return ser(src);
         }    
         getLogger().debug("ser class::" + src.getClass() + " with filter " + filter);
-        mapper.setFilters(filter);
+        mapper.setFilterProvider(filter);
         String res =  mapper.writer(filter).writeValueAsString(src);
         if (cleanCache) {
             cacheService.cleanSerializerCache(mapper);
@@ -149,7 +151,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
     public <T> T deSer(String json, Class<T> type) throws Exception {
         ObjectReader reader = null;
         if (type != null)
-            reader = mapper.reader(type);
+            reader = mapper.readerFor(type);
         else
             reader = mapper.reader();
 
@@ -164,7 +166,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
     
     public <T> String serCollectionWithTypeReference(Collection<T> src, TypeReference collectionType, Boolean cleanCache)
             throws Exception {
-        String res =  mapper.writerWithType(collectionType).writeValueAsString(src);
+        String res =  mapper.writerFor(collectionType).writeValueAsString(src);
         if (cleanCache) {
             cacheService.cleanSerializerCache(mapper);
         }
@@ -178,8 +180,17 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
             return mapper.readValue(json, (TypeReference<T>)collectionType);
         } else {
             return mapper.readValue(json, mapper.getTypeFactory()
-                    .constructCollectionType(((Collection<T>)collectionType).getClass(), elementType));            
+                    .constructCollectionType(((Collection<T>)collectionType).getClass(), elementType));         
         }
+    }
+    
+    public <T> List<T> deSerList(String json, Class<? extends List> targetList,
+            Object listType, Class<T> elementType) throws Exception {
+        return mapper.readValue(json, mapper.getTypeFactory().constructParametrizedType(targetList,listType.getClass(), elementType));        
+    }
+    
+    public <T,U> Map<T,U> deSerMap(String json, Class<? extends Map> mapClass, Class<T> keyClass, Class<U> valueClass) throws Exception {
+        return mapper.readValue(json, mapper.getTypeFactory().constructMapType(mapClass, keyClass, valueClass));        
     }
     
     public <T> Collection<T> deSerCollectionWithTypeReference(String json,
@@ -207,11 +218,11 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
     }
 
     /**
-     * Add a named module
+     * Add a named module or a {@link Module}.
      * 
-     * @param name Name of the module
+     * @param name Name of the module, optional. Could be null, if module is a  {@link Module}.
      * 
-     * @param target Target class
+     * @param target Target class, optional. Could be null, if module is a  {@link Module}.
      * 
      * @param module
      *            Either an Jackson Module @link {@link Module} or an custom
@@ -230,7 +241,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
             mapper.registerModule(cm);
         } else if (module instanceof Module) {
             getLogger().debug(
-                    "registering module " + module + "  for: " + target);
+                    "registering module " + module );
             mapper.registerModule((Module) module);
         } else {
             throw new Exception("expecting module type" + Module.class);

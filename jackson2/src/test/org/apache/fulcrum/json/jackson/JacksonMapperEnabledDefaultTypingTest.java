@@ -54,7 +54,7 @@ import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
  * @version $Id$
  */
 public class JacksonMapperEnabledDefaultTypingTest extends BaseUnit4Test {
-    private final String preDefinedOutput = "{\"type\":\"org.apache.fulcrum.json.TestClass\",\"container\":{\"type\":\"java.util.HashMap\",\"cf\":\"Config.xml\"},\"configurationName\":\"Config.xml\",\"name\":\"mytest\"}";
+    public static final String preDefinedOutput = "{\"type\":\"org.apache.fulcrum.json.TestClass\",\"container\":{\"type\":\"java.util.HashMap\",\"cf\":\"Config.xml\"},\"configurationName\":\"Config.xml\",\"name\":\"mytest\"}";
     private JsonService sc = null;
     Logger logger;
 

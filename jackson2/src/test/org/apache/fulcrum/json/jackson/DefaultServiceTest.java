@@ -41,6 +41,9 @@ import org.junit.Test;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.MappingJsonFactory;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
 
 /**
  * Jackson 2 JSON Test
@@ -63,6 +66,17 @@ public class DefaultServiceTest extends BaseUnit4Test {
         String serJson = sc.ser(new TestClass("mytest"));
         assertEquals("Serialization failed ", preDefinedOutput, serJson);
     }
+    
+//    @Test
+//    public void testCustomMapperSerialize() throws Exception {
+//        ObjectMapper objectMapper = new ObjectMapper(
+//                new MappingJsonFactory(((Jackson2MapperService) sc).getMapper()));
+//        objectMapper.enableDefaultTypingAsProperty(
+//                DefaultTyping.NON_FINAL, "type");
+//        ((Jackson2MapperService) sc).setMapper(objectMapper);
+//        String serJson = sc.ser(new TestClass("mytest"));
+//        assertEquals("Serialization with custom mapper failed ", JacksonMapperEnabledDefaultTypingTest.preDefinedOutput, serJson);
+//    }
 
     @Test
     // the default test class: one String field, one Map  
@@ -224,6 +238,52 @@ public class DefaultServiceTest extends BaseUnit4Test {
         for (int i = 0; i < 10; i++) {
             assertEquals("deser reread size failed", (i * i), ((List<Rectangle>)resultList0)
                     .get(i).getSize());
+        }
+    }
+    @Test
+    public void testDeserializationWithPlainListCollection() throws Exception {
+        List<Rectangle> rectList = new ArrayList<Rectangle>(); 
+        for (int i = 0; i < 10; i++) {
+            Rectangle filteredRect = new Rectangle(i, i, "rect" + i);
+            rectList.add(filteredRect);
+        }
+        String serColl = sc.ser(rectList);
+        Collection<Rectangle> resultList0 =  sc.deSerCollection(serColl, new ArrayList(), Rectangle.class);
+        System.out.println("resultList0 class:" +resultList0.getClass());
+        for (int i = 0; i < 10; i++) {
+            assertEquals("deser reread size failed", (i * i),  ((List<Rectangle>)resultList0)
+                    .get(i).getSize());
+        }
+    }
+    @Test
+    public void testDeserializationWithPlainList() throws Exception {
+        List<Rectangle> rectList = new ArrayList<Rectangle>(); 
+        for (int i = 0; i < 10; i++) {
+            Rectangle filteredRect = new Rectangle(i, i, "rect" + i);
+            rectList.add(filteredRect);
+        }
+        String serColl = sc.ser(rectList);
+        //Collection<Rectangle> resultList0 =  sc.deSerCollection(serColl, List.class, Rectangle.class);
+        List<Rectangle> resultList0 =  ((Jackson2MapperService)sc).deSerList(serColl, ArrayList.class,List.class, Rectangle.class);
+        System.out.println("resultList0 class:" +resultList0.getClass());
+        for (int i = 0; i < 10; i++) {
+            assertEquals("deser reread size failed", (i * i), resultList0
+                    .get(i).getSize());
+        }
+    }
+    @Test
+    public void testDeserializationWithPlainMap() throws Exception {
+        Map<String,Rectangle> rectList = new HashMap<String,Rectangle>(); 
+        for (int i = 0; i < 10; i++) {
+            Rectangle filteredRect = new Rectangle(i, i, "rect" + i);
+            rectList.put(""+i,filteredRect);
+        }
+        String serColl = sc.ser(rectList);
+        Map<String,Rectangle> resultList0 =  ((Jackson2MapperService)sc).deSerMap(serColl, Map.class, String.class,Rectangle.class);
+        System.out.println("resultList0 class:" +resultList0.getClass());
+        for (int i = 0; i < 10; i++) {
+            assertEquals("deser reread size failed", (i * i), resultList0
+                    .get(""+i).getSize());
         }
     }
     @Test
