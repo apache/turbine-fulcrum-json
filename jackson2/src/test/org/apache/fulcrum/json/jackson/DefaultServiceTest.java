@@ -40,10 +40,17 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.AnnotationIntrospector;
 import com.fasterxml.jackson.databind.MappingJsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
+import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
+import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
+import com.fasterxml.jackson.databind.ser.PropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 
 /**
  * Jackson 2 JSON Test
@@ -67,16 +74,82 @@ public class DefaultServiceTest extends BaseUnit4Test {
         assertEquals("Serialization failed ", preDefinedOutput, serJson);
     }
     
-//    @Test
-//    public void testCustomMapperSerialize() throws Exception {
-//        ObjectMapper objectMapper = new ObjectMapper(
-//                new MappingJsonFactory(((Jackson2MapperService) sc).getMapper()));
-//        objectMapper.enableDefaultTypingAsProperty(
-//                DefaultTyping.NON_FINAL, "type");
-//        ((Jackson2MapperService) sc).setMapper(objectMapper);
-//        String serJson = sc.ser(new TestClass("mytest"));
-//        assertEquals("Serialization with custom mapper failed ", JacksonMapperEnabledDefaultTypingTest.preDefinedOutput, serJson);
-//    }
+    @Test
+    public void testCustomSerializeWithoutServiceMapper() throws Exception {
+        ObjectMapper objectMapper = customMapper(true);
+        String expected = "{\"type\":\"org.apache.fulcrum.json.TestClass\",\"container\":{\"type\":\"java.util.HashMap\",\"cf\":\"Config.xml\"},\"configurationName\":\"Config.xml\"}";
+        String serJson = customAllExceptFilter(objectMapper, new TestClass("mytest"), TestClass.class,"name");
+        System.out.println("serJson:"+ serJson);
+        assertEquals("Serialization with custom mapper failed ",expected, serJson);
+    }
+
+    private ObjectMapper customMapper(boolean withType) {
+        // inheriting Jackson2MapperService mapper does not get the configs,
+        // but has e.g. JsonFactory.Feature fields
+        ObjectMapper objectMapper = new ObjectMapper(
+                new MappingJsonFactory(((Jackson2MapperService) sc).getMapper()));
+        // use other configuration
+        if (withType) objectMapper.enableDefaultTypingAsProperty(
+                DefaultTyping.NON_FINAL, "type");
+        AnnotationIntrospector ai = objectMapper.getSerializationConfig().getAnnotationIntrospector();
+        // AnnotationIntrospector is by default JacksonAnnotationIntrospector 
+        assertTrue("Expected Default JacksonAnnotationIntrospector", "ai:"+ ai != null && ai instanceof JacksonAnnotationIntrospector);
+        // add to allow filtering properties for non annotated class
+        AnnotationIntrospector siai = new SimpleNameIntrospector();
+        AnnotationIntrospector pair = new AnnotationIntrospectorPair(siai,ai);
+        objectMapper.setAnnotationIntrospector(pair);
+        return objectMapper;
+    }
+
+    private String customAllExceptFilter(ObjectMapper objectMapper, Object target, Class<?> filterClass, String... props) throws JsonProcessingException {
+        PropertyFilter pf = SimpleBeanPropertyFilter.SerializeExceptFilter.serializeAllExcept(props);
+        SimpleFilterProvider filter = new SimpleFilterProvider();
+        filter.setDefaultFilter(pf);
+        // we know thats a pair, and the second is our simple
+        Collection<AnnotationIntrospector> ais = ((AnnotationIntrospectorPair)objectMapper.getSerializationConfig().getAnnotationIntrospector()).allIntrospectors();
+        for (AnnotationIntrospector ai : ais) {
+            if (ai instanceof SimpleNameIntrospector) {
+                //activate filtering
+                ((SimpleNameIntrospector) ai).setFilteredClasses(filterClass);
+            }
+        } 
+        // alternatively we could have set it here, if ref is still available 
+        // ((SimpleNameIntrospector) siai).setFilteredClasses(filterClass);        
+        String serJson = objectMapper.writer(filter).writeValueAsString(target);
+        // alternatively
+        //String serJson2 = objectMapper.setFilterProvider(filter).writeValueAsString(new TestClass("mytest"));;
+        //assertEquals(serJson, serJson2);
+        return serJson;
+    }
+    
+    @Test
+    public void testCustomSerializeListWithoutServiceMapper() throws Exception {
+        String expected = "[{\"age\":0},{\"age\":1},{\"age\":2}]";
+        List<Bean> beanList = new ArrayList<Bean>();
+        for (int i = 0; i < 3; i++) {
+            Bean bean = new Bean();
+            bean.setAge(i);bean.setName("bean"+i);
+            beanList.add(bean);
+        }
+        ObjectMapper objectMapper = customMapper(false);
+        String serJson = customAllExceptFilter(objectMapper, beanList, Bean.class,"name","profession");
+        System.out.println("serJson:"+ serJson);
+        assertEquals("Serialization with custom mapper failed ",expected, serJson);
+    }
+    
+    @Test
+    public void testSerializeList() throws Exception {
+        String expected = "[{\"age\":0},{\"age\":1},{\"age\":2}]";
+        List<Bean> beanList = new ArrayList<Bean>();
+        for (int i = 0; i < 3; i++) {
+            Bean bean = new Bean();
+            bean.setAge(i);bean.setName("bean"+i);
+            beanList.add(bean);
+        }    
+        String serJson = sc.serializeAllExceptFilter(beanList, Bean.class, "name","profession");
+        System.out.println("serJsonByService:"+ serJson);
+        assertEquals("Serialization with service mapper failed",expected, serJson);
+    }
 
     @Test
     // the default test class: one String field, one Map  

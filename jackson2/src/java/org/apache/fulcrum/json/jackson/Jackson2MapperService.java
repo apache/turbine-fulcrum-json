@@ -137,7 +137,13 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
         if (filter == null) {
             getLogger().debug("ser class::" + src.getClass() + " without filter."); 
             return ser(src);
-        }    
+        } else {
+            getLogger().debug("add filter for cache filter Class " + src.getClass().getName());
+            setCustomIntrospectorWithExternalFilterId(src.getClass(), null); // filter class
+            if (filter != null)  {
+                cacheService.getFilters().put(src.getClass().getName(), filter);    
+            } 
+        }
         getLogger().debug("ser class::" + src.getClass() + " with filter " + filter);
         mapper.setFilterProvider(filter);
         String res =  mapper.writer(filter).writeValueAsString(src);
@@ -286,14 +292,26 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
         return serializeAllExceptFilter(src, new Class[] {filterClass}, cleanFilter, filterAttr);
     }
     
+    /**
+     * 
+     * @param src  the object to be serailized, may be a list
+     * @param filterClasses the same object class or a detail class, which should be filtered
+     * @param clean cleaning the cache after serialization
+     * @param filterAttr attributes to be filtered for filtered class
+     * @return the serailized string
+     * @throws Exception
+     */
     public synchronized <T> String serializeAllExceptFilter(Object src,
             Class<T>[] filterClasses, Boolean clean, String... filterAttr) throws Exception {
         PropertyFilter pf = null;
         if (filterAttr != null)
             pf = SimpleBeanPropertyFilter.serializeAllExcept(filterAttr);
-        else if (filterClasses == null) //no filter
-            return ser(src, clean);
-        return filter(src, new Class<?>[] { src.getClass() }, filterClasses, pf, clean);
+        else if (filterClasses == null) { //no filter
+            return ser(src, clean); 
+            // should be better: 
+             //return filter(src, new Class<?>[] { src.getClass() }, filterClasses, pf, clean);
+        }
+        return filter(src, new Class<?>[] { filterClasses[0] }, filterClasses, pf, clean);
     }
     
     @Override
@@ -347,6 +365,8 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
             SimpleFilterProvider filter = (SimpleFilterProvider) cacheService.getFilters().get(src.getClass()
                     .getName());
             return ser(src, filter, cleanCache);//mapper.writerWithView(src.getClass()).writeValueAsString(src);
+        } else {
+
         }
         String res = mapper.writerWithView(Object.class).writeValueAsString(src);
         if (cleanCache != null && cleanCache) {
@@ -383,7 +403,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
      * @param src The source Object to be filtered.
      * @param filterClass This Class array contains at least one element. If no class is provided it is the class type of the source object. 
      * The filterClass is to become the key of the filter object cache.
-     * @param excludeClasses The classes to be excluded, optionally used onlz for methods like {@link #serializeAllExceptFilter(Object, Class[], String...)}.
+     * @param excludeClasses The classes to be excluded, optionally used only for methods like {@link #serializeAllExceptFilter(Object, Class[], String...)}.
      * @param pf Expecting a property filter from e.g @link {@link SimpleBeanPropertyFilter}.
      * @param clean if <code>true</code> does not reuse the filter object (no cashing).  
      * @return The serialized Object as String 
