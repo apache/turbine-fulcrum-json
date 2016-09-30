@@ -105,9 +105,29 @@
           <version>2.6.6</version>
           <optional>true</optional>
         </dependency>
+        <dependency>
+            <groupId>com.jayway.jsonpath</groupId>
+            <artifactId>json-path</artifactId>
+            <version>2.2.0</version>
+            <optional>true</optional>
+            <!--  as we are using jackson -->
+            <exclusions>
+              <exclusion>
+                <groupId>net.minidev</groupId>
+                <artifactId>json-smart</artifactId>
+              </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-nop</artifactId>
+            <version>1.7.21</version>
+            <optional>true</optional>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
     <properties>
         <!-- 2.7.x hase Java 7 baseline, but copmiled with Java 6 support, cft. https://github.com/FasterXML/jackson/wiki/Jackson-Release-2.7 -->
-        <jackson2.version>2.7.3</jackson2.version>
+        <jackson2.version>2.7.7</jackson2.version>
     </properties>
 </project>

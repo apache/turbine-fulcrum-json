@@ -24,5 +24,6 @@
     <!-- adapter forClass="java.util.ArrayList">org.apache.fulcrum.json.gson.TypeAdapterForCollection</adapter>
     <adapter forClass="org.apache.fulcrum.json.TestClass">org.apache.fulcrum.json.gson.TestJsonSerializer</adapter-->
     </globalAdapters>
+    <useJsonPath>true</useJsonPath>
   </json>
 </componentConfig>

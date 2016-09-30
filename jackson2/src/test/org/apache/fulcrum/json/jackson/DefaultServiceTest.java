@@ -552,6 +552,14 @@ public class DefaultServiceTest extends BaseUnit4Test {
         //((Jackson2MapperService)sc).getMapper().getFactory().setCharacterEscapes(esc ) );
     }
     
+    /**
+     * checks if string serJson is deserializable to class target with adapter mixin and returns result. 
+     * @param serJson JSON String to be tested
+     * @param target class to be expected
+     * @param mixin adapter set
+     * @return the resulting instance 
+     * @throws Exception
+     */
     private <T> T checkDeserialization(String serJson, Class<T> target, Class mixin) throws Exception {
         sc.addAdapter("Mixin Adapter", target, mixin);
         T result = sc.deSer(serJson,target);

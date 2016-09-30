@@ -23,10 +23,12 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.avalon.framework.activity.Initializable;
 import org.apache.avalon.framework.configuration.Configurable;
@@ -63,6 +65,11 @@ import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.PropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
+import com.jayway.jsonpath.Option;
+import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
+import com.jayway.jsonpath.spi.json.JsonProvider;
+import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
+import com.jayway.jsonpath.spi.mapper.MappingProvider;
 
 /**
  * 
@@ -89,6 +96,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
     private static final String DATE_FORMAT = "dateFormat";
     private static final String ESCAPE_CHARS = "escapeCharsGlobal";
     private static final String ESCAPE_CHAR_CLASS = "escapeCharsClass";
+    private static final String USEJSONPATH = "useJsonPath";
     ObjectMapper mapper;
     AnnotationIntrospector primary; // support default
     AnnotationIntrospector secondary;
@@ -112,6 +120,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
     String[] defaultTypeDefs = null;
     private CacheService cacheService;
     private boolean escapeCharsGlobal = false; // to be backward compatible, but should be true, then escaping to avoid XSS payload by default
+    private boolean useJsonPath = false;
     private String escapeCharsClass = null;
 
     @Override
@@ -502,6 +511,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
 
         final Configuration configuredAnnotationInspectors = conf.getChild(
                 ANNOTATIONINSPECTOR, false);
+        
         if (configuredAnnotationInspectors != null) {
             Configuration[] nameVal = configuredAnnotationInspectors
                     .getChildren();
@@ -558,6 +568,11 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
             defaultTypeDefs = new String[] {
                     configuredDefaultType.getAttribute("type"),
                     configuredDefaultType.getAttribute("key") };
+        }
+        final Configuration configuredjsonPath = conf.getChild(
+                USEJSONPATH, false);
+        if (configuredjsonPath != null) {
+            this.useJsonPath  = configuredjsonPath.getValueAsBoolean();
         }
     }
 
@@ -769,6 +784,30 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
             getLogger().info(
                     "setting cacheService logger: "
                             + cacheService.getClass().getSimpleName());
+        }
+        
+        if (useJsonPath) {
+            // set it before runtime
+            com.jayway.jsonpath.Configuration.setDefaults(new com.jayway.jsonpath.Configuration.Defaults() {
+
+                private final JsonProvider jsonProvider = new JacksonJsonProvider(Jackson2MapperService.this.mapper);
+                private final MappingProvider mappingProvider = new JacksonMappingProvider(Jackson2MapperService.this.mapper);
+
+                @Override
+                public JsonProvider jsonProvider() {
+                    return jsonProvider;
+                }
+
+                @Override
+                public MappingProvider mappingProvider() {
+                    return mappingProvider;
+                }
+
+                @Override
+                public Set<Option> options() {
+                    return EnumSet.noneOf(Option.class);
+                }
+            });
         }
     }
 

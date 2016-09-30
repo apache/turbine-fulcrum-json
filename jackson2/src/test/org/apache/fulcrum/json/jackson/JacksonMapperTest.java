@@ -45,7 +45,6 @@ import org.junit.Test;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
 
 /**
@@ -360,31 +359,6 @@ public class JacksonMapperTest extends BaseUnit4Test {
         }
     }
 
-    // @JsonFilter("myFilter")
-    static class Bean {
-        private String name;
-        private int age;
-        public String profession;
-
-        public Bean() {
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public int getAge() {
-            return age;
-        }
-
-        public void setAge(int age) {
-            this.age = age;
-        }
-    }
 
     public static abstract class Mixin2 {
         void MixIn2(int w, int h) {

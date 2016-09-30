@@ -20,7 +20,7 @@
 
 <componentConfig>
   <json>
-  <annotationInspectors>
+	  <annotationInspectors>
       	<primary>org.apache.fulcrum.json.jackson.SimpleNameIntrospector</primary>
         <secondary>com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector</secondary>
         <features>
@@ -30,14 +30,14 @@
           <feature value="false" type="com.fasterxml.jackson.databind.DeserializationFeature">FAIL_ON_UNKNOWN_PROPERTIES</feature>          
           <feature value="false" type="com.fasterxml.jackson.databind.MapperFeature">ALLOW_FINAL_FIELDS_AS_MUTATORS</feature>
           <feature value="true"  type="com.fasterxml.jackson.core.JsonParser">ALLOW_UNQUOTED_FIELD_NAMES</feature>
-
           <!-- feature value="true">com.fasterxml.jackson.databind.SerializationFeature.INDENT_OUTPUT</feature-->
         </features>
-  </annotationInspectors>
-   <dateFormat>MM/dd/yyyy</dateFormat>
-   <escapeCharsGlobal>true</escapeCharsGlobal>
-        <!-- defaultTyping type="NON_FINAL" key="type"/--><!-- or OBJECT_AND_NON_CONCRETE -->
-        <!-- cacheFilters>false</cacheFilters-->
-   <!--  escapeCharsClass>net.example.EscapeCharClass</escapeCharsClass -->
+	  </annotationInspectors>
+	   <dateFormat>MM/dd/yyyy</dateFormat>
+	   <escapeCharsGlobal>true</escapeCharsGlobal>
+	        <!-- defaultTyping type="NON_FINAL" key="type"/--><!-- or OBJECT_AND_NON_CONCRETE -->
+	        <!-- cacheFilters>false</cacheFilters-->
+	   <!--  escapeCharsClass>net.example.EscapeCharClass</escapeCharsClass -->
+	   <useJsonPath>true</useJsonPath>
   </json>
 </componentConfig>

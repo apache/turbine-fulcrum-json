@@ -32,17 +32,20 @@ import com.google.gson.stream.JsonWriter;
 public class TypeAdapterForCollection extends TypeAdapter<List<Rectangle>> {
     @Override
     public void write(JsonWriter out, List<Rectangle> data) throws IOException {
+        out.beginArray();
         out.beginObject();
         for (int i = 0; i < data.size(); i++) {
             out.name(data.get(i).getName());
             out.value(data.get(i).getSize());
         }
         out.endObject();
+        out.endArray();
     }
 
     @Override
     public List<Rectangle> read(JsonReader in) throws IOException {
         ArrayList<Rectangle> list = new ArrayList<Rectangle>();
+        in.beginArray();
         in.beginObject();
         while (in.hasNext()) {
             String name = in.nextName();
@@ -52,6 +55,7 @@ public class TypeAdapterForCollection extends TypeAdapter<List<Rectangle>> {
             list.add(new Rectangle(value, value, name));
         }
         in.endObject();
+        in.endArray();
         return list;
     }
 

@@ -1,4 +1,4 @@
-package org.apache.fulcrum.json.gson;
+    package org.apache.fulcrum.json.gson;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -25,10 +25,12 @@ import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.Iterator;
+import java.util.Set;
+import java.util.concurrent.Callable;
 
 import org.apache.avalon.framework.activity.Initializable;
 import org.apache.avalon.framework.configuration.Configurable;
@@ -41,11 +43,12 @@ import com.google.gson.ExclusionStrategy;
 import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
 import com.google.gson.reflect.TypeToken;
+import com.jayway.jsonpath.Option;
+import com.jayway.jsonpath.spi.json.GsonJsonProvider;
+import com.jayway.jsonpath.spi.json.JsonProvider;
+import com.jayway.jsonpath.spi.mapper.GsonMappingProvider;
+import com.jayway.jsonpath.spi.mapper.MappingProvider;
 
 /**
  * 
@@ -63,6 +66,8 @@ public class GSONBuilderService extends AbstractLogEnabled implements
     private static final String GLOBAL_ADAPTERS = "globalAdapters";
 
     private static final String DATE_FORMAT = "dateFormat";
+    
+    private static final String USEJSONPATH = "useJsonPath";
 
     private String dateFormat;
 
@@ -70,6 +75,8 @@ public class GSONBuilderService extends AbstractLogEnabled implements
 
     private Hashtable<String, String> adapters = null;
 
+    private boolean useJsonPath = false;
+    
     GsonBuilder gson;
 
     @Override
@@ -198,21 +205,27 @@ public class GSONBuilderService extends AbstractLogEnabled implements
         throw new Exception("Not implemented!");
     }
 
-    public JsonService registerTypeAdapter(JsonSerializer serdeser, Type type) {
+    public JsonService registerTypeAdapter(Object serdeser, Type type) {
         gson.registerTypeAdapter(type, serdeser);
         return this;
+    }
+    
+    /**
+     * Alternative method to calling {@link #gson#registerTypeAdapter(Object, Type)}.
+     * Note: Always use either this direct format call or the other adapter register call,
+     * otherwise inconsistencies may occur!
+     * 
+     * @param dformat
+     */
+    public void setDateFormat(final String dfStr) {
+        gson.setDateFormat(dfStr);
     }
 
     @Override
     public void setDateFormat(final DateFormat df) {
-        JsonSerializer<Date> ser = new JsonSerializer<Date>() {
-            @Override
-            public JsonElement serialize(Date src, Type typeOfSrc,
-                    JsonSerializationContext context) {
-                return src == null ? null : new JsonPrimitive(df.format(src));
-            }
-        };
-        registerTypeAdapter(ser, Date.class);
+        DateTypeAdapter dateTypeAdapter = new DateTypeAdapter();
+        dateTypeAdapter.setCustomDateFormat(df);
+        gson.registerTypeAdapter(Date.class,dateTypeAdapter);
     }
 
     public void getJsonService() throws InstantiationException {
@@ -227,8 +240,10 @@ public class GSONBuilderService extends AbstractLogEnabled implements
 
         getLogger().debug("conf.getName()" + conf.getName());
         final Configuration configuredDateFormat = conf.getChild(DATE_FORMAT,
-                true);
-        this.dateFormat = configuredDateFormat.getValue(DEFAULTDATEFORMAT);
+                false);
+        if (configuredDateFormat != null) {
+            this.dateFormat = configuredDateFormat.getValue();// DEFAULTDATEFORMAT);
+        }
         final Configuration configuredAdapters = conf.getChild(GLOBAL_ADAPTERS,
                 true);
         if (configuredAdapters != null) {
@@ -244,14 +259,22 @@ public class GSONBuilderService extends AbstractLogEnabled implements
             }
         }
         // TODO provide configurable Type Adapters
+        final Configuration configuredjsonPath = conf.getChild(
+                USEJSONPATH, false);
+        if (configuredjsonPath != null) {
+            this.useJsonPath  = configuredjsonPath.getValueAsBoolean();
+        }
     }
 
     @Override
     public void initialize() throws Exception {
         gson = new GsonBuilder();
         getLogger().debug("initialized: gson:" + gson);
-        getLogger().info("setting date format to:" + dateFormat);
-        setDateFormat(new SimpleDateFormat(dateFormat));
+        if (dateFormat != null) {
+            getLogger().info("setting date format to: " + dateFormat);
+            setDateFormat(new SimpleDateFormat(dateFormat));
+            //setDateFormat(dateFormat);
+        }
 
         if (adapters != null) {
             Enumeration<String> enumKey = adapters.keys();
@@ -275,6 +298,37 @@ public class GSONBuilderService extends AbstractLogEnabled implements
                     }
                 }
             }
+        }
+        
+        if (useJsonPath) {
+            // set it before runtime
+            com.jayway.jsonpath.Configuration.setDefaults(new com.jayway.jsonpath.Configuration.Defaults() {
+                
+                private Callable<Gson> gsonFuture = new Callable<Gson>() {
+                    @Override
+                    public Gson call() {
+                        return GSONBuilderService.this.gson.create();
+                    }
+                };
+
+                private final JsonProvider jsonProvider = new GsonJsonProvider(GSONBuilderService.this.gson.create());
+                private final MappingProvider mappingProvider = new GsonMappingProvider(gsonFuture);
+
+                @Override
+                public JsonProvider jsonProvider() {
+                    return jsonProvider;
+                }
+
+                @Override
+                public MappingProvider mappingProvider() {
+                    return mappingProvider;
+                }
+
+                @Override
+                public Set<Option> options() {
+                    return EnumSet.noneOf(Option.class);
+                }
+            });
         }
     }
 

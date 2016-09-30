@@ -98,6 +98,16 @@ public class DefaultServiceTest extends BaseUnit4Test {
                 serJson);
     }
     @Test
+    public void testSerializeDefaultDate() throws Exception {
+        //MM:dd:yyyy
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("date", Calendar.getInstance().getTime());
+        String serJson = sc.ser(map);
+        System.out.println("serJson:" + serJson);
+        assertTrue("Serialize with Adapater failed ",
+                serJson.matches("\\{\"date\":\"\\d\\d:\\d\\d:\\d{4}\"\\}"));
+    }
+    @Test
     public void testSerializeDate() throws Exception {
         final SimpleDateFormat MMddyyyy = new SimpleDateFormat("MM/dd/yyyy");
         Map<String, Object> map = new HashMap<String, Object>();
@@ -148,7 +158,7 @@ public class DefaultServiceTest extends BaseUnit4Test {
         String adapterSer = sc.ser(rectList);
         assertEquals(
                 "collect ser",
-                "{'rect0':0,'rect1':1,'rect2':4,'rect3':9,'rect4':16,'rect5':25,'rect6':36,'rect7':49,'rect8':64,'rect9':81}",
+                "[{'rect0':0,'rect1':1,'rect2':4,'rect3':9,'rect4':16,'rect5':25,'rect6':36,'rect7':49,'rect8':64,'rect9':81}]",
                 adapterSer.replace('"', '\''));
     }
     @Test
