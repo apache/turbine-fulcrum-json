@@ -23,12 +23,10 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
-import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.avalon.framework.activity.Initializable;
 import org.apache.avalon.framework.configuration.Configurable;
@@ -38,6 +36,7 @@ import org.apache.avalon.framework.logger.AbstractLogEnabled;
 import org.apache.avalon.framework.logger.LogEnabled;
 import org.apache.fulcrum.json.JsonService;
 import org.apache.fulcrum.json.jackson.filters.CustomModuleWrapper;
+import org.apache.fulcrum.json.jackson.jsonpath.DefaultJsonPathWrapper;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -65,11 +64,6 @@ import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.PropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
-import com.jayway.jsonpath.Option;
-import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
-import com.jayway.jsonpath.spi.json.JsonProvider;
-import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
-import com.jayway.jsonpath.spi.mapper.MappingProvider;
 
 /**
  * 
@@ -90,6 +84,7 @@ import com.jayway.jsonpath.spi.mapper.MappingProvider;
  */
 public class Jackson2MapperService extends AbstractLogEnabled implements
         JsonService, Initializable, Configurable {
+
 
     private static final String DEFAULT_TYPING = "defaultTyping";
     private static final String CACHE_FILTERS = "cacheFilters";
@@ -788,26 +783,16 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
         
         if (useJsonPath) {
             // set it before runtime
-            com.jayway.jsonpath.Configuration.setDefaults(new com.jayway.jsonpath.Configuration.Defaults() {
+            DefaultJsonPathWrapper djpw = null;
+            try {
+                djpw = new DefaultJsonPathWrapper(this.mapper);
+                getLogger().debug("******** initialized new jsonPath defaults: " +djpw.getJsonPathDefault());
+            } catch (Exception e) {
+                throw new Exception(
+                        "JsonMapperService: Error instantiating " + djpw
+                                + " using useJsonPath=" + useJsonPath);
+            }
 
-                private final JsonProvider jsonProvider = new JacksonJsonProvider(Jackson2MapperService.this.mapper);
-                private final MappingProvider mappingProvider = new JacksonMappingProvider(Jackson2MapperService.this.mapper);
-
-                @Override
-                public JsonProvider jsonProvider() {
-                    return jsonProvider;
-                }
-
-                @Override
-                public MappingProvider mappingProvider() {
-                    return mappingProvider;
-                }
-
-                @Override
-                public Set<Option> options() {
-                    return EnumSet.noneOf(Option.class);
-                }
-            });
         }
     }
 

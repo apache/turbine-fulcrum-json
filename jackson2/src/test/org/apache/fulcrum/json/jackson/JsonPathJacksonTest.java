@@ -19,11 +19,12 @@ package org.apache.fulcrum.json.jackson;
  * under the License.
  */
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -52,7 +53,7 @@ import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
  * Test without type setting 
  * 
  * @author gk
- * @version $Id: JacksonMapperTest.java 1738815 2016-04-12 15:22:39Z gk $
+ * @version $Id$
  */
 public class JsonPathJacksonTest extends BaseUnit4Test {
     
