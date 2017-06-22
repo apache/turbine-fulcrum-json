@@ -148,7 +148,7 @@ public class JacksonMapperService extends AbstractLogEnabled implements
     @Override
     public <T> T deSer(String src, Class<T> type) throws Exception {
         ObjectReader reader = mapper.reader(type);
-        return reader.readValue(src);
+        return (T) reader.readValue(src);
     }
     
     @Override
@@ -160,7 +160,7 @@ public class JacksonMapperService extends AbstractLogEnabled implements
 
     public <T> T deSer(String json, Class<? extends Collection> collectionType,
             Class<T> type) throws Exception {
-        return mapper.readValue(json, mapper.getTypeFactory()
+        return  (T) mapper.readValue(json, mapper.getTypeFactory()
                 .constructCollectionType(collectionType, type));
     }
     

@@ -165,7 +165,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
         else
             reader = mapper.reader();
 
-        return reader.readValue(json);
+        return (T) reader.readValue(json);
     }
     
     public <T> Collection<T> deSerCollectionWithType(String json, Class<? extends Collection> collectionClass, Class<T> type)

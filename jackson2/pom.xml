@@ -100,7 +100,7 @@
         <dependency>
           <groupId>com.fasterxml.jackson.datatype</groupId>
           <artifactId>jackson-datatype-json-org</artifactId>
-           <!-- 2.7.3 is not compiled/compatible with Java 6 support, version 51 error, bug? -->
+           <!--  2.7.x has Java 7 baseline, but not compiled with Java 6 support (version 51 error:), cft. https://github.com/FasterXML/jackson/wiki/Jackson-Release-2.7 Changes: compatibility: ..  should still be possible to use Jackson 2.7 on Java 6, but not compile, build. With Jackson 2.8, Java 7 languages features will be allowed -->
           <!--version>${jackson2.version}</version-->
           <version>2.6.6</version>
           <optional>true</optional>
@@ -127,7 +127,8 @@
         </dependency>
     </dependencies>
     <properties>
-        <!-- 2.7.x hase Java 7 baseline, but copmiled with Java 6 support, cft. https://github.com/FasterXML/jackson/wiki/Jackson-Release-2.7 -->
-        <jackson2.version>2.7.7</jackson2.version>
+        <!-- 2.7.x hase Java 7 baseline, but is compiled with Java 6 support, cft. https://github.com/FasterXML/jackson/wiki/Jackson-Release-2.7.
+        With Jackson 2.8, Java 7 languages features will be allowed -->
+        <jackson2.version>2.7.9</jackson2.version>
     </properties>
 </project>
