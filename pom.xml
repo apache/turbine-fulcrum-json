@@ -131,7 +131,7 @@
                       <artifactId>maven-site-plugin</artifactId>
                       <executions>
                           <execution>
-                            <phase>package</phase>		
+                            <phase>package</phase>
                               <goals>
                                   <goal>site</goal>
                               </goals>
@@ -147,8 +147,7 @@
     <turbine.site.path>fulcrum/fulcrum-json</turbine.site.path>
         <turbine.scmPubCheckoutDirectory>${turbine.site.cache}/fulcrum/json</turbine.scmPubCheckoutDirectory>
         <turbine.site.cache>${project.build.directory}/turbine-sites</turbine.site.cache>
-        <siteContent.path>${project.build.directory}/staging</siteContent.path><!-- default stagingSiteURL -->
-        <gpg.useagent>false</gpg.useagent> <!-- windows problem -->
+        <siteContent.path>${project.build.directory}/staging</siteContent.path><!-- default stagingSiteURL --> 
   </properties> 
     
 </project>
