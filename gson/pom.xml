@@ -89,7 +89,7 @@
          <dependency>
             <groupId>com.jayway.jsonpath</groupId>
             <artifactId>json-path</artifactId>
-            <version>2.2.0</version>
+            <version>2.3.0</version>
             <optional>true</optional>
             <!--  as we are using gson -->
             <exclusions>

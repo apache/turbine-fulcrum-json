@@ -37,7 +37,11 @@
         <li>Jackson2MapperService</li>
         <li>JacksonMapperService</li>
       </ul>
-      All Services provide basic serialization and deserialization functions for applications.
+      All Services provide basic serialization and deserialization functions for applications. Additional (optional) Features: 
+      <ul>
+      <li>Support for <a href="https://github.com/json-path/JsonPath/blob/master/README.md">JsonPath</a> in Gson and Jackson 2</li>
+      <li>Support for <a href="https://github.com/FasterXML/jackson-datatype-json-org">org.json mapping</a> (as registered module or adapter)</li>
+      </ul>
     </p>
   </section>
   
@@ -54,7 +58,7 @@
     </p>
      </subsection>
       <subsection name="Role Configuration">
-      <p>Jackson Version 2.4.5</p>
+      <p>Jackson Version 2.7.x</p>
       <source><![CDATA[
   <role
         name="org.apache.fulcrum.json.JsonService"
@@ -165,8 +169,7 @@ JsonService jsonService = (JsonService)TurbineServices
         .getInstance().getService(JsonService.ROLE);
 ]]></source>
 
-    <p>
-    </p>
+
   </subsection>
   <subsection name="Usage in Velocity Template: Serialization Example" id="velocity">
     <p>
