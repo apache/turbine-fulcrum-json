@@ -57,15 +57,13 @@ public class CacheService implements LogEnabled {
     
     <T> void removeCustomIntrospectorWithExternalFilterId(
             Class<T> externalFilterId, Boolean excludeType) {
-        if (primary instanceof SimpleNameIntrospector) {
-            if (externalFilterId != null) {
+        if (primary instanceof SimpleNameIntrospector && externalFilterId != null) {
                 ((SimpleNameIntrospector) primary)
                         .removeFilteredClass(externalFilterId);
                 if (excludeType) {
                     ((SimpleNameIntrospector) primary)
                     .removeExternalFilterExcludeClass(externalFilterId);
                 }
-            }
         }
     }
 
