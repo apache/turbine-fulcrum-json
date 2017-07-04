@@ -40,7 +40,7 @@ import com.jayway.jsonpath.spi.mapper.MappingProvider;
  *
  */
 public class JsonPathDefault implements
-        com.jayway.jsonpath.Configuration.Defaults {
+        Defaults {
 
     private final JsonProvider jsonProvider;
     private final MappingProvider mappingProvider;

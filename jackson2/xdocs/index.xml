@@ -28,7 +28,7 @@
   <body>
 
   <section name="Overview">
-    <p>This  component is to provide a configurable and customized integration of JSON De-/Serializer Jackson 2 JSON Processing APIs into Avalon/Turbine. 
+    <p>This  component is to provide a configurable and customized integration of JSON De-/Serializer <a href="http://wiki.fasterxml.com/JacksonHome">Jackson 2 JSON Processing APIs</a> into Avalon/Turbine. 
     </p>
   </section>
   

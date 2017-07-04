@@ -84,7 +84,7 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
         Map<String, Date> map = new HashMap<String, Date>();
         map.put("date", Calendar.getInstance().getTime());
         String serJson = sc.ser(map);
-        System.out.println("serJson:" +serJson);
+        logger.debug("serJson:" +serJson);
         assertTrue(
                 "Serialize with Adapater failed ",
                 serJson.matches(".*\"java.util.Date\",\"\\d\\d/\\d\\d/\\d{4}\".*"));
@@ -99,7 +99,7 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
         map.put("mydate2",mydate2.getTime());
         String serJson0 =  sc.ser(map, false);
         String serJson =  sc.ser(map, Map.class, false);
-        System.out.println("serJson:"+ serJson0);
+        logger.debug("serJson:"+ serJson0);
         assertEquals(serJson0, serJson);
         //sc.addAdapter("Collection Adapter", Object.class, DateKeyMixin.class);
         DateKeyMixin serObject =sc.deSer(serJson0, DateKeyMixin.class);
@@ -304,7 +304,7 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
         }
         String result = sc.addAdapter("M4RMixin", Bean.class, BeanMixin.class)
                 .ser(beanList);
-        System.out.println("result:::"+ result);
+        logger.debug("result:::"+ result);
         // Type List.class / TypeReference -> Exception: need JSON String that contains type id (for subtype of java.util.List)
         // Type: Bean.class -> Exception: Can not deserialize instance of org.apache.fulcrum.json.jackson.Bean out of START_ARRAY token
         

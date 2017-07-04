@@ -369,8 +369,6 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
             SimpleFilterProvider filter = (SimpleFilterProvider) cacheService.getFilters().get(src.getClass()
                     .getName());
             return ser(src, filter, cleanCache);//mapper.writerWithView(src.getClass()).writeValueAsString(src);
-        } else {
-
         }
         String res = mapper.writerWithView(Object.class).writeValueAsString(src);
         if (cleanCache != null && cleanCache) {

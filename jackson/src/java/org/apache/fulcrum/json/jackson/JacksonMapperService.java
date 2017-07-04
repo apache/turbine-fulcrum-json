@@ -286,27 +286,23 @@ public class JacksonMapperService extends AbstractLogEnabled implements
 
     private <T> void setCustomIntrospectorWithExternalFilterId(
             Class<T> externalFilterId) {
-        if (primary instanceof CustomIntrospector) {
-            if (externalFilterId != null) {
+        if (primary instanceof CustomIntrospector && externalFilterId != null) {
                 ((CustomIntrospector) primary)
                         .setExternalFilterClasses(externalFilterId);
                 getLogger().debug(
                         "added class from filters "
                                 + externalFilterId.getName());
-            }
         }
     }
 
     private <T> void removeCustomIntrospectorWithExternalFilterId(
             Class<T> externalFilterId) {
-        if (primary instanceof CustomIntrospector) {
-            if (externalFilterId != null) {
+        if (primary instanceof CustomIntrospector && externalFilterId != null) {
                 ((CustomIntrospector) primary)
                         .removeExternalFilterClass(externalFilterId);
                 getLogger().debug(
                         "removed from introspector filter id  "
                                 + externalFilterId.getName());
-            }
         }
     }
 

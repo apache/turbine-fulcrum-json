@@ -71,8 +71,6 @@ public class GSONBuilderService extends AbstractLogEnabled implements
 
     private String dateFormat;
 
-    private static final String DEFAULTDATEFORMAT = "MM/dd/yyyy";
-
     private Hashtable<String, String> adapters = null;
 
     private boolean useJsonPath = false;
@@ -372,7 +370,7 @@ public class GSONBuilderService extends AbstractLogEnabled implements
                 // return paramFieldAttributes.getDeclaringClass() ==
                 // excludedThisClass &&
                 // excludesAttributes.contains(paramFieldAttributes.getName());
-                return (!excludedAttributes.isEmpty()) ? this.excludedAttributes
+                return !excludedAttributes.isEmpty() ? this.excludedAttributes
                         .contains(paramFieldAttributes.getName()) : false;
             }
         }.init(clazz, filterAttrs);
@@ -407,7 +405,7 @@ public class GSONBuilderService extends AbstractLogEnabled implements
             @Override
             public boolean shouldSkipClass(Class<?> clazz) {
                 getLogger().debug(includeThisClass+ ": comparing include class:" + clazz);
-                return (includeThisClass != null) ? !includeThisClass
+                return includeThisClass != null ? !includeThisClass
                         .equals(clazz) : false;
             }
 
@@ -416,7 +414,7 @@ public class GSONBuilderService extends AbstractLogEnabled implements
              */
             @Override
             public boolean shouldSkipField(FieldAttributes paramFieldAttributes) { 
-                return (!includedAttributes.isEmpty()) ? !this.includedAttributes
+                return !includedAttributes.isEmpty() ? !this.includedAttributes
                         .contains(paramFieldAttributes.getName()) : true;        
 
             }
