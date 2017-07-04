@@ -31,7 +31,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.avalon.framework.component.ComponentException;
 import org.apache.fulcrum.json.JsonService;

@@ -334,7 +334,7 @@ public class JacksonMapperTest extends BaseUnit4Test {
         List typeRectList = new ArrayList(); //empty
         // could not use Mixins here, but Adapters are still set
         Collection<Rectangle> resultList0 =  sc.deSerCollection(deSerTest, typeRectList, Rectangle.class);
-        System.out.println("resultList0 class:" +resultList0.getClass());
+        logger.debug("resultList0 class:" +resultList0.getClass());
         for (int i = 0; i < 5; i++) {
             // name and h should be null as it is ignored,  cft. Mixin
             assertTrue(((List<Rectangle>)resultList0).get(i).getName()==null);
@@ -342,9 +342,9 @@ public class JacksonMapperTest extends BaseUnit4Test {
         }
         // could not use Mixins here, but Adapters are still set
         Collection<Bean> resultList1 =  sc.deSerCollection(deSerTest, typeRectList, Bean.class);
-        System.out.println("resultList1 class:" +resultList1.getClass());
+        logger.debug("resultList1 class:" +resultList1.getClass());
         for (int i = 0; i < 5; i++) {
-            System.out.println("resultList1 "+i+ " name:"+((List<Bean>)resultList1).get(i).getName());
+            logger.debug("resultList1 "+i+ " name:"+((List<Bean>)resultList1).get(i).getName());
             // name should NOT be null, age should be ignored, cft. BeanMixin
             assertTrue(((List<Bean>)resultList1).get(i).getName()!=null);
             assertTrue(((List<Bean>)resultList1).get(i).getAge()==0);

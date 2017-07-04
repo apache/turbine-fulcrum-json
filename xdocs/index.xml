@@ -28,7 +28,7 @@
   <body>
 
   <section name="Overview">
-    <p>The intent of this  component is to provide a configurable and customized integration of JSON De-/Serializers using GSON, Jackson 1 and Jackson 2 APIs into Avalon/Turbine. It is a common pattern with client-side MVC applications to embed data for a base set of objects in a page instead of making a separate AJAX request to load them.
+    <p>The intent of this  component is to provide a configurable and customized integration of JSON De-/Serializers using <a href="https://github.com/google/gson/">GSON</a>, <a href="http://wiki.fasterxml.com/JacksonHome">Jackson 1 and Jackson 2 APIs</a> into Avalon/Turbine. It is a common pattern with client-side MVC applications to embed data for a base set of objects in a page instead of making a separate AJAX request to load them.
     
      It is written for use in Turbine but it can be used in any container compatible
       with Avalon's ECM container. There are three implementations
@@ -115,7 +115,23 @@
             This implicits, that you cannot retrieve for the same class/bean different properties in different calls.
             Otherwise different serializations per call are possible. You could invalidate (refresh) the cache per class, in most methods providing a Boolean parameter, cft. method parameters named <code>refresh*</code> or <code>clean*</code>. The default value is <code>true</code>.
           </td>
-        </tr>
+        </tr> 
+        <tr>
+          <td>escapeCharsGlobal</td>
+          <td>boolean</td>
+          <td>[0|1]</td>
+          <td>
+            If set to <code>true</code>, by default ASCII characters &lt;= 32 character code and the four characters '&lt;','&gt;','&amp;','\' (backslash) are escaped using com.fasterxml.jackson.core.io.CharacterEscapes.ESCAPE_STANDARD ('\u'). for details cft. com.fasterxml.jackson.core.io.CharTypes. The default value is <code>false</code>.
+          </td>
+        </tr>  
+         <tr>
+          <td>useJsonPath</td>
+          <td>boolean</td>
+          <td>[0|1]</td>
+          <td>
+            If set to <code>true</code>, JsonPath is enabled, which allows to apply JsonPath expressions using the integrated jackson provider by default (without setting this property to <code>true</code>, com.jayway.jsonpath.spi.mapper.JsonSmartMappingProvider will be used and would need to implement net.minidev.json.writer.JsonReaderI by default - which would fail as net.minidev.json package is excluded from dependencies; you would need to include this transitive dependency manually). The default value is <code>false</code>.
+          </td>
+        </tr>  
       </table>
     </subsection>
     <subsection name="Component Configuration Example">
@@ -138,7 +154,9 @@
   </annotationInspectors>
    <dateFormat>MM/dd/yyyy</dateFormat>
    <defaultTyping type="NON_FINAL" key="type"/><!-- or e.g.  OBJECT_AND_NON_CONCRETE -->
-   <!-- cacheFilters>false</cacheFilters>
+   <!-- cacheFilters>false</cacheFilters -->
+   <!-- <escapeCharsGlobal>true</escapeCharsGlobal> -->
+   <useJsonPath>true</useJsonPath>
   </json>
 ]]></source>
 <p>Jackson Version 1.9.x</p>
@@ -203,7 +221,7 @@ JsonService jsonService = (JsonService)TurbineServices
     
     <h4>Configuration Requirements</h4>
     <p>
-    Add <code>org.apache.fulcrum.json.jackson.SimpleNameIntrospector</code> to the annotation inspectors as primary or secondary inspector. <strong>[CHANGE in Version 1.1.0]</strong> SimpleNameIntrospector now extends from <a href="https://github.com/FasterXML/jackson-databind/blob/master/src/main/java/com/fasterxml/jackson/databind/introspect/NopAnnotationIntrospector.java">NopAnnotationIntrospector</a> to cleary divide responsibilities. Default introspector e.g. JacksonAnnotationIntrospector could be provided as a primary/secondary introspector in <a href="#compconf">Component Configuration</a>.
+    Add <code>org.apache.fulcrum.json.jackson.SimpleNameIntrospector</code> to the annotation inspectors as primary or secondary inspector. <strong>[CHANGE in Version 1.1.0]:</strong> SimpleNameIntrospector now extends from <a href="https://github.com/FasterXML/jackson-databind/blob/master/src/main/java/com/fasterxml/jackson/databind/introspect/NopAnnotationIntrospector.java">NopAnnotationIntrospector</a> to cleary divide responsibilities. Default introspector e.g. JacksonAnnotationIntrospector could be provided as a primary/secondary introspector in <a href="#compconf">Component Configuration</a>.
     </p>
    </subsection>
 
@@ -280,6 +298,14 @@ JsonService jsonService = (JsonService)TurbineServices
             <code>MM/dd/yyyy</code>. 
           </td>
         </tr>
+        <tr>
+          <td>useJsonPath</td>
+          <td>boolean</td>
+          <td>[0|1]</td>
+          <td>
+            If set to <code>true</code>, JsonPath is enabled, which allows to apply JsonPath expressions using the integrated gson provider by default. The default value is <code>false</code>. For more information see jackson2 component configuration property description.
+          </td>
+        </tr> 
       </table>
     </subsection>
 
@@ -290,6 +316,7 @@ JsonService jsonService = (JsonService)TurbineServices
     <globalAdapters>>
       <adapter forClass="x.y.z.Class">a.b.c.d.AdapterForClassXYZ</adapter-->
     </globalAdapters>
+    <useJsonPath>true</useJsonPath>
   </json>
 ]]></source>
     </subsection>

@@ -1,5 +1,4 @@
 package org.apache.fulcrum.json.jackson;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -31,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.avalon.framework.logger.ConsoleLogger;
+import org.apache.avalon.framework.logger.Logger;
 import org.apache.fulcrum.json.JsonService;
 import org.apache.fulcrum.json.Rectangle;
 import org.apache.fulcrum.json.TestClass;
@@ -61,10 +61,12 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 public class DefaultServiceTest extends BaseUnit4Test {
     private JsonService sc = null;
     private final String preDefinedOutput = "{\"container\":{\"cf\":\"Config.xml\"},\"configurationName\":\"Config.xml\",\"name\":\"mytest\"}";
+    Logger logger;
 
     @Before
     public void setUp() throws Exception {
         setLogLevel(ConsoleLogger.LEVEL_DEBUG);
+        logger = new ConsoleLogger(ConsoleLogger.LEVEL_DEBUG);
         sc = (JsonService) this.lookup(JsonService.ROLE);
     }
 
@@ -79,7 +81,7 @@ public class DefaultServiceTest extends BaseUnit4Test {
         ObjectMapper objectMapper = customMapper(true);
         String expected = "{\"type\":\"org.apache.fulcrum.json.TestClass\",\"container\":{\"type\":\"java.util.HashMap\",\"cf\":\"Config.xml\"},\"configurationName\":\"Config.xml\"}";
         String serJson = customAllExceptFilter(objectMapper, new TestClass("mytest"), TestClass.class,"name");
-        System.out.println("serJson:"+ serJson);
+        logger.debug("serJson:"+ serJson);
         assertEquals("Serialization with custom mapper failed ",expected, serJson);
     }
 
@@ -133,7 +135,7 @@ public class DefaultServiceTest extends BaseUnit4Test {
         }
         ObjectMapper objectMapper = customMapper(false);
         String serJson = customAllExceptFilter(objectMapper, beanList, Bean.class,"name","profession");
-        System.out.println("serJson:"+ serJson);
+        logger.debug("serJson:"+ serJson);
         assertEquals("Serialization with custom mapper failed ",expected, serJson);
     }
     
@@ -147,7 +149,7 @@ public class DefaultServiceTest extends BaseUnit4Test {
             beanList.add(bean);
         }    
         String serJson = sc.serializeAllExceptFilter(beanList, Bean.class, "name","profession");
-        System.out.println("serJsonByService:"+ serJson);
+        logger.debug("serJsonByService:"+ serJson);
         assertEquals("Serialization with service mapper failed",expected, serJson);
     }
 
@@ -224,7 +226,7 @@ public class DefaultServiceTest extends BaseUnit4Test {
 
         sc.setDateFormat(MMddyyyy);
         String serJson = sc.ser(map);
-        System.out.println("serJson:" + serJson);
+        logger.debug("serJson:" + serJson);
         assertTrue("Serialize with Adapater failed ",
                 serJson.matches("\\{\"date\":\"\\d\\d-\\d\\d-\\d{4}\"\\}"));
     }
@@ -307,7 +309,7 @@ public class DefaultServiceTest extends BaseUnit4Test {
         String serColl = sc.ser(rectList);
         TypeReference<List<Rectangle>> typeRef = new TypeReference<List<Rectangle>>(){};
         Collection<Rectangle> resultList0 =  sc.deSerCollection(serColl, typeRef, Rectangle.class);
-        //System.out.println("resultList0 class:" +resultList0.getClass());
+        //logger.debug("resultList0 class:" +resultList0.getClass());
         for (int i = 0; i < 10; i++) {
             assertEquals("deser reread size failed", (i * i), ((List<Rectangle>)resultList0)
                     .get(i).getSize());
@@ -322,7 +324,7 @@ public class DefaultServiceTest extends BaseUnit4Test {
         }
         String serColl = sc.ser(rectList);
         Collection<Rectangle> resultList0 =  sc.deSerCollection(serColl, new ArrayList(), Rectangle.class);
-        System.out.println("resultList0 class:" +resultList0.getClass());
+        logger.debug("resultList0 class:" +resultList0.getClass());
         for (int i = 0; i < 10; i++) {
             assertEquals("deser reread size failed", (i * i),  ((List<Rectangle>)resultList0)
                     .get(i).getSize());
@@ -338,7 +340,7 @@ public class DefaultServiceTest extends BaseUnit4Test {
         String serColl = sc.ser(rectList);
         //Collection<Rectangle> resultList0 =  sc.deSerCollection(serColl, List.class, Rectangle.class);
         List<Rectangle> resultList0 =  ((Jackson2MapperService)sc).deSerList(serColl, ArrayList.class,List.class, Rectangle.class);
-        System.out.println("resultList0 class:" +resultList0.getClass());
+        logger.debug("resultList0 class:" +resultList0.getClass());
         for (int i = 0; i < 10; i++) {
             assertEquals("deser reread size failed", (i * i), resultList0
                     .get(i).getSize());
@@ -353,7 +355,7 @@ public class DefaultServiceTest extends BaseUnit4Test {
         }
         String serColl = sc.ser(rectList);
         Map<String,Rectangle> resultList0 =  ((Jackson2MapperService)sc).deSerMap(serColl, Map.class, String.class,Rectangle.class);
-        System.out.println("resultList0 class:" +resultList0.getClass());
+        logger.debug("resultList0 class:" +resultList0.getClass());
         for (int i = 0; i < 10; i++) {
             assertEquals("deser reread size failed", (i * i), resultList0
                     .get(""+i).getSize());
@@ -532,7 +534,7 @@ public class DefaultServiceTest extends BaseUnit4Test {
         }
         TypeReference<List<TypedRectangle>> typeRef = new TypeReference<List<TypedRectangle>>(){};
         String jsonResult = ((Jackson2MapperService)sc).serCollectionWithTypeReference(rectList,typeRef, false);
-        System.out.println("aa:" +jsonResult);
+        logger.debug("aa:" +jsonResult);
         // could deserialize with type information 
         Collection<TypedRectangle> result2 =checkDeserCollection(jsonResult, List.class, TypedRectangle.class);
         assertTrue("expect at least one entry ", !result2.isEmpty()); 
@@ -540,12 +542,13 @@ public class DefaultServiceTest extends BaseUnit4Test {
         
     }
     @Test
-    // jackson does not escape anything, except double quotes and backslash, you could provide 
+    // jackson does not escape anything, except double quotes and backslash, additional characters could be provided
+    // by activationg escapeCharsGlobal xml characters are added  
     public void testSerializeHTMLEscape() throws Exception {
         Rectangle filteredRect = new Rectangle(2, 3, "rectÜber<strong>StockundStein &iuml;</strong></script><script>alert('xss')</script>" + 0);
         String adapterSer = sc.ser(filteredRect);
-        System.out.println(adapterSer);
-        assertEquals("html entities ser",
+        logger.debug("Escaped serialized string:"+ adapterSer); 
+        assertEquals("escaped html entities ser expected, iei <,>,&,\\ escaped (requires escapeCharsGlobal in json component configuration",
                 "{'w':2,'h':3,'name':'rectÜber\\u003Cstrong\\u003EStockundStein \\u0026iuml;\\u003C/strong\\u003E\\u003C/script\\u003E\\u003Cscript\\u003Ealert(\\u0027xss\\u0027)\\u003C/script\\u003E0','size':6}",
                 adapterSer.replace('"', '\''));
         // you could set your own escapes here in class esc extending from CharacterEscapes. 

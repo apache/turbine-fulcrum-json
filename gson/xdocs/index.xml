@@ -28,7 +28,7 @@
   <body>
 
   <section name="Overview">
-    <p>The intent of this  component is to provide a configurable and customized integration of JSON De-/Seriallizers ousing GSON, Jackson 1 and Jackson 2 APIs into Avalon/Turbine. 
+    <p>The intent of this  component is to provide a configurable and customized integration of JSON De-/Seriallizers using <a href="https://github.com/google/gson/">GSON</a>, Jackson 1 and Jackson 2 APIs into Avalon/Turbine. 
     
      It is written for use in Turbine but it can be used in any container compatible
       with Avalon's ECM container. There are three implementations

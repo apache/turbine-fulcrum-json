@@ -82,7 +82,7 @@ public class JacksonMapperEnabledDefaultTypingTest extends BaseUnit4Test {
         Map<String, Date> map = new HashMap<String, Date>();
         map.put("date", Calendar.getInstance().getTime());
         String serJson = sc.ser(map);
-        System.out.println("serJson:" +serJson);
+        logger.debug("serJson:" +serJson);
         assertEquals(
                 "Serialize with Adapater failed ",true,
                 serJson.matches(".*\"java.util.Date\",\"\\d\\d/\\d\\d/\\d{4}\".*"));
@@ -92,9 +92,9 @@ public class JacksonMapperEnabledDefaultTypingTest extends BaseUnit4Test {
         Map<String, Date> map = new HashMap<String, Date>();
         map.put("date", Calendar.getInstance().getTime());
         String serJson0 =  sc.ser(map);
-        System.out.println("serJson0:"+ serJson0);
+        logger.debug("serJson0:"+ serJson0);
         String serJson =  sc.ser(map, Map.class);
-        System.out.println("serJsonwithmap:"+ serJson);
+        logger.debug("serJsonwithmap:"+ serJson);
         Map<String, Date> serDate = sc.deSer(serJson, Map.class);
         assertEquals("Date DeSer failed ", Date.class, serDate.get("date")
                 .getClass());   
@@ -139,7 +139,7 @@ public class JacksonMapperEnabledDefaultTypingTest extends BaseUnit4Test {
     private <T> T checkDeserialization(String serJson, Class<T> target, Class mixin) throws Exception {
         sc.addAdapter("TestClass Adapter", target, mixin);
         T result = sc.deSer(serJson,target);
-        //System.out.println("result:"+ result + " is of type "+ target.getName());
+        //logger.debug("result:"+ result + " is of type "+ target.getName());
         assertTrue("result instance check", target.isAssignableFrom(result.getClass()));
         return result;
      }

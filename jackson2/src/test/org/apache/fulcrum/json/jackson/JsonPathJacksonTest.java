@@ -66,14 +66,14 @@ public class JsonPathJacksonTest extends BaseUnit4Test {
         logger = new ConsoleLogger(ConsoleLogger.LEVEL_DEBUG);
         try {
             Configuration conf = Configuration.defaultConfiguration();
-            System.out.println("jayway jsonpath conf:"+ conf.jsonProvider());
+            logger.debug("jayway jsonpath conf:"+ conf.jsonProvider());
             assertEquals("Jackson JsonPath JsonProvider match failed ", JacksonJsonProvider.class.getName(), conf.jsonProvider().getClass().getName());
-            System.out.println("Jackson2MapperService.mapper:"+ ((Jackson2MapperService)sc).getMapper()  + " confjsonProvider:" + conf.jsonProvider());
+            logger.debug("Jackson2MapperService.mapper:"+ ((Jackson2MapperService)sc).getMapper()  + " confjsonProvider:" + conf.jsonProvider());
             assertTrue("JsonProvider is not a JacksonJsonProvider ",  conf.jsonProvider() instanceof JacksonJsonProvider);
             assertEquals("JacksonJsonProvider mapper is not configured mapper", ((Jackson2MapperService)sc).getMapper(), ((JacksonJsonProvider)conf.jsonProvider()).getObjectMapper());
         } catch (Throwable e) {
             if (e.getCause() != null && e.getCause() instanceof ClassNotFoundException) { 
-                System.out.println(e.getCause());
+                logger.error(e.getMessage(), e.getCause());
                 fail("Check correct initialization with useJsonPath = true):");
             } else {
                 fail(e.getMessage());
@@ -85,7 +85,7 @@ public class JsonPathJacksonTest extends BaseUnit4Test {
     @Test
     public void testSerialize() throws Exception {
         String serJson = sc.ser(new TestClass("mytest"));
-        System.out.println("serJson:"+ serJson);
+        logger.debug("serJson:"+ serJson);
         String cf = JsonPath.parse(serJson).read("$.container.cf");// .using(conf)
         assertEquals("Serialization failed ", "Config.xml", cf);   
     }
@@ -130,7 +130,7 @@ public class JsonPathJacksonTest extends BaseUnit4Test {
         // could not use as TestClass constructor generates configurationName again
         //String serJson = sc.serializeAllExceptFilter(new TestClass("mytest"), "configurationName");
         String serJson = sc.serializeAllExceptFilter(new TestClass("mytest"), "name"); 
-        System.out.println("serJson: "+ serJson);
+        logger.debug("serJson: "+ serJson);
         TypeRef<TestClass> typeRef = new TypeRef<TestClass>() { };
         // could not use as TestClass constructor generates configurationName again
         TestClass result = JsonPath.parse(serJson).read("$",typeRef); //  TestClass.class
@@ -146,7 +146,7 @@ public class JsonPathJacksonTest extends BaseUnit4Test {
             rectList.add(filteredRect);
         }
         String serColl = sc.ser(rectList);
-        System.out.println("serColl: "+ serColl);
+        logger.debug("serColl: "+ serColl);
         TypeRef<List<Rectangle>> typeRef = new TypeRef<List<Rectangle>>() { };
         List<Rectangle> result = JsonPath.parse(serColl).read("$",typeRef);
         //System.out.println("result: "+ result);
