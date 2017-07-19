@@ -3,3 +3,9 @@ Copyright 2005-2016 The Apache Software Foundation.
 
 This product includes software developed at
 The Apache Software Foundation (http://www.apache.org/).
+
+No JSON-licensed (org.json) license is included, not even optionally or transitively.
+
+Details: 
+The Fulcrum Json Jackson Module version 1.1.1 includes the optional dependency com.fasterxml.jackson.datatype:jackson-datatype-json-org:2.6.6. 
+This artifact supports since version 2.4.0 the Apache 2.0 licensed artifact org.apache.geronimo.bundles:json:20090211_1 (org.json wrapper). Unless you override the defaults or use a version before version 2.4.0 only this may become a transitive dependency (cft. https://github.com/FasterXML/jackson-datatype-json-org).

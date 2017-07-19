@@ -22,6 +22,7 @@ package org.apache.fulcrum.json.jackson;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -89,27 +90,64 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
                 "Serialize with Adapater failed ",
                 serJson.matches(".*\"java.util.Date\",\"\\d\\d/\\d\\d/\\d{4}\".*"));
     }
+    //  no day time
     @Test
     public void testDeSerializeDate() throws Exception {
         Map<String, Date> map = new HashMap<String, Date>();
-        map.put("mydate",Calendar.getInstance().getTime());
-        Calendar mydate2 = Calendar.getInstance();
-        mydate2.set(1999, 3, 10);
-        mydate2.setTimeZone(TimeZone.getTimeZone("CEST"));
-        map.put("mydate2",mydate2.getTime());
+        Calendar sourceDate = Calendar.getInstance();
+        sourceDate.set(1999, 3, 10);
+        sourceDate.set(Calendar.HOUR, 0);
+        sourceDate.set(Calendar.MINUTE, 0);
+        sourceDate.set(Calendar.SECOND, 0);
+        sourceDate.set(Calendar.MILLISECOND, 0);
+        sourceDate.set(Calendar.HOUR_OF_DAY, 0);
+        logger.debug("sourceDate TZ:"+ sourceDate.getTimeZone().getID());
+//        logger.debug("sourceDate calendar:"+ sourceDate);
+        logger.debug("sourceDate date:"+ sourceDate.getTime());
+        logger.debug("sourceDate millisec:"+ sourceDate.getTime().getTime());
+        map.put("mydate",sourceDate.getTime());
+        // default dateformat dd/mm/yy -> day time will be cut off !(hh, mm,)
         String serJson0 =  sc.ser(map, false);
         String serJson =  sc.ser(map, Map.class, false);
+        
         logger.debug("serJson:"+ serJson0);
         assertEquals(serJson0, serJson);
-        //sc.addAdapter("Collection Adapter", Object.class, DateKeyMixin.class);
+        
         DateKeyMixin serObject =sc.deSer(serJson0, DateKeyMixin.class);
-//        System.out.println("serObject:"+ serObject);
-//        System.out.println("serObject:"+ serObject.mydate.getClass());
         assertTrue(serObject.mydate instanceof Date);
-        assertTrue(serObject.mydate2 instanceof Date);
-        assertTrue(serObject.mydate2.toString().equals("Sat Apr 10 00:00:00 CEST 1999"));
-//        System.out.println("serObject:"+ ((Date)serObject.mydate));
-//        System.out.println("serObject:"+ ((Date)serObject.mydate2));
+        
+        logger.debug("resultDate millisec: " + ((Date)serObject.mydate).getTime() +" source:"+ sourceDate.getTime().getTime() );        
+        assertTrue("resultDate not equal not sourceDate millisec: ",((Date)serObject.mydate).getTime() == sourceDate.getTime().getTime() );
+    }
+    // timezone
+    @Test
+    public void testDeSerializeTZDate() throws Exception {
+        Map<String, Date> map = new HashMap<String, Date>();
+        Calendar sourceDate = Calendar.getInstance(TimeZone.getTimeZone("America/Montreal"));// UTC -5
+        sourceDate.set(1999, 3, 10, 11, 10); // set in Montreal Time this date and time
+        sourceDate.set(Calendar.SECOND, 0);
+        sourceDate.set(Calendar.MILLISECOND, 0);
+        
+        // shows date and time in locale time
+        //logger.debug("sourceDate millisec:"+ sourceDate.getTime().getTime());
+        
+        // any "timezone" information is lost from the Calendar when converting it  into a java.util.Date by calling getTime()
+        map.put("mydate",sourceDate.getTime());
+        
+        sc.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm a z"));
+        
+        String serJson0 =  sc.ser(map, false);
+        String serJson =  sc.ser(map, Map.class, false);
+        
+        //this may be in "any" locale timezone, eg. 1999-04-10 17:10 PM MESZ
+        logger.debug("serJson:"+ serJson0);
+        assertEquals(serJson0, serJson);
+        
+        DateKeyMixin serObject =sc.deSer(serJson0, DateKeyMixin.class);
+        assertTrue(serObject.mydate instanceof Date);
+
+        logger.debug("resultDate millisec: " + ((Date)serObject.mydate).getTime() +" source:"+ sourceDate.getTime().getTime() );        
+        assertTrue("resultDate not equal not sourceDate millisec: ",((Date)serObject.mydate).getTime() == sourceDate.getTime().getTime() );
     }
     @Test
     public void testSerializeWithCustomFilter() throws Exception {
