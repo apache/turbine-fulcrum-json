@@ -41,7 +41,9 @@
               <exclude>target/**</exclude>
               <exclude>.classpath</exclude>
               <exclude>.project</exclude>
-             <exclude>*.iml</exclude>
+              <exclude>*.iml</exclude>
+              <exclude>.idea/**</exclude>
+              <exclude>.settings/**</exclude>
             </excludes>
           </fileSet>
         </fileSets>
