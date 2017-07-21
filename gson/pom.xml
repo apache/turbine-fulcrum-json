@@ -19,7 +19,7 @@
     <parent>
         <artifactId>fulcrum-json-parent</artifactId>
         <groupId>org.apache.fulcrum</groupId>
-        <version>1.1.1</version>
+        <version>1.1.2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -29,9 +29,9 @@
     
     <url>http://turbine.apache.org/fulcrum/fulcrum-json/fulcrum-json-gson</url>
     <scm>
-        <connection>scm:svn:http://svn.apache.org/repos/asf/turbine/fulcrum/tags/fulcrum-json-1.1.1/gson</connection>
-        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/turbine/fulcrum/tags/fulcrum-json-1.1.1/gson</developerConnection>
-        <url>http://svn.apache.org/viewvc/turbine/fulcrum/tags/fulcrum-json-1.1.1/gson</url>
+        <connection>scm:svn:http://svn.apache.org/repos/asf/turbine/fulcrum/trunk/json/gson/</connection>
+        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/turbine/fulcrum/trunk/json/gson/</developerConnection>
+        <url>http://svn.apache.org/viewvc/turbine/fulcrum/trunk/json/gson/</url>
     </scm>
 
     <build>
