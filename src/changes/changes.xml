@@ -24,12 +24,17 @@
   </properties>
 
   <body>
-  <release version="1.1.1" date="in SVN">
-  <action type="update" dev="gk">
-        Gson: Update to version 2.6.1, add support for JsonPath, Bugfix in date formatting and array serial/deserial test, use JUnit 4
+  <release version="1.1.2" date="in SVN">
+  </release>
+  <release version="1.1.1" date="2017-08-15">
+     <action type="update" dev="gk">
+        Gson: Update to version 2.6.1, add support for JsonPath, Bugfix in date formatting and array serial/deserial test
       </action>
-   <action type="update" dev="gk">
-        Jackson 2: Update to version 2.7.9, add support for JsonPath, Datatype json-org version 2.6.6, which is Java 6 compatible
+      <action type="update" dev="gk">
+        JUnit 4 in all sub modules
+      </action>
+    <action type="update" dev="gk">
+        Jackson 2: Update to version 2.7.9, add support for JsonPath 2.3.0, Datatype json-org version 2.6.6, Java 6 compatible
       </action>
   </release>
   <release version="1.1.0" date="2015-06-22">
