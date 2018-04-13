@@ -37,15 +37,12 @@ import org.apache.fulcrum.json.JsonService;
 import org.apache.fulcrum.json.Rectangle;
 import org.apache.fulcrum.json.TestClass;
 import org.apache.fulcrum.testcontainer.BaseUnit4Test;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
 
 /**
  * Jackson2 JSON Test
@@ -97,17 +94,18 @@ public class JacksonMapperTest extends BaseUnit4Test {
     }
     @Test
     public void testSerializeWithCustomFilter() throws Exception {
-        Bean filteredBean = new Bean();
-        filteredBean.setName("joe");
-        String bean = sc.serializeOnlyFilter(filteredBean, Bean.class, "name");
-        assertEquals("Ser filtered Bean failed ", "{\"name\":\"joe\"}", bean);
+        Bean bean = new Bean();
+        bean.setName("joe");
+        bean.setAge(12);
+        String filteredBean  = sc.serializeOnlyFilter(bean, Bean.class, "name");
+        assertEquals("Ser filtered Bean failed ", "{\"name\":\"joe\"}", filteredBean);
 
-        Rectangle filteredRectangle = new Rectangle(5, 10);
-        filteredRectangle.setName("jim");
-        String rectangle = sc.serializeOnlyFilter(filteredRectangle,
+        Rectangle rectangle = new Rectangle(5, 10);
+        rectangle.setName("jim");
+        String filteredRectangle  = sc.serializeOnlyFilter(rectangle,
                 Rectangle.class, "w", "name");
         assertEquals("Ser filtered Rectangle failed ",
-                "{\"w\":5,\"name\":\"jim\"}", rectangle);
+                "{\"w\":5,\"name\":\"jim\"}", filteredRectangle);
 
     }
     @Test
@@ -115,17 +113,17 @@ public class JacksonMapperTest extends BaseUnit4Test {
 
         List<Bean> beanList = new ArrayList<Bean>();
         for (int i = 0; i < 10; i++) {
-            Bean filteredBean = new Bean();
-            filteredBean.setName("joe" + i);
-            filteredBean.setAge(i);
-            beanList.add(filteredBean);
+            Bean bean = new Bean();
+            bean.setName("joe" + i);
+            bean.setAge(i);
+            beanList.add(bean);
         }
-        String result = sc.serializeOnlyFilter(beanList, Bean.class, "name",
+        String filteredResult = sc.serializeOnlyFilter(beanList, Bean.class, "name",
                 "age");
         assertEquals(
                 "Serialization of beans failed ",
                 "[{'name':'joe0','age':0},{'name':'joe1','age':1},{'name':'joe2','age':2},{'name':'joe3','age':3},{'name':'joe4','age':4},{'name':'joe5','age':5},{'name':'joe6','age':6},{'name':'joe7','age':7},{'name':'joe8','age':8},{'name':'joe9','age':9}]",
-                result.replace('"', '\''));
+                filteredResult.replace('"', '\''));
     }
 
     @Test
@@ -133,15 +131,15 @@ public class JacksonMapperTest extends BaseUnit4Test {
 
         List<Bean> beanList = new ArrayList<Bean>();
         for (int i = 0; i < 10; i++) {
-            Bean filteredBean = new Bean();
-            filteredBean.setName("joe" + i);
-            filteredBean.setAge(i);
-            beanList.add(filteredBean);
+            Bean bean = new Bean();
+            bean.setName("joe" + i);
+            bean.setAge(i);
+            beanList.add(bean);
         }
-        String result = sc.serializeOnlyFilter(beanList, Bean.class, "name",
+        String filteredResult = sc.serializeOnlyFilter(beanList, Bean.class, "name",
                 "age");
         List<Bean> beanList2 = (List<Bean>) ((Jackson2MapperService) sc)
-                .deSerCollectionWithType(result, List.class, Bean.class);
+                .deSerCollectionWithType(filteredResult, List.class, Bean.class);
         assertTrue("DeSer failed ", beanList2.size() == 10);
         for (Bean bean : beanList2) {
             assertEquals("DeSer failed ", Bean.class, bean.getClass());
@@ -153,14 +151,14 @@ public class JacksonMapperTest extends BaseUnit4Test {
 
         List<Bean> beanList = new ArrayList<Bean>();
         for (int i = 0; i < 10; i++) {
-            Bean filteredBean = new Bean();
-            filteredBean.setName("joe" + i);
-            filteredBean.setAge(i);
-            beanList.add(filteredBean);
+            Bean bean = new Bean();
+            bean.setName("joe" + i);
+            bean.setAge(i);
+            beanList.add(bean);
         }
-        String result = sc.serializeOnlyFilter(beanList, Bean.class, "name",
+        String filteredResult = sc.serializeOnlyFilter(beanList, Bean.class, "name",
                 "age");
-        Object beanList2 = sc.deSer(result, List.class);
+        Object beanList2 = sc.deSer(filteredResult, List.class);
         assertTrue("DeSer failed ", beanList2 instanceof List);
         assertTrue("DeSer failed ", ((List) beanList2).size() == 10);
         for (int i = 0; i < ((List) beanList2).size(); i++) {
@@ -173,68 +171,18 @@ public class JacksonMapperTest extends BaseUnit4Test {
         }
     }
     
-    // support for org.json mapping 
-    @Test
-    public void testDeSerToORGJSONCollectionObject() throws Exception {
-        // test array
-         List<Bean> beanResults = new ArrayList<Bean> ( );
-         Bean tu = new Bean();
-         tu.setName("jim jar");
-         beanResults.add(tu);
-         Bean tu2 = new Bean();
-         tu2.setName("jim2 jar2");
-         tu2.setAge(45);
-         beanResults.add(tu2);
-         
-         String[] filterAttr = {"name", "age" };   
-         String filteredSerList = sc.serializeOnlyFilter(beanResults, Bean.class, filterAttr);
-         logger.debug("serList: "+ filteredSerList);
-   
-         sc.addAdapter(null, null,new JsonOrgModule());
-         //((Jackson2MapperService)sc).registerModule(new JsonOrgModule());
-         
-         JSONArray jsonOrgResult = sc.deSer(filteredSerList, JSONArray.class);//readValue(serList, JSONArray.class);
-         logger.debug("jsonOrgResult: "+ jsonOrgResult.toString(2));
-         assertEquals("DeSer failed ", "jim jar", ((JSONObject)(jsonOrgResult.get(0))).get("name") );
-         assertEquals("DeSer failed ", 45, ((JSONObject)(jsonOrgResult.get(1))).get("age") );      
-    }
-    
-    // support for org.json mapping 
-    @Test
-    public void testSerToORGJSONCollectionObject() throws Exception {
-  
-        // test array
-         List<Bean> userResults = new ArrayList<Bean> ( );
-         Bean tu = new Bean();
-         tu.setName("jim jar");
-         userResults.add(tu);
-         Bean tu2 = new Bean();
-         tu2.setName("jim2 jar2");
-         tu2.setAge(45);
-         userResults.add(tu2);
-         
-         String[] filterAttr = {"name", "age" };
-         
-         sc.addAdapter(null, null,new JsonOrgModule());
-         //((Jackson2MapperService)sc).registerModule(new JsonOrgModule());
-         String filteredSerList = sc.serializeOnlyFilter(userResults, Bean.class, filterAttr);
-         logger.debug("serList: "+ filteredSerList);
-         
-    }
-    
     @Test
     public void testSerializeWithMixin() throws Exception {
-        Rectangle filteredRectangle = new Rectangle(5, 10);
-        filteredRectangle.setName("jim");
-        String serRect = sc
-                .addAdapter("M4RMixin", Rectangle.class, Mixin.class).ser(
-                        filteredRectangle);
-        assertEquals("Ser failed ", "{\"width\":5}", serRect);
+        Rectangle rectangle = new Rectangle(5, 10);
+        rectangle.setName("jim");
+        String filteredRectangle = sc
+                .addAdapter("M4RMixin", Rectangle.class, Mixin.class).ser(rectangle);
+        assertEquals("Ser failed ", "{\"width\":5}", filteredRectangle);
     }
     @Test
     public void testSerializeWith2Mixins() throws Exception {
-        Bean filteredBean = new Bean();
-        filteredBean.setName("joe");
+        Bean bean = new Bean();
+        bean.setName("joe");
         Rectangle filteredRectangle = new Rectangle(5, 10);
         filteredRectangle.setName("jim");
 
@@ -242,26 +190,37 @@ public class JacksonMapperTest extends BaseUnit4Test {
                 Mixin2.class).ser(filteredRectangle);
         assertEquals("Ser failed ", "{\"name\":\"jim\",\"width\":5}", serRect);
 
-        String bean = sc.serializeOnlyFilter(filteredBean, Bean.class, "name");
-        assertEquals("Ser filtered Bean failed ", "{\"name\":\"joe\"}", bean);
+        String filteredBean = sc.serializeOnlyFilter(bean, Bean.class, "name");
+        assertEquals("Ser filtered Bean failed ", "{\"name\":\"joe\"}", filteredBean);
     }
     @Test
     public void testSerializationCollectionWithMixin() throws Exception {
 
         List<Bean> beanList = new ArrayList<Bean>();
         for (int i = 0; i < 10; i++) {
-            Bean filteredBean = new Bean();
-            filteredBean.setName("joe" + i);
-            filteredBean.setAge(i);
-            beanList.add(filteredBean);
+            Bean bean = new Bean();
+            bean.setName("joe" + i);
+            bean.setAge(i);
+            beanList.add(bean);
         }
-        String result = sc.addAdapter("M4RMixin", Bean.class, BeanMixin.class)
+        String filterResult = sc.addAdapter("M4RMixin", Bean.class, BeanMixin.class)
                 .ser(beanList);
         assertEquals(
                 "Serialization of beans failed ",
                 "[{'name':'joe0'},{'name':'joe1'},{'name':'joe2'},{'name':'joe3'},{'name':'joe4'},{'name':'joe5'},{'name':'joe6'},{'name':'joe7'},{'name':'joe8'},{'name':'joe9'}]",
-                result.replace('"', '\''));
+                filterResult.replace('"', '\''));
     }
+    
+    @Test
+    public void testSerializationBeanWithMixin() throws Exception {
+        Bean bean = new Bean();
+        bean.setName("joe1");
+        bean.setAge(1);
+        String filterResult = sc.addAdapter("M4RMixin", Bean.class, BeanMixin.class)
+                .ser(bean);
+        logger.debug("filterResult: "+ filterResult.toString());
+    }
+    
     @Test
     public void testDeSerUnQuotedObject() throws Exception {
         String jsonString = "{name:\"joe\"}";
@@ -288,14 +247,14 @@ public class JacksonMapperTest extends BaseUnit4Test {
 
         List<Bean> beanList = new ArrayList<Bean>();
         for (int i = 0; i < 10; i++) {
-            Bean filteredBean = new Bean();
-            filteredBean.setName("joe" + i);
-            filteredBean.setAge(i);
-            beanList.add(filteredBean);
+            Bean bean = new Bean();
+            bean.setName("joe" + i);
+            bean.setAge(i);
+            beanList.add(bean);
         }
-        String result = sc.addAdapter("M4RMixin", Bean.class, BeanMixin.class)
+        String filterResult = sc.addAdapter("M4RMixin", Bean.class, BeanMixin.class)
                 .ser(beanList);
-        Object beanList2 = sc.deSer(result,
+        Object beanList2 = sc.deSer(filterResult,
                 List.class);
         assertTrue("DeSer failed ", beanList2 instanceof List);
         assertTrue("DeSer failed ", ((List) beanList2).size() == 10);
@@ -377,7 +336,7 @@ public class JacksonMapperTest extends BaseUnit4Test {
     }
 
     public static abstract class BeanMixin {
-        void BeanMixin() {
+        BeanMixin() {
         }
 
         @JsonIgnore

@@ -79,7 +79,6 @@ public class JsonPathJacksonTest extends BaseUnit4Test {
                 fail(e.getMessage());
             }
         }
-
     }
 
     @Test

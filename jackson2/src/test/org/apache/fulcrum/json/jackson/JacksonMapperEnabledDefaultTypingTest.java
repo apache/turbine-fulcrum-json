@@ -101,30 +101,30 @@ public class JacksonMapperEnabledDefaultTypingTest extends BaseUnit4Test {
     }
     @Test
     public void testSerializeWithCustomFilter() throws Exception {
-        Bean filteredBean = new Bean();
-        filteredBean.setName("joe");
-        String bean = sc.serializeOnlyFilter(filteredBean, Bean.class, "name");
+        Bean bean = new Bean();
+        bean.setName("joe");
+        String filteredBean  = sc.serializeOnlyFilter(bean, Bean.class, "name");
         assertEquals(
                 "Ser filtered Bean failed ",
                 "{\"type\":\"org.apache.fulcrum.json.jackson.Bean\",\"name\":\"joe\"}",
-                bean);
+                filteredBean);
 
-        Rectangle filteredRectangle = new Rectangle(5, 10);
-        filteredRectangle.setName("jim");
-        String rectangle = sc.serializeOnlyFilter(filteredRectangle,
+        Rectangle rectangle = new Rectangle(5, 10);
+        rectangle.setName("jim");
+        String filteredRectangle = sc.serializeOnlyFilter(rectangle,
                 Rectangle.class, "w", "name");
         assertEquals("Ser filtered Rectangle failed ",
-                "{\"w\":5,\"name\":\"jim\"}", rectangle);
+                "{\"w\":5,\"name\":\"jim\"}", filteredRectangle );
     }
     @Test
     public void testSerializationCollectionWithFilter() throws Exception {
 
         List<Bean> beanList = new ArrayList<Bean>();
         for (int i = 0; i < 10; i++) {
-            Bean filteredBean = new Bean();
-            filteredBean.setName("joe" + i);
-            filteredBean.setAge(i);
-            beanList.add(filteredBean);
+            Bean bean = new Bean();
+            bean.setName("joe" + i);
+            bean.setAge(i);
+            beanList.add(bean);
         }
         String result = sc.serializeOnlyFilter(beanList, Bean.class, "name",
                 "age");
@@ -156,10 +156,10 @@ public class JacksonMapperEnabledDefaultTypingTest extends BaseUnit4Test {
 
         List<Bean> beanList = new ArrayList<Bean>();
         for (int i = 0; i < 10; i++) {
-            Bean filteredBean = new Bean();
-            filteredBean.setName("joe" + i);
-            filteredBean.setAge(i);
-            beanList.add(filteredBean);
+            Bean bean = new Bean();
+            bean.setName("joe" + i);
+            bean.setAge(i);
+            beanList.add(bean);
         }
         String result = sc.serializeOnlyFilter(beanList, Bean.class, "name",
                 "age");
@@ -179,10 +179,10 @@ public class JacksonMapperEnabledDefaultTypingTest extends BaseUnit4Test {
 
         List<Bean> beanList = new ArrayList<Bean>();
         for (int i = 0; i < 10; i++) {
-            Bean filteredBean = new Bean();
-            filteredBean.setName("joe" + i);
-            filteredBean.setAge(i);
-            beanList.add(filteredBean);
+            Bean bean = new Bean();
+            bean.setName("joe" + i);
+            bean.setAge(i);
+            beanList.add(bean);
         }
         String result = sc.serializeOnlyFilter(beanList, Bean.class, "name",
                 "age");
@@ -208,23 +208,23 @@ public class JacksonMapperEnabledDefaultTypingTest extends BaseUnit4Test {
     }
     @Test
     public void testSerializeWith2Mixins() throws Exception {
-        Bean filteredBean = new Bean();
-        filteredBean.setName("joe");
-        Rectangle filteredRectangle = new Rectangle(5, 10);
-        filteredRectangle.setName("jim");
+        Bean bean = new Bean();
+        bean.setName("joe");
+        Rectangle rectangle = new Rectangle(5, 10);
+        rectangle.setName("jim");
 
        String serRect =  sc.addAdapter("M4RMixin2", Rectangle.class,
-                Mixin2.class).ser(filteredRectangle);
+                Mixin2.class).ser(rectangle);
         assertEquals("Ser failed ", "{\"name\":\"jim\",\"width\":5}", serRect);
 
         //
-        String bean = sc.addAdapter("M4RBeanMixin", Bean.class,
-                BeanMixin.class).ser(filteredBean);;
+        String filteredBean = sc.addAdapter("M4RBeanMixin", Bean.class,
+                BeanMixin.class).ser(bean);;
         
         assertEquals(
                 "Ser filtered Bean failed ",
                 "{\"type\":\"org.apache.fulcrum.json.jackson.Bean\",\"name\":\"joe\"}",
-                bean);
+                filteredBean);
     }
     @Test
     public void testSerializeWithMixinAndFilter() throws Exception {
@@ -242,55 +242,55 @@ public class JacksonMapperEnabledDefaultTypingTest extends BaseUnit4Test {
     }
     @Test
     public void testSerializeWithUnregisteredMixinAndFilter() throws Exception {
-        Bean filteredBean = new Bean();
-        filteredBean.setName("joe");
+        Bean bean = new Bean();
+        bean.setName("joe");
         //
         sc.addAdapter("M4RBeanMixin", Bean.class,
                 BeanMixin.class)
         .addAdapter("M4RBeanMixin", Bean.class,
                 null);
         // now profession is used after cleaning adapter
-        String bean = sc.serializeOnlyFilter(filteredBean, Bean.class, "profession");
+        String filteredBean = sc.serializeOnlyFilter(bean, Bean.class, "profession");
         assertEquals(
                 "Ser filtered Bean failed ",
                 "{\"type\":\"org.apache.fulcrum.json.jackson.Bean\",\"profession\":\"\"}",
-                bean);
+                filteredBean);
     }
     @Test
     public void testMultipleSerializingWithMixinAndFilter() throws Exception {
-        Rectangle filteredRectangle = new Rectangle(5, 10);
-        filteredRectangle.setName("jim");
+        Rectangle rectangle = new Rectangle(5, 10);
+        rectangle.setName("jim");
         //
         sc.addAdapter("M4RMixin2", Rectangle.class,
                 Mixin2.class);
         
         // if serialization is done Jackson clean cache
-        String rectangle0 = sc.ser(filteredRectangle,Rectangle.class,true);
+        String rectangle0 = sc.ser(rectangle,Rectangle.class,true);
         assertEquals(
                 "Ser filtered Rectangle failed ",
                 "{\"name\":\"jim\",\"width\":5}",
                 rectangle0);
         // filtering out name, using width from mixin2 as a second filter
-        String rectangle = sc.serializeOnlyFilter(filteredRectangle, Rectangle.class, true, "width");
+        String rectangle1 = sc.serializeOnlyFilter(rectangle, Rectangle.class, true, "width");
         assertEquals(
                 "Ser filtered Rectangle failed ",
                 "{\"width\":5}",
-                rectangle);
+                rectangle1);
         // default for mixin
-       String rectangle1 = sc.ser(filteredRectangle);
+       String rectangle2 = sc.ser(rectangle);
        assertEquals(
               "Ser filtered Rectangle failed ",
               "{\"name\":\"jim\",\"width\":5}",
-              rectangle1);
+              rectangle2);
     }
     @Test
     public void testSerializationCollectionWithMixin() throws Exception {
         List<Bean> beanList = new ArrayList<Bean>();
         for (int i = 0; i < 10; i++) {
-            Bean filteredBean = new Bean();
-            filteredBean.setName("joe" + i);
-            filteredBean.setAge(i);
-            beanList.add(filteredBean);
+            Bean bean = new Bean();
+            bean.setName("joe" + i);
+            bean.setAge(i);
+            beanList.add(bean);
         }
         String result = sc.addAdapter("M4RMixin", Bean.class, BeanMixin.class)
                 .ser(beanList);
@@ -303,10 +303,10 @@ public class JacksonMapperEnabledDefaultTypingTest extends BaseUnit4Test {
     public void testDeSerializationCollectionWithMixin() throws Exception {
         List<Bean> beanList = new ArrayList<Bean>();
         for (int i = 0; i < 10; i++) {
-            Bean filteredBean = new Bean();
-            filteredBean.setName("joe" + i);
-            filteredBean.setAge(i);
-            beanList.add(filteredBean);
+            Bean bean = new Bean();
+            bean.setName("joe" + i);
+            bean.setAge(i);
+            beanList.add(bean);
         }
         String result = sc.addAdapter("M4RMixin", Bean.class, BeanMixin.class)
                 .ser(beanList);
@@ -325,10 +325,10 @@ public class JacksonMapperEnabledDefaultTypingTest extends BaseUnit4Test {
         components.add(new Rectangle(25, 3));
         components.add(new Rectangle(250, 30));
         for (int i = 0; i < 3; i++) {
-            Bean filteredBean = new Bean();
-            filteredBean.setName("joe" + i);
-            filteredBean.setAge(i);
-            components.add(filteredBean);
+            Bean bean = new Bean();
+            bean.setName("joe" + i);
+            bean.setAge(i);
+            components.add(bean);
         }
         sc.addAdapter("M4RMixin", Rectangle.class, Mixin.class).addAdapter(
                 "M4BeanRMixin", Bean.class, BeanMixin.class);

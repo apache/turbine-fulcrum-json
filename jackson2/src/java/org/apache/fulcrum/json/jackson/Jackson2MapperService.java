@@ -168,6 +168,10 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
         return (T) reader.readValue(json);
     }
     
+    public <T> T deSer(Object src, Class<T> type) throws Exception {
+         return mapper.convertValue( src, type);
+    }
+    
     public <T> Collection<T> deSerCollectionWithType(String json, Class<? extends Collection> collectionClass, Class<T> type)
             throws Exception {
         return mapper.readValue(json, mapper.getTypeFactory()

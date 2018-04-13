@@ -186,13 +186,13 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
     }
     @Test
     public void testSerializeWithCustomFilter() throws Exception {
-        Bean filteredBean = new Bean();
-        filteredBean.setName("joe");
-        String bean = sc.serializeOnlyFilter(filteredBean, "name");
+        Bean bean = new Bean();
+        bean.setName("joe");
+        String filteredBean = sc.serializeOnlyFilter(bean, "name");
         assertEquals(
                 "Ser filtered Bean failed ",
                 "{\"name\":\"joe\"}",
-                bean);
+                filteredBean);
         Rectangle filteredRectangle = new Rectangle(5, 10);
         filteredRectangle.setName("jim");
         String rectangle = sc.serializeOnlyFilter(filteredRectangle,
@@ -205,28 +205,28 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
 
         List<Bean> beanList = new ArrayList<Bean>();
         for (int i = 0; i < 10; i++) {
-            Bean filteredBean = new Bean();
-            filteredBean.setName("joe" + i);
-            filteredBean.setAge(i);
-            beanList.add(filteredBean);
+            Bean bean = new Bean();
+            bean.setName("joe" + i);
+            bean.setAge(i);
+            beanList.add(bean);
         }
-        String result = sc.serializeOnlyFilter(beanList, Bean.class, "name",
+        String filteredResult = sc.serializeOnlyFilter(beanList, Bean.class, "name",
                 "age");
         assertEquals(
                 "Serialization of beans failed ",
                 "[{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe0','age':0},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe1','age':1},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe2','age':2},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe3','age':3},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe4','age':4},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe5','age':5},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe6','age':6},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe7','age':7},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe8','age':8},{'type':'org.apache.fulcrum.json.jackson.Bean','name':'joe9','age':9}]",
-                result.replace('"', '\''));
+                filteredResult.replace('"', '\''));
     }
     @Test
     public void testDeserializationCollectionWithFilter() throws Exception {
         List<Bean> beanList = new ArrayList<Bean>();
         for (int i = 0; i < 10; i++) {
-            Bean filteredBean = new Bean();
-            filteredBean.setName("joe" + i);
-            filteredBean.setAge(i);
-            beanList.add(filteredBean);
+            Bean bean = new Bean();
+            bean.setName("joe" + i);
+            bean.setAge(i);
+            beanList.add(bean);
         }
-        String result = sc.serializeOnlyFilter(beanList, Bean.class, "name",
+        String filteredResult = sc.serializeOnlyFilter(beanList, Bean.class, "name",
                 "age");
         //System.out.println("res:"+result);
         // could not use TypeReference as JSON string has no type set for array:
@@ -235,7 +235,7 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
         // 
         // -> need to use constructCollectionType        
         Class clazz = Class.forName("org.apache.fulcrum.json.jackson.Bean");
-        List<Bean> beanList2 = (List<Bean>)sc.deSerCollection(result, new ArrayList(),clazz);
+        List<Bean> beanList2 = (List<Bean>)sc.deSerCollection(filteredResult, new ArrayList(),clazz);
         assertTrue("DeSer failed ", beanList2.size() == 10);
         for (Bean bean : beanList2) {
             assertEquals("DeSer failed ", Bean.class, bean.getClass());
@@ -246,10 +246,10 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
             throws Exception {
         List<Bean> beanList = new ArrayList<Bean>();
         for (int i = 0; i < 10; i++) {
-            Bean filteredBean = new Bean();
-            filteredBean.setName("joe" + i);
-            filteredBean.setAge(i);
-            beanList.add(filteredBean);
+            Bean bean = new Bean();
+            bean.setName("joe" + i);
+            bean.setAge(i);
+            beanList.add(bean);
         }
         String result = sc.serializeOnlyFilter(beanList, Bean.class, "name",
                 "age");
@@ -280,8 +280,8 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
     }
     @Test
     public void testSerializeWith2Mixins() throws Exception {
-        Bean filteredBean = new Bean();
-        filteredBean.setName("joe");
+        Bean bean = new Bean();
+        bean.setName("joe");
         Rectangle filteredRectangle = new Rectangle(5, 10);
         filteredRectangle.setName("jim");
 
@@ -289,13 +289,13 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
                 Mixin2.class).ser(filteredRectangle);
         assertEquals("Ser failed ", "{\"name\":\"jim\",\"width\":5}", serRect);
         //
-        String bean = sc.addAdapter("M4RBeanMixin", Bean.class,
-                BeanMixin.class).ser(filteredBean);;
+        String filteredBean = sc.addAdapter("M4RBeanMixin", Bean.class,
+                BeanMixin.class).ser(bean);;
         
         assertEquals(
                 "Ser filtered Bean failed ",
                 "{\"name\":\"joe\"}",
-                bean);
+                filteredBean);
     }
     @Test
     public void testSerializeWithMixinAndFilter() throws Exception {
@@ -312,52 +312,52 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
     }
     @Test
     public void testSerializeWithUnregisteredMixinAndFilter() throws Exception {
-        Bean filteredBean = new Bean();
-        filteredBean.setName("joe");
+        Bean bean = new Bean();
+        bean.setName("joe");
         sc.addAdapter("M4RBeanMixin", Bean.class,
                 BeanMixin.class)
         .addAdapter("M4RBeanMixin", Bean.class,
                 null);
         // now profession is used after cleaning adapter
-        String bean = sc.serializeOnlyFilter(filteredBean, Bean.class, "profession");
+        String filteredBeanSer = sc.serializeOnlyFilter(bean, Bean.class, "profession");
         assertEquals(
                 "Ser filtered Bean failed ",
                 "{\"profession\":\"\"}",
-                bean);
+                filteredBeanSer);
     }
     @Test
     public void testMultipleSerializingWithMixinAndFilter() throws Exception {
-        Rectangle filteredRectangle = new Rectangle(5, 10);
-        filteredRectangle.setName("jim");
+        Rectangle rectangle = new Rectangle(5, 10);
+        rectangle.setName("jim");
         sc.addAdapter("M4RMixin2", Rectangle.class,
                 Mixin2.class);
         // if serialization is done Jackson clean cache
-        String rectangle0 = sc.ser(filteredRectangle,Rectangle.class,true);
+        String rectangle0 = sc.ser(rectangle,Rectangle.class,true);
         assertEquals(
                 "Ser filtered Rectangle failed ",
                 "{\"name\":\"jim\",\"width\":5}",
                 rectangle0);
         // filtering out name, using width from mixin2 as a second filter
-        String rectangle = sc.serializeOnlyFilter(filteredRectangle, Rectangle.class, true, "width");
+        String rectangle1 = sc.serializeOnlyFilter(rectangle, Rectangle.class, true, "width");
         assertEquals(
                 "Ser filtered Rectangle failed ",
                 "{\"width\":5}",
-                rectangle);
+                rectangle1);
         // default for mixin
-       String rectangle1 = sc.ser(filteredRectangle);
+       String rectangle2 = sc.ser(rectangle);
        assertEquals(
               "Ser filtered Rectangle failed ",
               "{\"name\":\"jim\",\"width\":5}",
-              rectangle1);
+              rectangle2);
     }
     @Test
     public void testSerializationCollectionWithMixin() throws Exception {
         List<Bean> beanList = new ArrayList<Bean>();
         for (int i = 0; i < 10; i++) {
-            Bean filteredBean = new Bean();
-            filteredBean.setName("joe" + i);
-            filteredBean.setAge(i);
-            beanList.add(filteredBean);
+            Bean bean = new Bean();
+            bean.setName("joe" + i);
+            bean.setAge(i);
+            beanList.add(bean);
         }
         String result = sc.addAdapter("M4RMixin", Bean.class, BeanMixin.class)
                 .ser(beanList);
@@ -370,10 +370,10 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
     public void testDeSerializationCollectionWithMixin() throws Exception {
         List<Bean> beanList = new ArrayList<Bean>();
         for (int i = 0; i < 10; i++) {
-            Bean filteredBean = new Bean();
-            filteredBean.setName("joe" + i);
-            filteredBean.setAge(i);
-            beanList.add(filteredBean);
+            Bean bean = new Bean();
+            bean.setName("joe" + i);
+            bean.setAge(i);
+            beanList.add(bean);
         }
         String result = sc.addAdapter("M4RMixin", Bean.class, BeanMixin.class)
                 .ser(beanList);
@@ -394,10 +394,10 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
         components.add(new Rectangle(25, 3));
         components.add(new Rectangle(250, 30));
         for (int i = 0; i < 3; i++) {
-            Bean filteredBean = new Bean();
-            filteredBean.setName("joe" + i);
-            filteredBean.setAge(i);
-            components.add(filteredBean);
+            Bean bean = new Bean();
+            bean.setName("joe" + i);
+            bean.setAge(i);
+            components.add(bean);
         }
         // property w->width, BeanMixin:  name ignore other properties
         sc.addAdapter("M4RMixin", Rectangle.class, Mixin.class).addAdapter(
