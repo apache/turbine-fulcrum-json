@@ -18,9 +18,10 @@ package org.apache.fulcrum.json.jackson;
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -43,6 +44,8 @@ import org.junit.Test;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 
 /**
  * Jackson2 JSON Test
@@ -124,6 +127,122 @@ public class JacksonMapperTest extends BaseUnit4Test {
                 "Serialization of beans failed ",
                 "[{'name':'joe0','age':0},{'name':'joe1','age':1},{'name':'joe2','age':2},{'name':'joe3','age':3},{'name':'joe4','age':4},{'name':'joe5','age':5},{'name':'joe6','age':6},{'name':'joe7','age':7},{'name':'joe8','age':8},{'name':'joe9','age':9}]",
                 filteredResult.replace('"', '\''));
+    }
+    
+    @Test
+    public void testTwoSerializationCollectionWithTwoDifferentFilter() throws Exception {
+
+        List<Bean> beanList = new ArrayList<Bean>();
+        for (int i = 0; i < 10; i++) {
+            Bean bean = new Bean();
+            bean.setName("joe" + i);
+            bean.setAge(i);
+            beanList.add(bean);
+        }
+        String filteredResult = sc.serializeOnlyFilter(beanList, Bean.class, "name",
+                "age");
+        System.out.println( filteredResult );
+        assertEquals("Serialization of beans failed ",
+                "[{'name':'joe0','age':0},{'name':'joe1','age':1},{'name':'joe2','age':2},{'name':'joe3','age':3},{'name':'joe4','age':4},{'name':'joe5','age':5},{'name':'joe6','age':6},{'name':'joe7','age':7},{'name':'joe8','age':8},{'name':'joe9','age':9}]",
+        filteredResult.replace('"', '\''));
+        filteredResult = sc.serializeOnlyFilter(beanList, Bean.class, "name");
+        System.out.println( filteredResult );
+        assertEquals("Serialization of beans failed ",
+                     "[{'name':'joe0'},{'name':'joe1'},{'name':'joe2'},{'name':'joe3'},{'name':'joe4'},{'name':'joe5'},{'name':'joe6'},{'name':'joe7'},{'name':'joe8'},{'name':'joe9'}]",
+             filteredResult.replace('"', '\''));
+    }
+    
+    /** This may be a bug in jackson, the filter is not exchanged if the same class is matched again
+    * 
+    * first it may be com.fasterxml.jackson.databind.ser.impl.PropertySerializerMap.Empty.serializerFor(Class<?>)
+    * and then 
+    * com.fasterxml.jackson.databind.ser.impl.PropertySerializerMap.Single.serializerFor(Class<?>)
+    * which returns a serializer
+    * **/
+    @Test
+    public void testTwoSerializationCollectionNoAndWithFilter() throws Exception {
+        List<Bean> beanList = new ArrayList<Bean>();
+        for (int i = 0; i < 4; i++) {
+            Bean bean = new Bean();
+            bean.setName("joe" + i);
+            bean.setAge(i);
+            beanList.add(bean);
+        }
+        String filteredResult = sc.ser(beanList, Bean.class);//unfiltered
+        System.out.println( filteredResult );
+        assertEquals("First unfiltered serialization of beans failed ",
+                "[{'name':'joe0','age':0,'profession':''},{'name':'joe1','age':1,'profession':''},{'name':'joe2','age':2,'profession':''},{'name':'joe3','age':3,'profession':''}]",
+        filteredResult.replace('"', '\''));
+        
+        filteredResult = sc.serializeOnlyFilter(beanList, Bean.class, "name");
+        System.out.println( filteredResult );
+        // this may be a bug in jackson, serializer is reused, if not cleaned up
+        assertNotEquals("[{'name':'joe0'},{'name':'joe1'},{'name':'joe2'},{'name':'joe3'}]",
+        filteredResult.replace('"', '\''));
+        
+        // cleaning requires, that you have to provide some other type, which is different from the (typed) source object, 
+        // providing just new ArrayList<Bean>() only will not help, but an anonymous class may be sufficient.
+        // A simple object will do it, this resets to an unknown serializer, which eventaully does clean up  the serializer cache.
+        sc.serializeOnlyFilter(new Object(), new String[]{});
+        filteredResult = sc.serializeOnlyFilter(beanList, Bean.class, "name");
+        System.out.println( filteredResult );
+        assertEquals("Second filtered serialization of beans failed ", "[{'name':'joe0'},{'name':'joe1'},{'name':'joe2'},{'name':'joe3'}]",
+        filteredResult.replace('"', '\''));
+    }
+    
+    @Test
+    public void testSetMixin() {
+        Bean src = new Bean();
+        src.setName("joe");
+        src.setAge( 99 );
+        src.setProfession("runner");
+        //
+        // profession was already set to ignore, does not change
+        String result = null;
+        try
+        {
+            result = ((Jackson2MapperService)sc).withMixinModule(src, "mixinbean", Bean.class, BeanMixin.class );
+            assertEquals(
+                         "Ser filtered Bean failed ",
+                         "{\"name\":\"joe\"}",
+                         result);
+            // clean up buffer is not sufficient..
+            sc.serializeOnlyFilter(new Object(), new String[]{});
+            
+            // .. this assert result is not to be expected!!!
+            result = ((Jackson2MapperService)sc).withMixinModule(src, "mixin2bean", Bean.class, BeanMixin2.class );
+            assertEquals(
+                         "Ser filtered Bean failed ",
+                         "{\"name\":\"joe\"}",
+                         result);
+            // clean up of mixin and buffer required
+            
+            // clean up mixins 
+             ((Jackson2MapperService)sc).setMixins(Bean.class, BeanMixin2.class );
+             
+             // clean up buffer 
+             sc.serializeOnlyFilter(new Object(), new String[]{});
+             
+//           Map<Class<?>, Class<?>> sourceMixins = new HashMap<Class<?>, Class<?>>(1);
+//           sourceMixins.put( Bean.class,BeanMixin2.class );
+//           ((Jackson2MapperService)sc).getMapper().setMixIns( sourceMixins  );
+             result =sc.ser( src, Bean.class );
+             assertEquals(
+                     "Ser filtered Bean failed ",
+                     "{\"age\":99,\"profession\":\"runner\"}",
+                     result);
+        }
+        catch ( JsonProcessingException e )
+        {
+            logger.error( "err",e );
+           fail();
+        }
+        catch ( Throwable e )
+        {
+            logger.error( "err",e );
+            fail();
+        }
+
     }
 
     @Test
@@ -347,6 +466,12 @@ public class JacksonMapperTest extends BaseUnit4Test {
 
         @JsonProperty
         abstract String getName();//
+    }
+    public static abstract class BeanMixin2 extends Bean {
+        BeanMixin2() {
+        }
+        @JsonIgnore
+        public abstract String getName();//
     }
 
 }

@@ -227,7 +227,6 @@ public class DefaultServiceTest extends BaseUnit4Test {
     }
     @Test
     public void testSerializeWithOnlyFilter() throws Exception {
-
         // as gson adds we could not use multiple disjunct exclusion strategies
         String serJson = sc.serializeOnlyFilter(new TestClass("mytest"),
                 (Class) null, "configurationName");
@@ -237,7 +236,6 @@ public class DefaultServiceTest extends BaseUnit4Test {
     }
     @Test
     public void testSerializeWithOnlyFilter2() throws Exception {
-
         // as gson adds we could not use multiple disjunct exclusion strategies
         Rectangle filteredRectangle = new Rectangle(5, 10);
         filteredRectangle.setName("jim");
@@ -247,6 +245,15 @@ public class DefaultServiceTest extends BaseUnit4Test {
                 "{\"w\":5}",
                 rectangle);
     }
+    @Test
+    public void testSerializeNoAttributesWithOnlyFilter() throws Exception {
+        // as gson adds we could not use multiple disjunct exclusion strategies
+        Rectangle filteredRectangle = new Rectangle(5, 10);
+        filteredRectangle.setName("jim");
+        String rectangle = sc.serializeOnlyFilter(filteredRectangle);
+        System.out.println( "rectangle"+ rectangle );
+    }
+
 
 
 

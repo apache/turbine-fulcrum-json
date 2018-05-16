@@ -92,7 +92,7 @@ public class JSONConcurrentTest extends BaseUnit4Test
 
        
          @Before
-         public void init() throws ComponentException {             
+         public void init() throws ComponentException {
 
              fSynchronizer = new CountDownLatch(N);
          }
@@ -173,7 +173,7 @@ public class JSONConcurrentTest extends BaseUnit4Test
               return mapper.writer(filter).writeValueAsString(list);
           }
           
-          private ObjectMapper customMapper(boolean withType) {              
+          private ObjectMapper customMapper(boolean withType) {
               ObjectMapper objectMapper = new ObjectMapper(
                       new MappingJsonFactory(((Jackson2MapperService) jsonService).getMapper()));
               if (withType) objectMapper.enableDefaultTypingAsProperty(

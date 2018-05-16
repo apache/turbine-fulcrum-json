@@ -40,4 +40,10 @@ public class Bean {
     public void setAge(int age) {
         this.age = age;
     }
+
+    public void setProfession( String profession )
+    {
+        this.profession = profession;
+        
+    }
 }

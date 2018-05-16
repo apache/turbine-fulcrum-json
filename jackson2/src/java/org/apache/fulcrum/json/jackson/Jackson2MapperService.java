@@ -24,6 +24,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -156,6 +157,53 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
         }
         return res;
     }
+    
+    @Override
+    public String ser(Object src, Boolean cleanCache) throws Exception {
+        if (cacheService.getFilters().containsKey(src.getClass().getName())) {
+            getLogger().warn(
+                    "Found registered filter - using instead of default view filter for class:"
+                            + src.getClass().getName());
+            // throw new
+            // Exception("Found registered filter - could not use custom view and custom filter for class:"+
+            // src.getClass().getName());
+            SimpleFilterProvider filter = (SimpleFilterProvider) cacheService.getFilters().get(src.getClass()
+                    .getName());
+            return ser(src, filter, cleanCache);//mapper.writerWithView(src.getClass()).writeValueAsString(src);
+        }
+        String res = mapper.writerWithView(Object.class).writeValueAsString(src);
+        if (cleanCache != null && cleanCache) {
+            cacheService.cleanSerializerCache(mapper);
+        }
+        return res;
+    }
+
+    @Override
+    public <T> String ser(Object src, Class<T> type, Boolean cleanCache)
+            throws Exception {
+        getLogger().info("serializing object:" + src + " for type "+ type);
+        if (src != null && cacheService.getFilters().containsKey(src.getClass().getName())) {
+            getLogger()
+                    .warn("Found registered filter - could not use custom view and custom filter for class:"
+                            + src.getClass().getName());
+            // throw new
+            // Exception("Found registered filter - could not use custom view and custom filter for class:"+
+            // src.getClass().getName());
+            SimpleFilterProvider filter = (SimpleFilterProvider) cacheService.getFilters().get(src.getClass()
+                    .getName());
+            return ser(src, filter);
+        }
+
+        String res = (type != null)? mapper.writerWithView(type).writeValueAsString(src): mapper.writeValueAsString(src);
+        if (cleanCache) {
+            cacheService.cleanSerializerCache(mapper);
+        }
+        // jackson bug? filter is not cleaned in collection type
+        if (type != null) {
+            // todo may do something
+        }
+        return res;
+    } 
 
     @Override
     public <T> T deSer(String json, Class<T> type) throws Exception {
@@ -267,8 +315,21 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
     public String withMixinModule(Object src, String name, Class target,
             Class mixin) throws JsonProcessingException {
         Module mx = new MixinModule(name, target, mixin);
-        getLogger().debug("registering module " + mx + "  for: " + mixin);
+        getLogger().debug("registering module " + mx + ", mixin: " + mixin);
         return mapper.registerModule(mx).writer().writeValueAsString(src);
+    }
+    @SuppressWarnings("rawtypes")
+    public String withSetMixins(Object src, Class target,
+              Class mixin) throws JsonProcessingException {
+        return setMixins(target, mixin).writer().writeValueAsString(src);
+    }
+    @SuppressWarnings("rawtypes")
+    public ObjectMapper setMixins(Class target,
+              Class mixin) throws JsonProcessingException {
+        Map<Class<?>, Class<?>> sourceMixins = new HashMap<Class<?>, Class<?>>(1);
+        sourceMixins.put( target,mixin );
+        getLogger().debug("clean set mixins for target " + target + ", mixin: " + mixin);
+        return mapper.setMixIns( sourceMixins );
     }
     
     @Override
@@ -355,54 +416,11 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
             getLogger().debug("setting filteroutAllexcept filter for size of filterAttr: " + filterAttr.length);
         } else {
             getLogger().warn("no filter attributes set!");
-            pf = SimpleBeanPropertyFilter.filterOutAllExcept("dummy");
+            pf = SimpleBeanPropertyFilter.filterOutAllExcept("dummy"); // to be consistent with gson anything is filtered out.
         }
         if (filterClasses == null) throw new Exception("You have to provide some class to apply the filtering!");
         return filter(src, filterClasses, null, pf, refresh);
-    }
-    
-    @Override
-    public String ser(Object src, Boolean cleanCache) throws Exception {
-        if (cacheService.getFilters().containsKey(src.getClass().getName())) {
-            getLogger().warn(
-                    "Found registered filter - using instead of default view filter for class:"
-                            + src.getClass().getName());
-            // throw new
-            // Exception("Found registered filter - could not use custom view and custom filter for class:"+
-            // src.getClass().getName());
-            SimpleFilterProvider filter = (SimpleFilterProvider) cacheService.getFilters().get(src.getClass()
-                    .getName());
-            return ser(src, filter, cleanCache);//mapper.writerWithView(src.getClass()).writeValueAsString(src);
-        }
-        String res = mapper.writerWithView(Object.class).writeValueAsString(src);
-        if (cleanCache != null && cleanCache) {
-            cacheService.cleanSerializerCache(mapper);
-        }
-        return res;
-    }
-
-    @Override
-    public <T> String ser(Object src, Class<T> type, Boolean cleanCache)
-            throws Exception {
-        getLogger().info("serializing object:" + src + " for type "+ type);
-        if (src != null && cacheService.getFilters().containsKey(src.getClass().getName())) {
-            getLogger()
-                    .warn("Found registered filter - could not use custom view and custom filter for class:"
-                            + src.getClass().getName());
-            // throw new
-            // Exception("Found registered filter - could not use custom view and custom filter for class:"+
-            // src.getClass().getName());
-            SimpleFilterProvider filter = (SimpleFilterProvider) cacheService.getFilters().get(src.getClass()
-                    .getName());
-            return ser(src, filter);
-        }
-
-        String res = (type != null)? mapper.writerWithView(type).writeValueAsString(src): mapper.writeValueAsString(src);
-        if (cleanCache) {
-            cacheService.cleanSerializerCache(mapper);
-        }
-        return res;
-    }  
+    } 
 
     /**
      * 
