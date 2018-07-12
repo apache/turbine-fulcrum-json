@@ -24,6 +24,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -45,6 +46,10 @@ import org.junit.Test;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.SerializationFeature;
+
 
 
 /**
@@ -109,8 +114,8 @@ public class JacksonMapperTest extends BaseUnit4Test {
                 Rectangle.class, "w", "name");
         assertEquals("Ser filtered Rectangle failed ",
                 "{\"w\":5,\"name\":\"jim\"}", filteredRectangle);
-
     }
+    
     @Test
     public void testSerializationCollectionWithFilter() throws Exception {
 
@@ -435,6 +440,91 @@ public class JacksonMapperTest extends BaseUnit4Test {
             // name should be set without Mixin
             assertTrue(((List<Rectangle>)resultList3).get(i).getName()!=null);
         }
+    }
+    
+    @Test
+    public void testSerializeListWithWrapper()  {
+        try
+        {
+            Bean bean = new Bean();
+            bean.setName("joe");
+            bean.setAge(12);
+            String filteredBean  = sc.serializeOnlyFilter(bean, Bean.class, "name");
+            assertEquals("Ser filtered Bean failed ", "{\"name\":\"joe\"}", filteredBean);
+
+            Rectangle rectangle = new Rectangle(5, 10);
+            rectangle.setName("quadro");
+            String filteredRectangle  = sc.serializeOnlyFilter(rectangle,
+                    Rectangle.class, "w", "name");
+            assertEquals("Ser filtered Rectangle failed ",
+                    "{\"w\":5,\"name\":\"quadro\"}", filteredRectangle);
+            
+            Bean bean2 = new Bean();
+            bean2.setName("jim");
+            bean2.setAge(92);
+            List<Bean> beans = Arrays.asList( bean, bean2 );
+            List<Rectangle> rectangles = Arrays.asList( rectangle );
+            List wrapper = new ArrayList();
+            wrapper.addAll( beans ); wrapper.addAll( rectangles );
+            
+            //String wrappedLists =  sc.serializeOnlyFilter( wrapper, "name" );
+            String jsonResult =  sc.ser( wrapper );
+            // res:wrappedLists:[{"name":"joe","age":12,"profession":""},{"w":5,"h":10,"name":"jim","size":50}]
+            logger.debug( "jsonResult provided wrapper:" +jsonResult );
+            List listResult = (List) ((Jackson2MapperService)sc).deSerCollectionWithType( jsonResult, ArrayList.class,Object.class );
+            logger.debug( " provided wrapper lists:" +listResult );
+            
+            String jsonResult2 =  ((Jackson2MapperService)sc).ser( false, bean, bean2, rectangle );
+            logger.debug( "jsonResult2 bean, rectangle / no collection:" +jsonResult2 );
+            List listResult2 = (List) ((Jackson2MapperService)sc).deSerCollectionWithType( jsonResult2, ArrayList.class,Object.class );
+            logger.debug( "bean, rectangle / no collection lists:" +listResult2 );
+            assertTrue( jsonResult.equals( jsonResult2 ) );
+            listResult2.removeAll( listResult );
+            assertTrue( listResult2.isEmpty() );
+            
+            String jsonResult3 =  ((Jackson2MapperService)sc).ser( false, (Collection)beans, (Collection)rectangles );
+            // this wrape anything
+            logger.debug( "jsonResult3 raw lists:" +jsonResult3 ); 
+            List<List> listResult3 = (List) ((Jackson2MapperService)sc).deSerCollectionWithType( jsonResult3, ArrayList.class,List.class );
+            logger.debug( "raw lists:" +listResult3 );
+            listResult3.get( 0 ).removeAll( listResult );
+            listResult3.get( 1 ).removeAll( listResult );
+            assertTrue( listResult3.get( 0 ).isEmpty() );
+            assertTrue( listResult3.get( 1 ).isEmpty() );
+            
+            // this does not get any information, just to demonstrate
+            TypeReference<List<?>> typeRef = new TypeReference<List<?>>(){};
+            String jsonResult4 = ((Jackson2MapperService)sc).serCollectionWithTypeReference(wrapper,typeRef, false);
+            logger.debug( "jsonResult4 typereference:" +jsonResult4 );
+            List<Object> listResult4 = (List) ((Jackson2MapperService)sc).deSerCollectionWithType( jsonResult4, ArrayList.class,Object.class );
+            logger.debug( "typereference lists:" +listResult4 );
+            listResult4.removeAll( listResult );
+            assertTrue( listResult4.isEmpty() );
+
+            ((Jackson2MapperService)sc).getMapper().enable(SerializationFeature.WRAP_ROOT_VALUE);
+            String jsonResult5 =  sc.ser( wrapper );
+            // res:wrappedLists:[{"name":"joe","age":12,"profession":""},{"w":5,"h":10,"name":"jim","size":50}]
+            logger.debug( "jsonResult5 wrap root:" +jsonResult5 );
+            
+            ((Jackson2MapperService)sc).getMapper().configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
+            List<Object> listResult5 = (List) ((Jackson2MapperService)sc)
+                            .deSerCollectionWithType( jsonResult4, ArrayList.class,Object.class );
+            logger.debug( "wrap root lists:" +listResult5 );
+            listResult5.removeAll( listResult );
+            assertTrue( listResult5.isEmpty() );
+            List<Object> listResult51 = (List) ((Jackson2MapperService)sc)
+                            .deSerCollectionWithTypeReference( jsonResult5, new TypeReference<List<?>>() {} );
+            logger.debug( "wrap root lists typereferenced:" +listResult51 );
+            ((Map<String, List>)listResult51.get( 0 )).values().iterator().next().removeAll( listResult );
+            assertTrue( ((Map<String, List>)listResult51.get( 0 )).values().iterator().next().isEmpty() );
+            
+            
+        }
+        catch ( Exception e )
+        {
+            e.printStackTrace();
+           fail();
+        } 
     }
 
 

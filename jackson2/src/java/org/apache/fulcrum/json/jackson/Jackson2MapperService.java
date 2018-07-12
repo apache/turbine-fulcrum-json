@@ -150,8 +150,8 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
             } 
         }
         getLogger().debug("ser class::" + src.getClass() + " with filter " + filter);
-        mapper.setFilterProvider(filter);
-        String res =  mapper.writer(filter).writeValueAsString(src);
+        //mapper.setFilterProvider(filter);// this is global
+        String res =  mapper.writer().with(filter).writeValueAsString(src);
         if (cleanCache) {
             cacheService.cleanSerializerCache(mapper);
         }
@@ -169,7 +169,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
             // src.getClass().getName());
             SimpleFilterProvider filter = (SimpleFilterProvider) cacheService.getFilters().get(src.getClass()
                     .getName());
-            return ser(src, filter, cleanCache);//mapper.writerWithView(src.getClass()).writeValueAsString(src);
+            return ser(src, filter, cleanCache);
         }
         String res = mapper.writerWithView(Object.class).writeValueAsString(src);
         if (cleanCache != null && cleanCache) {
@@ -181,7 +181,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
     @Override
     public <T> String ser(Object src, Class<T> type, Boolean cleanCache)
             throws Exception {
-        getLogger().info("serializing object:" + src + " for type "+ type);
+        getLogger().debug("serializing object:" + src + " for type "+ type);
         if (src != null && cacheService.getFilters().containsKey(src.getClass().getName())) {
             getLogger()
                     .warn("Found registered filter - could not use custom view and custom filter for class:"
@@ -193,8 +193,8 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
                     .getName());
             return ser(src, filter);
         }
-
-        String res = (type != null)? mapper.writerWithView(type).writeValueAsString(src): mapper.writeValueAsString(src);
+        mapper.setFilterProvider(new SimpleFilterProvider().setFailOnUnknownId(false));
+        String res = (type != null)? mapper.writerWithView(type).writeValueAsString(src): mapper.writer().writeValueAsString(src);
         if (cleanCache) {
             cacheService.cleanSerializerCache(mapper);
         }
@@ -204,6 +204,22 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
         }
         return res;
     } 
+    
+    
+    public <T> String ser( Object... objects) throws Exception {
+        return ser( objects, false );
+    }
+    /**
+     * convenience method to provide a list of coolections without providign a wrapper 
+     * @param cleanCache
+     * @param objects
+     * @return serialized JSON
+     * @throws Exception
+     */
+    public <T> String ser(Boolean cleanCache, Object... objects) throws Exception {
+        return ser( objects, cleanCache );
+    }  
+   
 
     @Override
     public <T> T deSer(String json, Class<T> type) throws Exception {
@@ -812,8 +828,9 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
                         "JsonMapperService: Error instantiating " + djpw
                                 + " using useJsonPath=" + useJsonPath);
             }
-
         }
+        // JACKSON-650, Ignore missing filters, may be, because previoulsy a filter was set (e.g. ignore filter)
+        mapper.setFilterProvider(new SimpleFilterProvider().setFailOnUnknownId(false));
     }
 
     public ObjectMapper getMapper() {
