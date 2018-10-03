@@ -231,7 +231,7 @@ public class JSONConcurrentTest extends BaseUnit4Test
     
     public static String getFailures(Result result) {
         List<Failure> failures = result.getFailures() ;
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (Failure failure : failures) {
             sb.append(failure.getMessage()); 
             //System.out.println(failure.getMessage());
@@ -242,7 +242,7 @@ public class JSONConcurrentTest extends BaseUnit4Test
     
     public static String getTrace(Result result) {
         List<Failure> failures = result.getFailures() ;
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (Failure failure : failures) {
             failure.getException().printStackTrace();
             if (failure.getException().getCause() != null) 
