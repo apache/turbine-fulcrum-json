@@ -23,7 +23,6 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.apache.fulcrum</groupId>
     <artifactId>fulcrum-json-api</artifactId>
     <name>Fulcrum JSON API</name>
 
