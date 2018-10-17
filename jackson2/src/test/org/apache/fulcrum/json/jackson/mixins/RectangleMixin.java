@@ -1,4 +1,5 @@
-package org.apache.fulcrum.json.jackson;
+package org.apache.fulcrum.json.jackson.mixins;
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -20,16 +21,19 @@ package org.apache.fulcrum.json.jackson;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public abstract class BeanMixin {
-    BeanMixin() {
+public abstract class RectangleMixin {
+    void MixIn(int w, int h) {
     }
 
-    @JsonIgnore
-    abstract int getAge();
+    @JsonProperty("width")
+    abstract int getW(); // rename property
 
     @JsonIgnore
-    String profession; // exclude
+    abstract int getH();
 
-    @JsonProperty
-    abstract String getName();//
+    @JsonIgnore
+    abstract int getSize(); // exclude
+
+    @JsonIgnore
+    abstract String getName();
 }

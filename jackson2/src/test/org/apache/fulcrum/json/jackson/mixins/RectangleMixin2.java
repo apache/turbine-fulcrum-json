@@ -1,4 +1,5 @@
-package org.apache.fulcrum.json;
+package org.apache.fulcrum.json.jackson.mixins;
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -17,42 +18,22 @@ package org.apache.fulcrum.json;
  * specific language governing permissions and limitations
  * under the License.
  */
-public final class Rectangle {
-    private int w, h;
-    private String name;
- 
-    public Rectangle() {
-        // may be this is needed for deserialization, if not set otherwise
-    }
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public abstract class RectangleMixin2 {
     
-    public Rectangle(int w, int h) {
-        this.w = w;
-        this.h = h;
+    void MixIn2(int w, int h) {
     }
 
-    public Rectangle(int w, int h, String name) {
-        this.w = w;
-        this.h = h;
-        this.name = name;
-    }
+    @JsonProperty("width")
+    abstract int getW(); // rename property
 
-    public int getW() {
-        return w;
-    }
+    @JsonIgnore
+    abstract int getH();
 
-    public int getH() {
-        return h;
-    }
+    @JsonIgnore
+    abstract int getSize(); // exclude
 
-    public int getSize() {
-        return w * h;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
+    abstract String getName();
 }

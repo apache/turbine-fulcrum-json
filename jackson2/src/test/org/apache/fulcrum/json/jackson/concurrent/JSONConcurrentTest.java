@@ -34,9 +34,9 @@ import java.util.concurrent.CountDownLatch;
 
 import org.apache.avalon.framework.component.ComponentException;
 import org.apache.fulcrum.json.JsonService;
-import org.apache.fulcrum.json.jackson.Bean;
 import org.apache.fulcrum.json.jackson.Jackson2MapperService;
 import org.apache.fulcrum.json.jackson.SimpleNameIntrospector;
+import org.apache.fulcrum.json.jackson.example.Bean;
 import org.apache.fulcrum.testcontainer.BaseUnit4Test;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -64,12 +64,10 @@ public class JSONConcurrentTest extends BaseUnit4Test
    private static volatile Thread fTwo = null;
    private static volatile Thread fThree = null;
    private static JsonService jsonService = null;
-    
 
 //    
     public JSONConcurrentTest( )
                     throws Exception {}
-      
 
     @BeforeClass
     public static void setUp() throws Exception
@@ -93,13 +91,12 @@ public class JSONConcurrentTest extends BaseUnit4Test
        
          @Before
          public void init() throws ComponentException {
-
              fSynchronizer = new CountDownLatch(N);
          }
          @Test
          public void one() throws InterruptedException {
              String result = doJob("name");
-             assertTrue("Result does contain type", !result.contains( "org.apache.fulcrum.json.jackson.Bean" )  );
+             assertTrue("Result does contain type", !result.contains( "org.apache.fulcrum.json.jackson.example.Bean" )  );
              assertTrue("Result does contain type", !result.contains( "java.util.ArrayList" )  );
              fSynchronizer.countDown();
              //assertTrue("waiting failed", fSynchronizer.await(TIMEOUT, TimeUnit.SECONDS));
@@ -110,7 +107,7 @@ public class JSONConcurrentTest extends BaseUnit4Test
           public void two() throws InterruptedException {
               String result = doJob( "name", "age");
               
-              assertTrue("Result does contain type", !result.contains( "org.apache.fulcrum.json.jackson.Bean" )  );
+              assertTrue("Result does contain type", !result.contains( "org.apache.fulcrum.json.jackson.example.Bean" )  );
               assertTrue("Result does contain type", !result.contains( "java.util.ArrayList" )  );
               fSynchronizer.countDown();
               //assertTrue("waiting failed", fSynchronizer.await(TIMEOUT, TimeUnit.SECONDS));
@@ -123,7 +120,8 @@ public class JSONConcurrentTest extends BaseUnit4Test
               //((Jackson2MapperService) jsonService).setMapper(mapper);
               //String result = doTaskJob("name", "age","profession");
               String result = doFilteredJob(mapper, new String[]{"age","profession"});
-              assertTrue("Result does not contain type, which it should", result.contains( "org.apache.fulcrum.json.jackson.Bean" )  );
+              assertTrue("Result does not contain type, which it should", result.contains( "org.apache"
+                  + ".fulcrum.json.jackson.example.Bean" )  );
               assertTrue("Result does not contain type, which it should", result.contains( "java.util.ArrayList" )  );
               assertTrue("Result should not contain attribute name", !result.contains( "\"name\"" )  );
               fSynchronizer.countDown();
@@ -173,7 +171,7 @@ public class JSONConcurrentTest extends BaseUnit4Test
               return mapper.writer(filter).writeValueAsString(list);
           }
           
-          private ObjectMapper customMapper(boolean withType) {
+          private ObjectMapper customMapper(boolean withType) {              
               ObjectMapper objectMapper = new ObjectMapper(
                       new MappingJsonFactory(((Jackson2MapperService) jsonService).getMapper()));
               if (withType) objectMapper.enableDefaultTypingAsProperty(
@@ -231,7 +229,7 @@ public class JSONConcurrentTest extends BaseUnit4Test
     
     public static String getFailures(Result result) {
         List<Failure> failures = result.getFailures() ;
-        StringBuilder sb = new StringBuilder();
+        StringBuffer sb = new StringBuffer();
         for (Failure failure : failures) {
             sb.append(failure.getMessage()); 
             //System.out.println(failure.getMessage());
@@ -242,7 +240,7 @@ public class JSONConcurrentTest extends BaseUnit4Test
     
     public static String getTrace(Result result) {
         List<Failure> failures = result.getFailures() ;
-        StringBuilder sb = new StringBuilder();
+        StringBuffer sb = new StringBuffer();
         for (Failure failure : failures) {
             failure.getException().printStackTrace();
             if (failure.getException().getCause() != null) 

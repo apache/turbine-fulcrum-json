@@ -19,7 +19,7 @@
     <parent>
         <artifactId>fulcrum-json-parent</artifactId>
         <groupId>org.apache.fulcrum</groupId>
-        <version>1.1.2-SNAPSHOT</version>
+        <version>2.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -61,9 +61,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
-            <version>2.6</version>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.7</version>
         </dependency>
         <dependency>
             <groupId>org.apache.avalon.framework</groupId>
@@ -84,12 +84,16 @@
         <dependency>
           <groupId>org.codehaus.jackson</groupId>
           <artifactId>jackson-mapper-asl</artifactId>
-          <version>1.9.13</version>
+          <version>${jackson.version}</version>
         </dependency>
         <dependency>
           <groupId>org.codehaus.jackson</groupId>
           <artifactId>jackson-xc</artifactId>
-           <version>1.9.13</version>
+           <version>${jackson.version}</version>
         </dependency>
     </dependencies>
+    <properties>
+        <!-- 1.9.13, released 14-Jul-2013: latest version see https://github.com/FasterXML/jackson -->
+        <jackson.version>1.9.13</jackson.version>
+    </properties>
 </project>

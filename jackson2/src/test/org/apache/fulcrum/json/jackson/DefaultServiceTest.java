@@ -32,9 +32,17 @@ import java.util.Map;
 import org.apache.avalon.framework.logger.ConsoleLogger;
 import org.apache.avalon.framework.logger.Logger;
 import org.apache.fulcrum.json.JsonService;
-import org.apache.fulcrum.json.Rectangle;
-import org.apache.fulcrum.json.TestClass;
+import org.apache.fulcrum.json.jackson.example.Bean;
+import org.apache.fulcrum.json.jackson.example.BeanChild;
+import org.apache.fulcrum.json.jackson.example.Rectangle;
+import org.apache.fulcrum.json.jackson.example.TestClass;
 import org.apache.fulcrum.json.jackson.filters.CustomModuleWrapper;
+import org.apache.fulcrum.json.jackson.mixins.BeanMixin;
+import org.apache.fulcrum.json.jackson.mixins.TypedRectangle;
+import org.apache.fulcrum.json.jackson.serializers.TestDeserializer;
+import org.apache.fulcrum.json.jackson.serializers.TestDummyWrapperDeserializer;
+import org.apache.fulcrum.json.jackson.serializers.TestJsonSerializer;
+import org.apache.fulcrum.json.jackson.serializers.TestSerializer;
 import org.apache.fulcrum.testcontainer.BaseUnit4Test;
 import org.junit.Before;
 import org.junit.Test;
@@ -79,7 +87,7 @@ public class DefaultServiceTest extends BaseUnit4Test {
     @Test
     public void testCustomSerializeWithoutServiceMapper() throws Exception {
         ObjectMapper objectMapper = customMapper(true);
-        String expected = "{\"type\":\"org.apache.fulcrum.json.TestClass\",\"container\":{\"type\":\"java.util.HashMap\",\"cf\":\"Config.xml\"},\"configurationName\":\"Config.xml\"}";
+        String expected = "{\"type\":\"org.apache.fulcrum.json.jackson.example.TestClass\",\"container\":{\"type\":\"java.util.HashMap\",\"cf\":\"Config.xml\"},\"configurationName\":\"Config.xml\"}";
         String serJson = customAllExceptFilter(objectMapper, new TestClass("mytest"), TestClass.class,"name");
         logger.debug("serJson:"+ serJson);
         assertEquals("Serialization with custom mapper failed ",expected, serJson);
@@ -287,7 +295,7 @@ public class DefaultServiceTest extends BaseUnit4Test {
     public void testMixinAdapter() throws Exception {
         TestJsonSerializer tser = new TestJsonSerializer();
         CustomModuleWrapper<TestClass> cmw = new CustomModuleWrapper<TestClass>(
-                tser, null);
+                tser, new TestDummyWrapperDeserializer(TestClass.class));
         sc.addAdapter("Collection Adapter", TestClass.class, cmw);
         String adapterSer = sc.ser(new TestClass("mytest"));
         assertEquals("failed adapter serialization:",
@@ -339,7 +347,7 @@ public class DefaultServiceTest extends BaseUnit4Test {
         }
         String serColl = sc.ser(rectList);
         //Collection<Rectangle> resultList0 =  sc.deSerCollection(serColl, List.class, Rectangle.class);
-        List<Rectangle> resultList0 =  ((Jackson2MapperService)sc).deSerList(serColl, ArrayList.class,List.class, Rectangle.class);
+        List<Rectangle> resultList0 =  ((Jackson2MapperService)sc).deSerList(serColl, ArrayList.class, Rectangle.class);
         logger.debug("resultList0 class:" +resultList0.getClass());
         for (int i = 0; i < 10; i++) {
             assertEquals("deser reread size failed", (i * i), resultList0
@@ -505,7 +513,7 @@ public class DefaultServiceTest extends BaseUnit4Test {
             TypedRectangle filteredRect = new TypedRectangle(i, i, "rect" + i);
             rectList.add(filteredRect);
         }
-        Class<?> clazz = Class.forName("org.apache.fulcrum.json.jackson.TypedRectangle");
+        Class<?> clazz = Class.forName("org.apache.fulcrum.json.jackson.mixins.TypedRectangle");
         // no type cft. https://github.com/FasterXML/jackson-databind/issues/303 !!
         String jsonResult = sc.serializeOnlyFilter(rectList, clazz, true,"w");
         assertEquals("[{\"w\":0},{\"w\":1}]",jsonResult);
@@ -519,9 +527,9 @@ public class DefaultServiceTest extends BaseUnit4Test {
             TypedRectangle filteredRect = new TypedRectangle(i, i, "rect" + i);
             rectList.add(filteredRect);
         }
-        Class<?> clazz = Class.forName("org.apache.fulcrum.json.jackson.TypedRectangle");
+        Class<?> clazz = Class.forName("org.apache.fulcrum.json.jackson.mixins.TypedRectangle");
         sc.addAdapter("Collection Adapter", Object.class, TypedRectangle.Mixins.class);
-        assertEquals("[\"java.util.ArrayList\",[{\"type\":\"org.apache.fulcrum.json.jackson.TypedRectangle\",\"w\":0},{\"type\":\"org.apache.fulcrum.json.jackson.TypedRectangle\",\"w\":1}]]",
+        assertEquals("[\"java.util.ArrayList\",[{\"type\":\"org.apache.fulcrum.json.jackson.mixins.TypedRectangle\",\"w\":0},{\"type\":\"org.apache.fulcrum.json.jackson.mixins.TypedRectangle\",\"w\":1}]]",
                 sc.serializeOnlyFilter(rectList, clazz, true, "w"));
     }
     @Test

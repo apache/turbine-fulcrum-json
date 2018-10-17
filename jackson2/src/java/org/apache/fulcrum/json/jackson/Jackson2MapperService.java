@@ -23,9 +23,8 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
-import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -92,26 +91,25 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
     private static final String DATE_FORMAT = "dateFormat";
     private static final String ESCAPE_CHARS = "escapeCharsGlobal";
     private static final String ESCAPE_CHAR_CLASS = "escapeCharsClass";
-    private static final String USEJSONPATH = "useJsonPath";
+    private static final String USE_JSON_PATH = "useJsonPath";
     ObjectMapper mapper;
     AnnotationIntrospector primary; // support default
     AnnotationIntrospector secondary;
 
-    public String ANNOTATIONINSPECTOR = "annotationInspectors";
+    private static final String ANNOTATIONINSPECTOR = "annotationInspectors";
 
-    private Hashtable<String, String> annotationInspectors = null;
-    private Hashtable<String, Boolean> features = null;
-    private Hashtable<String, String> featureTypes = null;
+    private Map<String, String> annotationInspectors = null;
+    private Map<String, Boolean> features = null;
+    private Map<String, String> featureTypes = null;
 
     private String dateFormat;
 
     /**
      * Default dateformat is <code>MM/dd/yyyy</code>, could be overwritten in {@link #setDateFormat(DateFormat)}.
      */
-    public final String DEFAULTDATEFORMAT = "MM/dd/yyyy";
+    public static final String DEFAULTDATEFORMAT = "MM/dd/yyyy";
 
-    final boolean defaultType = false;
-    public boolean cacheFilters = true; // true -> this is by default true in jackson, if not using
+    private boolean cacheFilters = true; // true -> this is by default true in jackson, if not using
                                         // multiple serialization in one thread
     String[] defaultTypeDefs = null;
     private CacheService cacheService;
@@ -129,11 +127,11 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
        return ser(src, type, false);
     }
 
-    public <T> String ser(Object src, FilterProvider filter) throws Exception {
+    public String ser(Object src, FilterProvider filter) throws Exception {
         return ser(src, filter, false);
     }
     
-    public <T> String ser(Object src, FilterProvider filter, Boolean cleanCache) throws Exception {
+    public String ser(Object src, FilterProvider filter, Boolean cleanCache) throws Exception {
         String serResult= null;
         if (src == null) {
             getLogger().info("no serializable object.");
@@ -145,81 +143,16 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
         } else {
             getLogger().debug("add filter for cache filter Class " + src.getClass().getName());
             setCustomIntrospectorWithExternalFilterId(src.getClass(), null); // filter class
-            if (filter != null)  {
-                cacheService.getFilters().put(src.getClass().getName(), filter);    
-            } 
+            cacheService.getFilters().put(src.getClass().getName(), filter);    
         }
         getLogger().debug("ser class::" + src.getClass() + " with filter " + filter);
-        //mapper.setFilterProvider(filter);// this is global
-        String res =  mapper.writer().with(filter).writeValueAsString(src);
+        mapper.setFilterProvider(filter);
+        String res =  mapper.writer(filter).writeValueAsString(src);
         if (cleanCache) {
             cacheService.cleanSerializerCache(mapper);
         }
         return res;
     }
-    
-    @Override
-    public String ser(Object src, Boolean cleanCache) throws Exception {
-        if (cacheService.getFilters().containsKey(src.getClass().getName())) {
-            getLogger().warn(
-                    "Found registered filter - using instead of default view filter for class:"
-                            + src.getClass().getName());
-            // throw new
-            // Exception("Found registered filter - could not use custom view and custom filter for class:"+
-            // src.getClass().getName());
-            SimpleFilterProvider filter = (SimpleFilterProvider) cacheService.getFilters().get(src.getClass()
-                    .getName());
-            return ser(src, filter, cleanCache);
-        }
-        String res = mapper.writerWithView(Object.class).writeValueAsString(src);
-        if (cleanCache != null && cleanCache) {
-            cacheService.cleanSerializerCache(mapper);
-        }
-        return res;
-    }
-
-    @Override
-    public <T> String ser(Object src, Class<T> type, Boolean cleanCache)
-            throws Exception {
-        getLogger().debug("serializing object:" + src + " for type "+ type);
-        if (src != null && cacheService.getFilters().containsKey(src.getClass().getName())) {
-            getLogger()
-                    .warn("Found registered filter - could not use custom view and custom filter for class:"
-                            + src.getClass().getName());
-            // throw new
-            // Exception("Found registered filter - could not use custom view and custom filter for class:"+
-            // src.getClass().getName());
-            SimpleFilterProvider filter = (SimpleFilterProvider) cacheService.getFilters().get(src.getClass()
-                    .getName());
-            return ser(src, filter);
-        }
-        mapper.setFilterProvider(new SimpleFilterProvider().setFailOnUnknownId(false));
-        String res = (type != null)? mapper.writerWithView(type).writeValueAsString(src): mapper.writer().writeValueAsString(src);
-        if (cleanCache) {
-            cacheService.cleanSerializerCache(mapper);
-        }
-        // jackson bug? filter is not cleaned in collection type
-        if (type != null) {
-            // todo may do something
-        }
-        return res;
-    } 
-    
-    
-    public <T> String ser( Object... objects) throws Exception {
-        return ser( objects, false );
-    }
-    /**
-     * convenience method to provide a list of coolections without providign a wrapper 
-     * @param cleanCache
-     * @param objects
-     * @return serialized JSON
-     * @throws Exception
-     */
-    public <T> String ser(Boolean cleanCache, Object... objects) throws Exception {
-        return ser( objects, cleanCache );
-    }  
-   
 
     @Override
     public <T> T deSer(String json, Class<T> type) throws Exception {
@@ -229,11 +162,11 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
         else
             reader = mapper.reader();
 
-        return (T) reader.readValue(json);
+        return reader.readValue(json);
     }
     
     public <T> T deSer(Object src, Class<T> type) throws Exception {
-         return mapper.convertValue( src, type);
+        return mapper.convertValue( src, type);
     }
     
     public <T> Collection<T> deSerCollectionWithType(String json, Class<? extends Collection> collectionClass, Class<T> type)
@@ -262,9 +195,8 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
         }
     }
     
-    public <T> List<T> deSerList(String json, Class<? extends List> targetList,
-            Object listType, Class<T> elementType) throws Exception {
-        return mapper.readValue(json, mapper.getTypeFactory().constructParametrizedType(targetList,listType.getClass(), elementType));        
+    public <T> List<T> deSerList(String json, Class<? extends List> targetList, Class<T> elementType) throws Exception {
+        return mapper.readValue(json, mapper.getTypeFactory().constructParametricType(targetList,elementType));        
     }
     
     public <T,U> Map<T,U> deSerMap(String json, Class<? extends Map> mapClass, Class<T> keyClass, Class<U> valueClass) throws Exception {
@@ -274,9 +206,6 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
     public <T> Collection<T> deSerCollectionWithTypeReference(String json,
             TypeReference<T> collectionType ) throws Exception {
             return mapper.readValue(json, collectionType);
-    }
-
-    public void getJsonService() throws InstantiationException {
     }
 
     /**
@@ -326,7 +255,17 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
         }
         return this;
     }
-
+    
+    /**
+     * set a single mixin. convenience method, calls {@link ObjectMapper#registerModule(Module)}.
+     * 
+     * @param src the object to be serialized
+     * @param name the name for the mixin
+     * @param target the target class for the mixin
+     * @param mixin the mixin class
+     * @return serialized result
+     * @throws JsonProcessingException
+     */
     @SuppressWarnings("rawtypes")
     public String withMixinModule(Object src, String name, Class target,
             Class mixin) throws JsonProcessingException {
@@ -334,28 +273,44 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
         getLogger().debug("registering module " + mx + ", mixin: " + mixin);
         return mapper.registerModule(mx).writer().writeValueAsString(src);
     }
+    
+    /**
+     * convenience method with read (but old mixins will be cleared!).
+     * 
+     * @see  {@link ObjectMapper#setMixins(Class, Class)}
+     * 
+     * @param src the object to be serialized
+     * @param target the target class for the mixin
+     * @param mixin the mixin class
+     * @return serialized result
+     * @throws JsonProcessingException
+     */
     @SuppressWarnings("rawtypes")
     public String withSetMixins(Object src, Class target,
               Class mixin) throws JsonProcessingException {
         return setMixins(target, mixin).writer().writeValueAsString(src);
     }
+    
     @SuppressWarnings("rawtypes")
     public ObjectMapper setMixins(Class target,
-              Class mixin) throws JsonProcessingException {
-        Map<Class<?>, Class<?>> sourceMixins = new HashMap<Class<?>, Class<?>>(1);
-        sourceMixins.put( target,mixin );
+              Class mixin) {
+        Map<Class<?>, Class<?>> sourceMixins = null;
+        if (target != null) {
+            sourceMixins = new HashMap<>(1);
+            sourceMixins.put( target,mixin );   
+        }
         getLogger().debug("clean set mixins for target " + target + ", mixin: " + mixin);
         return mapper.setMixIns( sourceMixins );
     }
     
     @Override
-    public <T> String serializeAllExceptFilter(Object src, String... filterAttr)
+    public String serializeAllExceptFilter(Object src, String... filterAttr)
             throws Exception {
         return serializeAllExceptFilter(src, src.getClass(), true, filterAttr);
     }
     
     @Override
-    public synchronized <T> String serializeAllExceptFilter(Object src, Boolean cache, String... filterAttr) throws Exception {
+    public synchronized String serializeAllExceptFilter(Object src, Boolean cache, String... filterAttr) throws Exception {
         return serializeAllExceptFilter(src, src.getClass(), cache, filterAttr);
     }
     
@@ -400,13 +355,13 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
     }
     
     @Override
-    public <T> String serializeOnlyFilter(Object src, String... filterAttrs)
+    public String serializeOnlyFilter(Object src, String... filterAttrs)
             throws Exception {
         return serializeOnlyFilter(src, src.getClass(), true, filterAttrs);
     }
     
     @Override
-    public synchronized <T> String serializeOnlyFilter(Object src,
+    public synchronized String serializeOnlyFilter(Object src,
              Boolean cache, String... filterAttr) throws Exception {
         return serializeOnlyFilter(src, src.getClass(), cache, filterAttr);
     }
@@ -432,11 +387,51 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
             getLogger().debug("setting filteroutAllexcept filter for size of filterAttr: " + filterAttr.length);
         } else {
             getLogger().warn("no filter attributes set!");
-            pf = SimpleBeanPropertyFilter.filterOutAllExcept("dummy"); // to be consistent with gson anything is filtered out.
+            pf = SimpleBeanPropertyFilter.filterOutAllExcept("dummy");
         }
         if (filterClasses == null) throw new Exception("You have to provide some class to apply the filtering!");
         return filter(src, filterClasses, null, pf, refresh);
-    } 
+    }
+    
+    @Override
+    public String ser(Object src, Boolean cleanCache) throws Exception {
+        if (cacheService.getFilters().containsKey(src.getClass().getName())) {
+            getLogger().warn(
+                    "Found registered filter - using instead of default view filter for class:"
+                            + src.getClass().getName());
+            SimpleFilterProvider filter = (SimpleFilterProvider) cacheService.getFilters().get(src.getClass()
+                    .getName());
+            return ser(src, filter, cleanCache);//mapper.writerWithView(src.getClass()).writeValueAsString(src);
+        }
+        String res = mapper.writerWithView(Object.class).writeValueAsString(src);
+        if (cleanCache != null && cleanCache) {
+            cacheService.cleanSerializerCache(mapper);
+        }
+        return res;
+    }
+
+    @Override
+    public <T> String ser(Object src, Class<T> type, Boolean cleanCache)
+            throws Exception {
+        getLogger().info("serializing object:" + src + " for type "+ type);
+        if (src != null && cacheService.getFilters().containsKey(src.getClass().getName())) {
+            getLogger()
+                    .warn("Found registered filter - could not use custom view and custom filter for class:"
+                            + src.getClass().getName());
+            // throw new
+            // Exception("Found registered filter - could not use custom view and custom filter for class:"+
+            // src.getClass().getName());
+            SimpleFilterProvider filter = (SimpleFilterProvider) cacheService.getFilters().get(src.getClass()
+                    .getName());
+            return ser(src, filter);
+        }
+
+        String res = (type != null)? mapper.writerWithView(type).writeValueAsString(src): mapper.writeValueAsString(src);
+        if (cleanCache) {
+            cacheService.cleanSerializerCache(mapper);
+        }
+        return res;
+    }  
 
     /**
      * 
@@ -538,7 +533,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
     @Override
     public void configure(Configuration conf) throws ConfigurationException {
         getLogger().debug("conf.getName()" + conf.getName());
-        this.annotationInspectors = new Hashtable<String, String>();
+        this.annotationInspectors = new HashMap<>();
 
         final Configuration configuredAnnotationInspectors = conf.getChild(
                 ANNOTATIONINSPECTOR, false);
@@ -550,14 +545,14 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
                 String key = nameVal[i].getName();
                 getLogger().debug("configured key: " + key);
                 if (key.equals("features")) {
-                    this.features = new Hashtable<String, Boolean>();
-                    this.featureTypes = new Hashtable<String, String>();
-                    Configuration[] features = nameVal[i].getChildren();
-                    for (int j = 0; j < features.length; j++) {
-                        boolean featureValue = features[j]
+                    this.features = new HashMap<>();
+                    this.featureTypes = new HashMap<>();
+                    Configuration[] localFeatures = nameVal[i].getChildren();
+                    for (int j = 0; j < localFeatures.length; j++) {
+                        boolean featureValue = localFeatures[j]
                                 .getAttributeAsBoolean("value", false);
-                        String featureType = features[j].getAttribute("type");
-                        String feature = features[j].getValue();
+                        String featureType = localFeatures[j].getAttribute("type");
+                        String feature = localFeatures[j].getValue();
                         getLogger().debug(
                                 "configuredAnnotationInspectors " + feature
                                         + ":" + featureValue);
@@ -601,7 +596,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
                     configuredDefaultType.getAttribute("key") };
         }
         final Configuration configuredjsonPath = conf.getChild(
-                USEJSONPATH, false);
+                USE_JSON_PATH, false);
         if (configuredjsonPath != null) {
             this.useJsonPath  = configuredjsonPath.getValueAsBoolean();
         }
@@ -611,63 +606,90 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
     public void initialize() throws Exception {
         mapper = new ObjectMapper(null, null, null);// add configurable JsonFactory,.. later?
 
-        Enumeration<String> enumKey = annotationInspectors.keys();
-        while (enumKey.hasMoreElements()) {
-            String key = enumKey.nextElement();
-            String avClass = annotationInspectors.get(key);
-            if (key.equals("primary") && avClass != null) {
-                try {
-                    primary = (AnnotationIntrospector) Class.forName(avClass).getConstructor()
-                            .newInstance();
-                } catch (Exception e) {
-                    throw new Exception(
-                            "JsonMapperService: Error instantiating " + avClass
-                                    + " for " + key);
-                }
-            } else if (key.equals("secondary") && avClass != null) {
-                try {
-                    secondary = (AnnotationIntrospector) Class.forName(avClass).getConstructor()
-                            .newInstance();
-                } catch (Exception e) {
-                    throw new Exception(
-                            "JsonMapperService: Error instantiating " + avClass
-                                    + " for " + key);
-                }
-            }
-        }
-        if (primary == null) {
-            primary = new JacksonAnnotationIntrospector(); // support default
-            getLogger().info(
-                    "using default introspector:"
-                            + primary.getClass().getName());
-            mapper.setAnnotationIntrospector(primary);
-        } else if (primary != null && secondary != null){
-            AnnotationIntrospector pair = new AnnotationIntrospectorPair(
-                    primary, secondary);
-            mapper.setAnnotationIntrospector(pair);
-        } else {
-            mapper.setAnnotationIntrospector(primary);
-        }
-        
-        if (primary instanceof LogEnabled)
-        {
-            ((LogEnabled)primary).enableLogging(getLogger().getChildLogger(primary.getClass().getSimpleName()));
-            getLogger().info(
-                    "setting primary introspector logger: "
-                            + primary.getClass().getSimpleName());
-        }
-        if (secondary instanceof LogEnabled)
-        {
-            ((LogEnabled)secondary).enableLogging(getLogger().getChildLogger(secondary.getClass().getSimpleName()));
-            getLogger().info(
-                    "setting secondary introspector logger: "
-                            + secondary.getClass().getSimpleName());
+        initAnnotationInspectors();
+
+        initFeatures();
+
+        initDefaultTyping();
+
+        getLogger().info("setting date format to:" + dateFormat);
+        getLogger().info("cacheFilters is:" + cacheFilters);
+        if (!cacheFilters) {
+            mapper.configure(SerializationFeature.FLUSH_AFTER_WRITE_VALUE, true);
         }
 
+        mapper.setDateFormat(new SimpleDateFormat(dateFormat));
+        
+        if (escapeCharsGlobal) {
+            mapper.getFactory().setCharacterEscapes(characterEscapes);
+        }
+        if (escapeCharsClass != null) {
+            try {
+                characterEscapes = (CharacterEscapes) Class.forName(escapeCharsClass).getConstructor()
+                        .newInstance();
+            } catch (Exception e) {
+                throw new Exception(
+                        "JsonMapperService: Error instantiating " + escapeCharsClass
+                                + " for " + ESCAPE_CHAR_CLASS );
+            }
+        }
+
+        getLogger().debug("initialized mapper:" + mapper);
+
+        mapper.getSerializerProvider().setNullValueSerializer(
+                new JsonSerializer<Object>() {
+                    @Override
+                    public void serialize(Object value, JsonGenerator jgen,
+                            SerializerProvider provider) throws IOException
+                             {
+                        jgen.writeString("");
+
+                    }
+                });
+        cacheService = new CacheService(primary);
+        if (cacheService instanceof LogEnabled)
+        {
+            cacheService.enableLogging(getLogger().getChildLogger(cacheService.getClass().getSimpleName()));
+            getLogger().info(
+                    "setting cacheService logger: "
+                            + cacheService.getClass().getSimpleName());
+        }
+        
+        if (useJsonPath) {
+            // set it before runtime
+            DefaultJsonPathWrapper djpw = null;
+            try {
+                djpw = new DefaultJsonPathWrapper(this.mapper);
+                getLogger().debug("******** initialized new jsonPath defaults: " +djpw.getJsonPathDefault());
+            } catch (Exception e) {
+                throw new Exception(
+                        "JsonMapperService: Error instantiating " + djpw
+                                + " using useJsonPath=" + useJsonPath);
+            }
+
+        }
+    }
+
+    private void initDefaultTyping()
+    {
+        if (defaultTypeDefs != null && defaultTypeDefs.length == 2) {
+            DefaultTyping defaultTyping = DefaultTyping
+                    .valueOf(defaultTypeDefs[0]);
+            mapper.enableDefaultTypingAsProperty(defaultTyping,
+                    defaultTypeDefs[1]);
+            getLogger().info(
+                    "default typing is " + defaultTypeDefs[0] + " with key:"
+                            + defaultTypeDefs[1]);
+        }
+    }
+
+    private void initFeatures()
+        throws Exception
+    {
         if (features != null && !features.isEmpty()) {
-            Enumeration<String> enumFeatureKey = features.keys();
-            while (enumFeatureKey.hasMoreElements()) {
-                String featureKey = enumFeatureKey.nextElement();// e.g.
+            Iterator<String> featureKeys = features.keySet().iterator();
+            while (featureKeys.hasNext()) {
+                String featureKey = featureKeys.next();// e.g.
                                                                  // FAIL_ON_EMPTY_BEANS
                 Boolean featureValue = features.get(featureKey); // e.g.false
                 String featureType = featureTypes.get(featureKey);
@@ -762,77 +784,65 @@ public class Jackson2MapperService extends AbstractLogEnabled implements
                 }
             }
         }
-
-        if (defaultTypeDefs != null && defaultTypeDefs.length == 2) {
-            DefaultTyping defaultTyping = DefaultTyping
-                    .valueOf(defaultTypeDefs[0]);
-            mapper.enableDefaultTypingAsProperty(defaultTyping,
-                    defaultTypeDefs[1]);
-            getLogger().info(
-                    "default typing is " + defaultTypeDefs[0] + " with key:"
-                            + defaultTypeDefs[1]);
-        }
-
-        getLogger().info("setting date format to:" + dateFormat);
-        getLogger().info("cacheFilters is:" + cacheFilters);
-        if (!cacheFilters) {
-            mapper.configure(SerializationFeature.FLUSH_AFTER_WRITE_VALUE, true);
-        }
-
-        mapper.setDateFormat(new SimpleDateFormat(dateFormat));
-        
-        if (escapeCharsGlobal) {
-            mapper.getFactory().setCharacterEscapes(characterEscapes);
-        }
-        if (escapeCharsClass != null) {
-            try {
-                characterEscapes = (CharacterEscapes) Class.forName(escapeCharsClass).getConstructor()
-                        .newInstance();
-            } catch (Exception e) {
-                throw new Exception(
-                        "JsonMapperService: Error instantiating " + escapeCharsClass
-                                + " for " + ESCAPE_CHAR_CLASS );
-            }
-        }
-
-        getLogger().debug("initialized mapper:" + mapper);
-
-        mapper.getSerializerProvider().setNullValueSerializer(
-                new JsonSerializer<Object>() {
-
-                    @Override
-                    public void serialize(Object value, JsonGenerator jgen,
-                            SerializerProvider provider) throws IOException,
-                            JsonProcessingException {
-                        jgen.writeString("");
-
-                    }
-                });
-        cacheService = new CacheService(primary);
-        if (cacheService instanceof LogEnabled)
-        {
-            ((LogEnabled)cacheService).enableLogging(getLogger().getChildLogger(cacheService.getClass().getSimpleName()));
-            getLogger().info(
-                    "setting cacheService logger: "
-                            + cacheService.getClass().getSimpleName());
-        }
-        
-        if (useJsonPath) {
-            // set it before runtime
-            DefaultJsonPathWrapper djpw = null;
-            try {
-                djpw = new DefaultJsonPathWrapper(this.mapper);
-                getLogger().debug("******** initialized new jsonPath defaults: " +djpw.getJsonPathDefault());
-            } catch (Exception e) {
-                throw new Exception(
-                        "JsonMapperService: Error instantiating " + djpw
-                                + " using useJsonPath=" + useJsonPath);
-            }
-        }
-        // JACKSON-650, Ignore missing filters, may be, because previoulsy a filter was set (e.g. ignore filter)
-        mapper.setFilterProvider(new SimpleFilterProvider().setFailOnUnknownId(false));
     }
 
+    private void initAnnotationInspectors()
+        throws Exception
+    {
+        Iterator<String> aiKeys = annotationInspectors.keySet().iterator();
+        while (aiKeys.hasNext()) {
+            String key = aiKeys.next();
+            String avClass = annotationInspectors.get(key);
+            if (key.equals("primary") && avClass != null) {
+                try {
+                    primary = (AnnotationIntrospector) Class.forName(avClass).getConstructor()
+                            .newInstance();
+                } catch (Exception e) {
+                    throw new Exception(
+                            "JsonMapperService: Error instantiating " + avClass
+                                    + " for " + key);
+                }
+            } else if (key.equals("secondary") && avClass != null) {
+                try {
+                    secondary = (AnnotationIntrospector) Class.forName(avClass).getConstructor()
+                            .newInstance();
+                } catch (Exception e) {
+                    throw new Exception(
+                            "JsonMapperService: Error instantiating " + avClass
+                                    + " for " + key);
+                }
+            }
+        }
+        if (primary == null) {
+            primary = new JacksonAnnotationIntrospector(); // support default
+            getLogger().info(
+                    "using default introspector:"
+                            + primary.getClass().getName());
+            mapper.setAnnotationIntrospector(primary);
+        } else if (primary != null && secondary != null){
+            AnnotationIntrospector pair = new AnnotationIntrospectorPair(
+                    primary, secondary);
+            mapper.setAnnotationIntrospector(pair);
+        } else {
+            mapper.setAnnotationIntrospector(primary);
+        }
+        
+        if (primary instanceof LogEnabled)
+        {
+            ((LogEnabled)primary).enableLogging(getLogger().getChildLogger(primary.getClass().getSimpleName()));
+            getLogger().info(
+                    "setting primary introspector logger: "
+                            + primary.getClass().getSimpleName());
+        }
+        if (secondary instanceof LogEnabled)
+        {
+            ((LogEnabled)secondary).enableLogging(getLogger().getChildLogger(secondary.getClass().getSimpleName()));
+            getLogger().info(
+                    "setting secondary introspector logger: "
+                            + secondary.getClass().getSimpleName());
+        }
+    }
+    
     public ObjectMapper getMapper() {
         return mapper;
     }

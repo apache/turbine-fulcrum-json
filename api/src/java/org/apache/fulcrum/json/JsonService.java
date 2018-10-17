@@ -128,7 +128,7 @@ public interface JsonService {
      * 
      * <code>refreshFilter</code> is set to <code>true</code> for this method call.
      */
-    public <T> String serializeOnlyFilter(Object src, 
+    public String serializeOnlyFilter(Object src, 
             String... filterAttr) throws Exception;
     
     /**
@@ -142,7 +142,7 @@ public interface JsonService {
      * 
      * <code>refreshFilter</code> is set to <code>true</code> for this method call.
      */
-    public <T> String serializeOnlyFilter(Object src, Boolean cleanFilter,
+    public String serializeOnlyFilter(Object src, Boolean cleanFilter,
             String... filterAttr) throws Exception;
 
     /**
@@ -211,13 +211,13 @@ public interface JsonService {
      * 
      * @see #serializeAllExceptFilter(Object, Class, Boolean, String...)
      */
-    public <T> String serializeAllExceptFilter(Object src,
+    public String serializeAllExceptFilter(Object src,
             Boolean cleanFilter, String... filterAttr) throws Exception;
     
     /**
      *  @see #serializeAllExceptFilter(Object, Class, Boolean, String...)
      */
-    public <T> String serializeAllExceptFilter(Object src,
+    public String serializeAllExceptFilter(Object src,
             String... filterAttr) throws Exception;
 
     /**

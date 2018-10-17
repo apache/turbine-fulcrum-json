@@ -1,5 +1,4 @@
-package org.apache.fulcrum.json.jackson;
-
+package org.apache.fulcrum.json.jackson.example;
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,22 +17,32 @@ package org.apache.fulcrum.json.jackson;
  * specific language governing permissions and limitations
  * under the License.
  */
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+public class Bean {
+    private String name;
+    private int age = -1;
+    public String profession;
 
-public abstract class Mixin {
-    void MixIn(int w, int h) {
+    public Bean() {
     }
 
-    @JsonProperty("width")
-    abstract int getW(); // rename property
+    public String getName() {
+        return name;
+    }
 
-    @JsonIgnore
-    abstract int getH();
+    public void setName(String name) {
+        this.name = name;
+    }
 
-    @JsonIgnore
-    abstract int getSize(); // exclude
+    public int getAge() {
+        return age;
+    }
 
-    @JsonIgnore
-    abstract String getName();
+    public void setAge(int age) {
+        this.age = age;
+    }
+    public void setProfession( String profession )
+    {
+        this.profession = profession;
+        
+    }
 }

@@ -33,8 +33,9 @@ import java.util.Map;
 import org.apache.avalon.framework.logger.ConsoleLogger;
 import org.apache.avalon.framework.logger.Logger;
 import org.apache.fulcrum.json.JsonService;
-import org.apache.fulcrum.json.Rectangle;
-import org.apache.fulcrum.json.TestClass;
+import org.apache.fulcrum.json.jackson.example.Bean;
+import org.apache.fulcrum.json.jackson.example.Rectangle;
+import org.apache.fulcrum.json.jackson.example.TestClass;
 import org.apache.fulcrum.testcontainer.BaseUnit4Test;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -79,6 +80,7 @@ public class JsonPathJacksonTest extends BaseUnit4Test {
                 fail(e.getMessage());
             }
         }
+
     }
 
     @Test

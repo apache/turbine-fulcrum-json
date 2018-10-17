@@ -24,7 +24,16 @@
   </properties>
 
   <body>
-  <release version="1.1.2" date="in SVN">
+  <release version="2.0.0" date="in SVN">
+    <action type="update" dev="gk">
+        Java 8 compatiblity, updated SNAPSHOT version 1.1.2-SNAPSHOT to 2.0.0-SNAPSHOT
+      </action>
+    <action type="update" dev="gk">
+        Jackson 2: Update to version 2.9.6, use non deprecated methods, add tests, cleanup test packages
+      </action>
+      <action type="update" dev="painter">
+        Dependency Updates
+      </action>
   </release>
   <release version="1.1.1" date="2017-08-15">
      <action type="update" dev="gk">

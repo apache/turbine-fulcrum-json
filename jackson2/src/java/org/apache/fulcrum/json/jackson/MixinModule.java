@@ -39,11 +39,4 @@ public final class MixinModule extends SimpleModule {
     public void setupModule(SetupContext context) {
         context.setMixInAnnotations(this.clazz, this.mixin);
     }
-    
-//    @Override
-//    public Object getTypeId()
-//    {
-//        return null; // unique
-//        //return super.getTypeId();
-//    }
 }

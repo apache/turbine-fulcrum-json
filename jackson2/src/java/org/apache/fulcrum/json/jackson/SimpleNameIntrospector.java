@@ -48,9 +48,9 @@ public class SimpleNameIntrospector extends NopAnnotationIntrospector implements
      */
     private static final long serialVersionUID = 1L;
     
-    private List<Class<?>> filteredClasses = new CopyOnWriteArrayList<Class<?>>();
-    private List<String> externalFilterExcludeClasses = new CopyOnWriteArrayList<String>();
-    private List<String> externalFilterIncludeClasses = new CopyOnWriteArrayList<String>();
+    private List<Class<?>> filteredClasses = new CopyOnWriteArrayList<>();
+    private List<String> externalFilterExcludeClasses = new CopyOnWriteArrayList<>();
+    private List<String> externalFilterIncludeClasses = new CopyOnWriteArrayList<>();
     // is used only for filtering by class
     private AtomicBoolean isExludeType = new AtomicBoolean(false);
     

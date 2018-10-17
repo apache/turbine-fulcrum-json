@@ -34,7 +34,7 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 public class CacheService implements LogEnabled {
 
     AnnotationIntrospector primary;
-    Map<String, FilterProvider> filters =  new ConcurrentHashMap<String, FilterProvider>();
+    Map<String, FilterProvider> filters =  new ConcurrentHashMap<>();
     
     private static Logger logger;
     
