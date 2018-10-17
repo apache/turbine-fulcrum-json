@@ -53,7 +53,7 @@
   <fileSets>
     <fileSet>
       <directory>${project.build.directory}/maven-shared-archive-resources/META-INF</directory>
-      <outputDirectory>/</outputDirectory>
+      <outputDirectory>${file.separator}</outputDirectory>
       <includes>
         <include>LICENSE*</include>
         <include>NOTICE*</include>
@@ -61,7 +61,7 @@
     </fileSet>
     <fileSet>
       <directory>${project.parent.basedir}</directory>
-      <outputDirectory></outputDirectory>
+      <outputDirectory>${file.separator}</outputDirectory>
       <includes>
         <include>README*</include>
         <include>pom.xml</include>
