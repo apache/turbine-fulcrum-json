@@ -165,13 +165,13 @@ public class JacksonMapperService extends AbstractLogEnabled implements
     }
     
     @Override
-    public <T> String serializeAllExceptFilter(Object src, String... filterAttr)
+    public String serializeAllExceptFilter(Object src, String... filterAttr)
             throws Exception {
         return serializeAllExceptFilter(src, src.getClass(), true, filterAttr);
     }
 
     @Override
-    public <T> String serializeAllExceptFilter(Object src, Boolean refresh,
+    public String serializeAllExceptFilter(Object src, Boolean refresh,
             String... filterAttr) throws Exception {
         return serializeAllExceptFilter(src, src.getClass(), refresh, filterAttr);
     }
@@ -209,13 +209,13 @@ public class JacksonMapperService extends AbstractLogEnabled implements
     
 
     @Override
-    public <T> String serializeOnlyFilter(Object src, String... filterAttr)
+    public String serializeOnlyFilter(Object src, String... filterAttr)
             throws Exception {
         return serializeOnlyFilter(src, src.getClass(), true, filterAttr);
     }
 
     @Override
-    public <T> String serializeOnlyFilter(Object src, Boolean refresh,
+    public String serializeOnlyFilter(Object src, Boolean refresh,
             String... filterAttr) throws Exception {
         return serializeOnlyFilter(src, src.getClass(), refresh, filterAttr);
     }

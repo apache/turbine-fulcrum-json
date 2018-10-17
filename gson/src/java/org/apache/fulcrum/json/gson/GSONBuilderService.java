@@ -108,7 +108,7 @@ public class GSONBuilderService extends AbstractLogEnabled implements
     }
 
     @Override
-    public <T> String serializeOnlyFilter(Object src, String... filterAttr)
+    public String serializeOnlyFilter(Object src, String... filterAttr)
             throws Exception {
         return  gson
                 .addSerializationExclusionStrategy(
@@ -116,7 +116,7 @@ public class GSONBuilderService extends AbstractLogEnabled implements
     }
 
     @Override
-    public <T> String serializeOnlyFilter(Object src, Boolean notused,
+    public String serializeOnlyFilter(Object src, Boolean notused,
             String... filterAttr) throws Exception {
         return  gson
                 .addSerializationExclusionStrategy(
@@ -177,7 +177,7 @@ public class GSONBuilderService extends AbstractLogEnabled implements
     }
     
     @Override
-    public <T> String serializeAllExceptFilter(Object src, String... filterAttr)
+    public String serializeAllExceptFilter(Object src, String... filterAttr)
             throws Exception {
         return gson
                 .addSerializationExclusionStrategy(
@@ -185,7 +185,7 @@ public class GSONBuilderService extends AbstractLogEnabled implements
     }
 
     @Override
-    public <T> String serializeAllExceptFilter(Object src, Boolean notused,
+    public String serializeAllExceptFilter(Object src, Boolean notused,
             String... filterAttr) throws Exception {
         return gson
                 .addSerializationExclusionStrategy(
