@@ -60,11 +60,11 @@
     </build>
 
     <dependencies>
-        <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
-            <version>2.6</version>
-        </dependency>
+		<dependency>
+		    <groupId>org.apache.commons</groupId>
+		    <artifactId>commons-lang3</artifactId>
+		    <version>3.8.1</version>
+		</dependency>
         <dependency>
             <groupId>org.apache.avalon.framework</groupId>
             <artifactId>avalon-framework-api</artifactId>
@@ -128,6 +128,6 @@
     <properties>
         <!-- 2.7.x hase Java 7 baseline, but is compiled with Java 6 support, cft. https://github.com/FasterXML/jackson/wiki/Jackson-Release-2.7.
         With Jackson 2.8, Java 7 languages features will be allowed -->
-        <jackson2.version>2.9.6</jackson2.version>
+        <jackson2.version>2.9.7</jackson2.version>
     </properties>
 </project>
