@@ -209,16 +209,19 @@ public class GSONBuilderService extends AbstractLogEnabled implements
     }
     
     /**
-     * Alternative method to calling {@link #gson#registerTypeAdapter(Object, Type)}.
+     * Alternative method to calling {@link #registerTypeAdapter(Object, Type)}
      * Note: Always use either this direct format call or the other adapter register call,
      * otherwise inconsistencies may occur!
      * 
-     * @param dformat
+     * @param dfStr date format string
      */
     public void setDateFormat(final String dfStr) {
         gson.setDateFormat(dfStr);
     }
 
+    /* (non-Javadoc)
+     * @see org.apache.fulcrum.json.JsonService#setDateFormat(java.text.DateFormat)
+     */
     @Override
     public void setDateFormat(final DateFormat df) {
         DateTypeAdapter dateTypeAdapter = new DateTypeAdapter();
@@ -233,6 +236,9 @@ public class GSONBuilderService extends AbstractLogEnabled implements
         // return gson.create().toJson( src );
     }
 
+    /* (non-Javadoc)
+     * @see org.apache.avalon.framework.configuration.Configurable#configure(org.apache.avalon.framework.configuration.Configuration)
+     */
     @Override
     public void configure(Configuration conf) throws ConfigurationException {
 
@@ -264,6 +270,9 @@ public class GSONBuilderService extends AbstractLogEnabled implements
         }
     }
 
+    /* (non-Javadoc)
+     * @see org.apache.avalon.framework.activity.Initializable#initialize()
+     */
     @Override
     public void initialize() throws Exception {
         gson = new GsonBuilder();
@@ -376,6 +385,11 @@ public class GSONBuilderService extends AbstractLogEnabled implements
         }.init(clazz, filterAttrs);
     }
     
+    /**
+     * @param clazz the class to exclude
+     * @param filterAttrs bean elements not to be serialized
+     * @return
+     */
     private ExclusionStrategy include(Class clazz, String... filterAttrs) {
         return new ExclusionStrategy() {
 

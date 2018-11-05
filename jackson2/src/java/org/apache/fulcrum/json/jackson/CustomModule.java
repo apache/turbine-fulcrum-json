@@ -27,6 +27,14 @@ public final class CustomModule<T> extends SimpleModule {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Instantiate a custom module
+     * 
+     * @param name Name of module
+     * @param targetClazz The target class
+     * @param stdSer Standard serializer
+     * @param stdDeser  Standard de-serializer
+     */
     public CustomModule(String name, Class<T> targetClazz,
             StdSerializer<T> stdSer, StdDeserializer<T> stdDeser) {
         super(name, Version.unknownVersion());

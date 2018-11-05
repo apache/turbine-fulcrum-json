@@ -29,29 +29,49 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
  * 
  * @author gkallidis
  *
- * @param <T>
+ * @param <T> the class to wrap
  */
 public class CustomModuleWrapper<T> {
-    StdSerializer<T> ser;
-    StdDeserializer<T> deSer;
+	
+	// serializer and deserializer objects
+    StdSerializer<T> ser = null;
+    StdDeserializer<T> deSer = null;
 
+    /**
+     * Constructor for the custom module wrapper
+     * 
+     * @param ser the standard serializer
+     * @param deSer the standard de-serializer
+     */
     public CustomModuleWrapper(StdSerializer<T> ser, StdDeserializer<T> deSer) {
         this.ser = ser;
         this.deSer = deSer;
     }
 
+    /**
+     * @return the serializer
+     */
     public StdSerializer<T> getSer() {
         return ser;
     }
 
+    /**
+     * @param ser set the standard serializer
+     */
     public void setSer(StdSerializer<T> ser) {
         this.ser = ser;
     }
 
+    /**
+     * @return the de-serializer in use
+     */
     public StdDeserializer<T> getDeSer() {
         return deSer;
     }
 
+    /**
+     * @param deSer standard deserializer
+     */
     public void setDeSer(StdDeserializer<T> deSer) {
         this.deSer = deSer;
     }

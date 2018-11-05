@@ -22,7 +22,8 @@
   xsi:schemaLocation="http://maven.apache.org/DECORATION/1.4.0 http://maven.apache.org/xsd/decoration-1.4.0.xsd"
   name="Fulcrum JSON API">
 
-<body>
+<body>	
+	<menu ref="reports"></menu>
 </body>
 
 </project>
