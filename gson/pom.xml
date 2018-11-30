@@ -48,7 +48,6 @@
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <forkMode>always</forkMode>
                     <includes>
                         <include>**/*Test.*</include>
                         <include>**/*TestCase.*</include>

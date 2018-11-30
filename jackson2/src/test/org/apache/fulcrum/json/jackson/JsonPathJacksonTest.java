@@ -18,10 +18,9 @@ package org.apache.fulcrum.json.jackson;
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -30,17 +29,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.avalon.framework.logger.ConsoleLogger;
+import org.apache.avalon.framework.logger.Log4JLogger;
 import org.apache.avalon.framework.logger.Logger;
 import org.apache.fulcrum.json.JsonService;
 import org.apache.fulcrum.json.jackson.example.Bean;
 import org.apache.fulcrum.json.jackson.example.Rectangle;
 import org.apache.fulcrum.json.jackson.example.TestClass;
-import org.apache.fulcrum.testcontainer.BaseUnit4Test;
+import org.apache.fulcrum.testcontainer.BaseUnit5Test;
+import org.apache.log4j.LogManager;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.platform.runner.JUnitPlatform;
+import org.junit.runner.RunWith;
 
 import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
 import com.jayway.jsonpath.Configuration;
@@ -56,22 +58,29 @@ import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
  * @author gk
  * @version $Id$
  */
-public class JsonPathJacksonTest extends BaseUnit4Test {
+@RunWith(JUnitPlatform.class)
+public class JsonPathJacksonTest extends BaseUnit5Test {
     
     private JsonService sc = null;
     Logger logger;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         sc = (JsonService) this.lookup(JsonService.ROLE);
-        logger = new ConsoleLogger(ConsoleLogger.LEVEL_DEBUG);
+        logger = new Log4JLogger(LogManager.getLogger(getClass().getName()) );
         try {
             Configuration conf = Configuration.defaultConfiguration();
             logger.debug("jayway jsonpath conf:"+ conf.jsonProvider());
-            assertEquals("Jackson JsonPath JsonProvider match failed ", JacksonJsonProvider.class.getName(), conf.jsonProvider().getClass().getName());
+            assertEquals( JacksonJsonProvider.class.getName(), conf.jsonProvider().getClass().getName(),
+                          "Jackson JsonPath JsonProvider match failed ");
+            
             logger.debug("Jackson2MapperService.mapper:"+ ((Jackson2MapperService)sc).getMapper()  + " confjsonProvider:" + conf.jsonProvider());
-            assertTrue("JsonProvider is not a JacksonJsonProvider ",  conf.jsonProvider() instanceof JacksonJsonProvider);
-            assertEquals("JacksonJsonProvider mapper is not configured mapper", ((Jackson2MapperService)sc).getMapper(), ((JacksonJsonProvider)conf.jsonProvider()).getObjectMapper());
+            
+            assertTrue(conf.jsonProvider() instanceof JacksonJsonProvider, 
+                       "JsonProvider is not a JacksonJsonProvider ");
+            
+            assertEquals(((Jackson2MapperService)sc).getMapper(), ((JacksonJsonProvider)conf.jsonProvider()).getObjectMapper(), 
+                         "JacksonJsonProvider mapper is not configured mapper");
         } catch (Throwable e) {
             if (e.getCause() != null && e.getCause() instanceof ClassNotFoundException) { 
                 logger.error(e.getMessage(), e.getCause());
@@ -88,7 +97,7 @@ public class JsonPathJacksonTest extends BaseUnit4Test {
         String serJson = sc.ser(new TestClass("mytest"));
         logger.debug("serJson:"+ serJson);
         String cf = JsonPath.parse(serJson).read("$.container.cf");// .using(conf)
-        assertEquals("Serialization failed ", "Config.xml", cf);   
+        assertEquals("Config.xml", cf, "Serialization failed ");   
     }
 
     @Test
@@ -101,7 +110,7 @@ public class JsonPathJacksonTest extends BaseUnit4Test {
         Date date = JsonPath.parse(serJson).read("$.date", Date.class);// .using(conf)
         Calendar parsedDate = Calendar.getInstance();
         parsedDate.setTime(date);
-        assertEquals("Serialization failed ", refDate.get(Calendar.DATE), parsedDate.get(Calendar.DATE));
+        assertEquals(refDate.get(Calendar.DATE), parsedDate.get(Calendar.DATE), "Serialization failed ");
     }
 
     @Test
@@ -118,12 +127,15 @@ public class JsonPathJacksonTest extends BaseUnit4Test {
         //System.out.println("bean list: "+ result);
         
         Bean joe2 = JsonPath.parse(result).read("$[2]", Bean.class);
-        assertEquals("DeSer failed ", "joe2", joe2.getName());
+        assertEquals("joe2", joe2.getName(), 
+                     "DeSer failed ");
         // could not map to typed list
         List<Map<String, Object>> beanList2 = JsonPath.parse(result).read("$[-2:]", List.class);
-        assertEquals("Expect 2 Elements failed ", 2, beanList2.size());
+        assertEquals(2, beanList2.size(), 
+                     "Expect 2 Elements failed ");
         //System.out.println("bean list result: "+ beanList2);
-        assertEquals("DeSer failed ", "joe9", beanList2.get(1).get("name"));
+        assertEquals("joe9", beanList2.get(1).get("name"), 
+                     "DeSer failed ");
     }
 
     @Test
@@ -153,7 +165,8 @@ public class JsonPathJacksonTest extends BaseUnit4Test {
         //System.out.println("result: "+ result);
         int idx = 0;
         for (Rectangle rect : result) {
-            assertEquals("deser reread size failed", (idx * idx), rect.getSize());
+            assertEquals((idx * idx), rect.getSize(), 
+                         "deser reread size failed");
             idx++;
         }
     }
@@ -180,8 +193,10 @@ public class JsonPathJacksonTest extends BaseUnit4Test {
          JSONArray jsonOrgResult = JsonPath.parse(filteredSerList).read("$",typeRef);
          
          logger.debug("jsonOrgResult: "+ jsonOrgResult.toString(2));
-         assertEquals("DeSer failed ", "jim jar", ((JSONObject)(jsonOrgResult.get(0))).get("name") );
-         assertEquals("DeSer failed ", 45, ((JSONObject)(jsonOrgResult.get(1))).get("age") );      
+         assertEquals("jim jar", ((JSONObject)(jsonOrgResult.get(0))).get("name"), 
+                         "DeSer failed name" );
+         assertEquals(45, ((JSONObject)(jsonOrgResult.get(1))).get("age"),
+                      "DeSer failed age" );
     }
     
     @Test
@@ -189,7 +204,8 @@ public class JsonPathJacksonTest extends BaseUnit4Test {
         String jsonString = "{name:\"joe\"}";
         TypeRef<Bean> typeRef = new TypeRef<Bean>() { };
         Bean result = JsonPath.parse(jsonString).read("$",typeRef); 
-        assertTrue("expected bean object!", result instanceof Bean);
+        assertTrue(result instanceof Bean, 
+                   "expected bean object!");
     }
 
 }

@@ -1,5 +1,8 @@
 package org.apache.fulcrum.json.jackson;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,9 +22,6 @@ package org.apache.fulcrum.json.jackson;
  * under the License.
  */
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
-import org.apache.avalon.framework.logger.ConsoleLogger;
+import org.apache.avalon.framework.logger.Log4JLogger;
 import org.apache.avalon.framework.logger.Logger;
 import org.apache.fulcrum.json.JsonService;
 import org.apache.fulcrum.json.jackson.example.Bean;
@@ -42,9 +42,12 @@ import org.apache.fulcrum.json.jackson.mixins.BeanMixin;
 import org.apache.fulcrum.json.jackson.mixins.RectangleMixin;
 import org.apache.fulcrum.json.jackson.mixins.RectangleMixin2;
 import org.apache.fulcrum.json.jackson.mixins.TypedRectangle;
-import org.apache.fulcrum.testcontainer.BaseUnit4Test;
-import org.junit.Before;
-import org.junit.Test;
+import org.apache.fulcrum.testcontainer.BaseUnit5Test;
+import org.apache.log4j.LogManager;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.platform.runner.JUnitPlatform;
+import org.junit.runner.RunWith;
 
 import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
 
@@ -54,18 +57,21 @@ import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
  * 
  * cft. http://wiki.fasterxml.com/JacksonPolymorphicDeserialization
  * 
+ * adding {@literal @}{@link RunWith} annotation with {@link JUnitPlatform} allows intellij/eclipse IDE recognize it's a test
+ * 
  * @author gk
  * @version $Id$
  */
-public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test extends BaseUnit4Test {
+@RunWith(JUnitPlatform.class)
+public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test extends BaseUnit5Test {
     private JsonService sc = null;
     private final String preDefinedOutput = "{\"container\":{\"type\":\"java.util.HashMap\",\"cf\":\"Config.xml\"},\"configurationName\":\"Config.xml\",\"name\":\"mytest\"}";
     Logger logger;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         sc = (JsonService) this.lookup(JsonService.ROLE);
-        logger = new ConsoleLogger(ConsoleLogger.LEVEL_DEBUG);
+        logger = new Log4JLogger(LogManager.getLogger(getClass().getName()) );
         ((Jackson2MapperService) sc).getMapper().enableDefaultTypingAsProperty(
                 DefaultTyping.OBJECT_AND_NON_CONCRETE, "type");
     }
@@ -74,14 +80,14 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
     @Test
     public void testSerialize() throws Exception {
         String serJson = sc.ser(new TestClass("mytest"));
-        assertEquals("Serialization failed ", preDefinedOutput, serJson);
+        assertEquals( preDefinedOutput, serJson, "Serialization failed ");
     }
 
     @Test
     public void testDeSerialize() throws Exception {
         String serJson = sc.ser(new TestClass("mytest"));
         Object deson = sc.deSer(serJson, TestClass.class);
-        assertEquals("DeSer failed ", TestClass.class, deson.getClass());
+        assertEquals(TestClass.class, deson.getClass(), "DeSer failed ");
     }
     @Test
     public void testSerializeDateWithDefaultDateFormat() throws Exception {
@@ -90,9 +96,10 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
         map.put("date", Calendar.getInstance().getTime());
         String serJson = sc.ser(map);
         logger.debug("serJson:" +serJson);
-        assertTrue(
-                "Serialize with Adapater failed ",
-                serJson.matches(".*\"java.util.Date\",\"\\d\\d/\\d\\d/\\d{4}\".*"));
+        assertEquals(
+                true,
+                serJson.matches(".*\"java.util.Date\",\"\\d\\d/\\d\\d/\\d{4}\".*"),
+                "Serialize with Adapater failed ");
     }
     @Test
     public void testSerializeDeSerializeDate() throws Exception {
@@ -123,8 +130,9 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
         sourceDate.set(Calendar.SECOND, 0);
         sourceDate.set(Calendar.MILLISECOND, 0);
         sourceDate.set(Calendar.HOUR_OF_DAY, 0);
-        assertEquals("millisec of result and source date should be equal, after zeroing not used formatter values:: ",
-                ((Date)serObject.mydate).getTime(),sourceDate.getTime().getTime() );
+        assertEquals(
+                ((Date)serObject.mydate).getTime(),sourceDate.getTime().getTime(),
+                "millisec of result and source date should be equal, after zeroing not used formatter values:: ");
     }
     // all values represented in format of the object, which would be serialized are conserved, while the others are nulled   
     @Test
@@ -160,8 +168,9 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
         // cleanup all values the mapper dateformat does not contain.
         sourceDate.set(Calendar.SECOND, 0);
         sourceDate.set(Calendar.MILLISECOND, 0);
-        assertEquals("milliseconds of resultDate (serialized) should be equal, if properly set the: ",
-                ((Date)serObject.mydate).getTime(),sourceDate.getTime().getTime() );
+        assertEquals(
+                ((Date)serObject.mydate).getTime(),sourceDate.getTime().getTime(),
+                "milliseconds of resultDate (serialized) should be equal, if properly set the. ");
         
     }
     // timezone handling example
@@ -182,8 +191,9 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
         logger.debug("may not be equal: millisec(resultDate(string)):" + ((Date)serObject.mydate).getTime() + 
                 " millisec(sourceDate):"+ compareDate.getTime().getTime() );
         
-        assertEquals("format should be equal",  compareDateFormatted,
-                        df.format(((Date)serObject.mydate).getTime())
+        assertEquals( compareDateFormatted,
+                        df.format(((Date)serObject.mydate).getTime()),
+                        "format should be equal"
                         );
         logger.debug("format in locale timezone (resultDate(string)):" + df.format(((Date)serObject.mydate).getTime()));
     }
@@ -193,14 +203,13 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
         filteredBean.setName("joe");
         String bean = sc.serializeOnlyFilter(filteredBean, "name");
         assertEquals(
-                "Ser filtered Bean failed ",
                 "{\"name\":\"joe\"}",
                 bean);
         Rectangle filteredRectangle = new Rectangle(5, 10);
         filteredRectangle.setName("jim");
         String rectangle = sc.serializeOnlyFilter(filteredRectangle,
                "w", "name");
-        assertEquals("Ser filtered Rectangle failed ",
+        assertEquals(
                 "{\"w\":5,\"name\":\"jim\"}", rectangle);
     }
     @Test
@@ -216,7 +225,6 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
         String result = sc.serializeOnlyFilter(beanList, Bean.class, "name",
                 "age");
         assertEquals(
-                "Serialization of beans failed ",
                 "[{'type':'org.apache.fulcrum.json.jackson.example.Bean','name':'joe0','age':0},{'type':'org.apache.fulcrum.json.jackson.example.Bean','name':'joe1','age':1},{'type':'org.apache.fulcrum.json.jackson.example.Bean','name':'joe2','age':2},{'type':'org.apache.fulcrum.json.jackson.example.Bean','name':'joe3','age':3},{'type':'org.apache.fulcrum.json.jackson.example.Bean','name':'joe4','age':4},{'type':'org.apache.fulcrum.json.jackson.example.Bean','name':'joe5','age':5},{'type':'org.apache.fulcrum.json.jackson.example.Bean','name':'joe6','age':6},{'type':'org.apache.fulcrum.json.jackson.example.Bean','name':'joe7','age':7},{'type':'org.apache.fulcrum.json.jackson.example.Bean','name':'joe8','age':8},{'type':'org.apache.fulcrum.json.jackson.example.Bean','name':'joe9','age':9}]",
                 result.replace('"', '\''));
     }
@@ -239,9 +247,9 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
         // -> need to use constructCollectionType        
         Class clazz = Class.forName("org.apache.fulcrum.json.jackson.example.Bean");
         List<Bean> beanList2 = (List<Bean>)sc.deSerCollection(result, new ArrayList(),clazz);
-        assertTrue("DeSer failed ", beanList2.size() == 10);
+        assertTrue( beanList2.size() == 10);
         for (Bean bean : beanList2) {
-            assertEquals("DeSer failed ", Bean.class, bean.getClass());
+            assertEquals( Bean.class, bean.getClass());
         }
     }
     @Test
@@ -262,12 +270,12 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
         Class clazz = Class.forName("org.apache.fulcrum.json.jackson.example.Bean");
         List<Bean> beanList2 = (List<Bean>)sc.deSerCollection(result, new ArrayList(),clazz);
         //Object beanList2 = sc.deSer(result, List.class);
-        assertTrue("DeSer failed ", beanList2 instanceof List);
-        assertTrue("DeSer failed ", ((List) beanList2).size() == 10);
+        assertTrue( beanList2 instanceof List);
+        assertTrue( ((List) beanList2).size() == 10);
         for (int i = 0; i < ((List) beanList2).size(); i++) {
-            assertTrue("DeSer failed ",
+            assertTrue(
                     ((List) beanList2).get(i) instanceof Bean);
-            assertTrue("DeSer failed ", ((Bean) ((List) beanList2).get(i))
+            assertTrue(((Bean) ((List) beanList2).get(i))
                     .getName().equals("joe" + i));
 
         }
@@ -279,7 +287,7 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
         String serRect = sc
                 .addAdapter("M4RMixin", Rectangle.class, RectangleMixin.class).ser(
                         filteredRectangle);
-        assertEquals("Ser failed ", "{\"width\":5}", serRect);
+        assertEquals( "{\"width\":5}", serRect);
     }
     @Test
     public void testSerializeWith2Mixins() throws Exception {
@@ -290,13 +298,12 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
 
        String serRect =  sc.addAdapter("M4RMixin2", Rectangle.class,
                 RectangleMixin2.class).ser(filteredRectangle);
-        assertEquals("Ser failed ", "{\"name\":\"jim\",\"width\":5}", serRect);
+        assertEquals( "{\"name\":\"jim\",\"width\":5}", serRect);
         //
         String bean = sc.addAdapter("M4RBeanMixin", Bean.class,
                 BeanMixin.class).ser(filteredBean);;
         
         assertEquals(
-                "Ser filtered Bean failed ",
                 "{\"name\":\"joe\"}",
                 bean);
     }
@@ -309,7 +316,6 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
         // profession was already set to ignore, does not change
         String bean = sc.serializeOnlyFilter(filteredBean, Bean.class, "profession");
         assertEquals(
-                "Ser filtered Bean failed ",
                 "{}",
                 bean);
     }
@@ -324,7 +330,6 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
         // now profession is used after cleaning adapter
         String bean = sc.serializeOnlyFilter(filteredBean, Bean.class, "profession");
         assertEquals(
-                "Ser filtered Bean failed ",
                 "{\"profession\":\"\"}",
                 bean);
     }
@@ -337,19 +342,16 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
         // if serialization is done Jackson clean cache
         String rectangle0 = sc.ser(filteredRectangle,Rectangle.class,true);
         assertEquals(
-                "Ser filtered Rectangle failed ",
                 "{\"name\":\"jim\",\"width\":5}",
                 rectangle0);
         // filtering out name, using width from mixin2 as a second filter
         String rectangle = sc.serializeOnlyFilter(filteredRectangle, Rectangle.class, true, "width");
         assertEquals(
-                "Ser filtered Rectangle failed ",
                 "{\"width\":5}",
                 rectangle);
         // default for mixin
        String rectangle1 = sc.ser(filteredRectangle);
        assertEquals(
-              "Ser filtered Rectangle failed ",
               "{\"name\":\"jim\",\"width\":5}",
               rectangle1);
     }
@@ -365,7 +367,6 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
         String result = sc.addAdapter("M4RMixin", Bean.class, BeanMixin.class)
                 .ser(beanList);
         assertEquals(
-                "Serialization of beans failed ",
                 "[{'type':'org.apache.fulcrum.json.jackson.example.Bean','name':'joe0'},{'type':'org.apache.fulcrum.json.jackson.example.Bean','name':'joe1'},{'type':'org.apache.fulcrum.json.jackson.example.Bean','name':'joe2'},{'type':'org.apache.fulcrum.json.jackson.example.Bean','name':'joe3'},{'type':'org.apache.fulcrum.json.jackson.example.Bean','name':'joe4'},{'type':'org.apache.fulcrum.json.jackson.example.Bean','name':'joe5'},{'type':'org.apache.fulcrum.json.jackson.example.Bean','name':'joe6'},{'type':'org.apache.fulcrum.json.jackson.example.Bean','name':'joe7'},{'type':'org.apache.fulcrum.json.jackson.example.Bean','name':'joe8'},{'type':'org.apache.fulcrum.json.jackson.example.Bean','name':'joe9'}]",
                 result.replace('"', '\''));
     }
@@ -386,9 +387,9 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
         
         // -> need to use constructCollectionType
         List<Bean> beanList2 = (List<Bean>)sc.deSerCollection(result, new ArrayList(),Bean.class);
-        assertTrue("DeSer failed ", beanList2.size() == 10);
+        assertTrue( beanList2.size() == 10);
         for (Bean bean : beanList2) {
-            assertEquals("DeSer failed ", Bean.class, bean.getClass());
+            assertEquals( Bean.class, bean.getClass());
         }
     }
     @Test
@@ -407,9 +408,9 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
                 "M4BeanRMixin", Bean.class, BeanMixin.class);
         String serRect = sc.ser(components);
         assertEquals(
-                "Serialization failed ",
                 "[{'type':'org.apache.fulcrum.json.jackson.example.Rectangle','width':25},{'type':'org.apache.fulcrum.json.jackson.example.Rectangle','width':250},{'type':'org.apache.fulcrum.json.jackson.example.Bean','name':'joe0'},{'type':'org.apache.fulcrum.json.jackson.example.Bean','name':'joe1'},{'type':'org.apache.fulcrum.json.jackson.example.Bean','name':'joe2'}]",
-                serRect.replace('"', '\''));
+                serRect.replace('"', '\''),
+                "Serialization failed ");
     }
     @Test
     public void testSerializeCollectionWithOnlyFilter() throws Exception {

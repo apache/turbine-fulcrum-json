@@ -18,10 +18,8 @@ package org.apache.fulcrum.json.jackson;
  * specific language governing permissions and limitations
  * under the License.
  */
-
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -31,7 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.avalon.framework.logger.ConsoleLogger;
+import org.apache.avalon.framework.logger.Log4JLogger;
 import org.apache.avalon.framework.logger.Logger;
 import org.apache.fulcrum.json.JsonService;
 import org.apache.fulcrum.json.jackson.example.Bean;
@@ -41,9 +39,12 @@ import org.apache.fulcrum.json.jackson.mixins.BeanMixin;
 import org.apache.fulcrum.json.jackson.mixins.RectangleMixin;
 import org.apache.fulcrum.json.jackson.mixins.RectangleMixin2;
 import org.apache.fulcrum.json.jackson.mixins.TypedRectangle;
-import org.apache.fulcrum.testcontainer.BaseUnit4Test;
-import org.junit.Before;
-import org.junit.Test;
+import org.apache.fulcrum.testcontainer.BaseUnit5Test;
+import org.apache.log4j.LogManager;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.platform.runner.JUnitPlatform;
+import org.junit.runner.RunWith;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
@@ -56,29 +57,31 @@ import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
  * @author gk
  * @version $Id$
  */
-public class JacksonMapperEnabledDefaultTypingTest extends BaseUnit4Test {
+//@Nested
+@RunWith(JUnitPlatform.class)
+public class JacksonMapperEnabledDefaultTypingTest extends BaseUnit5Test {
     public static final String preDefinedOutput = "{\"type\":\"org.apache.fulcrum.json.jackson.example.TestClass\",\"container\":{\"type\":\"java.util.HashMap\",\"cf\":\"Config.xml\"},\"configurationName\":\"Config.xml\",\"name\":\"mytest\"}";
     private JsonService sc = null;
     Logger logger;
 
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         sc = (JsonService) this.lookup(JsonService.ROLE);
-        logger = new ConsoleLogger(ConsoleLogger.LEVEL_DEBUG);
+        logger = new Log4JLogger(LogManager.getLogger(getClass().getName()) );
         ((Jackson2MapperService) sc).getMapper().enableDefaultTypingAsProperty(
                 DefaultTyping.NON_FINAL, "type");
     }
     @Test
     public void testSerialize() throws Exception {
         String serJson = sc.ser(new TestClass("mytest"));
-        assertEquals("Serialization failed ", preDefinedOutput, serJson);
+        assertEquals(preDefinedOutput, serJson, "Serialization failed ");
     }
     @Test
     public void testDeSerialize() throws Exception {
         String serJson = sc.ser(new TestClass("mytest"));
         Object deson = sc.deSer(serJson, TestClass.class);
-        assertEquals("DeSer failed ", TestClass.class, deson.getClass());
+        assertEquals(TestClass.class, deson.getClass(), "DeSer failed ");
     }
     @Test
     public void testSerializeDateWithDefaultDateFormat() throws Exception {
@@ -87,8 +90,9 @@ public class JacksonMapperEnabledDefaultTypingTest extends BaseUnit4Test {
         String serJson = sc.ser(map);
         logger.debug("serJson:" +serJson);
         assertEquals(
-                "Serialize with Adapater failed ",true,
-                serJson.matches(".*\"java.util.Date\",\"\\d\\d/\\d\\d/\\d{4}\".*"));
+                true,
+                serJson.matches(".*\"java.util.Date\",\"\\d\\d/\\d\\d/\\d{4}\".*"),
+                "Serialize with Adapater failed ");
     }
     @Test
     public void testDeSerializeDate() throws Exception {
@@ -99,8 +103,8 @@ public class JacksonMapperEnabledDefaultTypingTest extends BaseUnit4Test {
         String serJson =  sc.ser(map, Map.class);
         logger.debug("serJsonwithmap:"+ serJson);
         Map<String, Date> serDate = sc.deSer(serJson, Map.class);
-        assertEquals("Date DeSer failed ", Date.class, serDate.get("date")
-                .getClass());   
+        assertEquals(Date.class, serDate.get("date")
+                .getClass(), "Date DeSer failed "); 
     }
     @Test
     public void testSerializeWithCustomFilter() throws Exception {
@@ -108,16 +112,16 @@ public class JacksonMapperEnabledDefaultTypingTest extends BaseUnit4Test {
         filteredBean.setName("joe");
         String bean = sc.serializeOnlyFilter(filteredBean, Bean.class, "name");
         assertEquals(
-                "Ser filtered Bean failed ",
                 "{\"type\":\"org.apache.fulcrum.json.jackson.example.Bean\",\"name\":\"joe\"}",
-                bean);
+                bean,
+                "Ser filtered Bean failed ");
 
         Rectangle filteredRectangle = new Rectangle(5, 10);
         filteredRectangle.setName("jim");
         String rectangle = sc.serializeOnlyFilter(filteredRectangle,
                 Rectangle.class, "w", "name");
-        assertEquals("Ser filtered Rectangle failed ",
-                "{\"w\":5,\"name\":\"jim\"}", rectangle);
+        assertEquals(
+                "{\"w\":5,\"name\":\"jim\"}", rectangle, "Ser filtered Rectangle failed ");
     }
     @Test
     public void testSerializationCollectionWithFilter() throws Exception {
@@ -132,9 +136,9 @@ public class JacksonMapperEnabledDefaultTypingTest extends BaseUnit4Test {
         String result = sc.serializeOnlyFilter(beanList, Bean.class, "name",
                 "age");
         assertEquals(
-                "Serialization of beans failed ",
                 "['java.util.ArrayList',[{'type':'org.apache.fulcrum.json.jackson.example.Bean','name':'joe0','age':0},{'type':'org.apache.fulcrum.json.jackson.example.Bean','name':'joe1','age':1},{'type':'org.apache.fulcrum.json.jackson.example.Bean','name':'joe2','age':2},{'type':'org.apache.fulcrum.json.jackson.example.Bean','name':'joe3','age':3},{'type':'org.apache.fulcrum.json.jackson.example.Bean','name':'joe4','age':4},{'type':'org.apache.fulcrum.json.jackson.example.Bean','name':'joe5','age':5},{'type':'org.apache.fulcrum.json.jackson.example.Bean','name':'joe6','age':6},{'type':'org.apache.fulcrum.json.jackson.example.Bean','name':'joe7','age':7},{'type':'org.apache.fulcrum.json.jackson.example.Bean','name':'joe8','age':8},{'type':'org.apache.fulcrum.json.jackson.example.Bean','name':'joe9','age':9}]]",
-                result.replace('"', '\''));
+                result.replace('"', '\''),
+                "Serialization of beans failed ");
         
         Collection<Rectangle> resultDeSer = checkDeserCollection(result, List.class, Rectangle.class);
     }
@@ -143,14 +147,15 @@ public class JacksonMapperEnabledDefaultTypingTest extends BaseUnit4Test {
         sc.addAdapter("TestClass Adapter", target, mixin);
         T result = sc.deSer(serJson,target);
         //logger.debug("result:"+ result + " is of type "+ target.getName());
-        assertTrue("result instance check", target.isAssignableFrom(result.getClass()));
+        assertTrue(target.isAssignableFrom(result.getClass()), "result instance check");
         return result;
      }
     
     private <U> Collection<U> checkDeserCollection(String serJson,Class<? extends Collection> collClass, Class entryClass) throws Exception {
           Collection<U> result = ((Jackson2MapperService) sc).deSerCollectionWithType(serJson, collClass, entryClass);
-          assertTrue("result instance check failed for result class "+ result.getClass() + " and target class: "+ collClass, 
-                  collClass.isAssignableFrom(result.getClass()));
+          assertTrue( 
+                  collClass.isAssignableFrom(result.getClass()),
+                  "result instance check failed for result class "+ result.getClass() + " and target class: "+ collClass);
           return result;
     }
   
@@ -171,9 +176,9 @@ public class JacksonMapperEnabledDefaultTypingTest extends BaseUnit4Test {
         TypeReference typeRef = new TypeReference<List<Bean>>(){};
         List<Bean> beanList2 = (List<Bean>) ((Jackson2MapperService) sc)
                 .deSerCollection(result, typeRef, Bean.class);
-        assertTrue("DeSer failed ", beanList2.size() == 10);
+        assertTrue(beanList2.size() == 10);
         for (Bean bean : beanList2) {
-            assertEquals("DeSer failed ", Bean.class, bean.getClass());
+            assertEquals(Bean.class, bean.getClass());
         }
     }
     @Test
@@ -190,12 +195,12 @@ public class JacksonMapperEnabledDefaultTypingTest extends BaseUnit4Test {
         String result = sc.serializeOnlyFilter(beanList, Bean.class, "name",
                 "age");
         Object beanList2 = sc.deSer(result, List.class);
-        assertTrue("DeSer failed ", beanList2 instanceof List);
-        assertTrue("DeSer failed ", ((List) beanList2).size() == 10);
+        assertTrue( beanList2 instanceof List);
+        assertTrue( ((List) beanList2).size() == 10);
         for (int i = 0; i < ((List) beanList2).size(); i++) {
-            assertTrue("DeSer failed ",
+            assertTrue(
                     ((List) beanList2).get(i) instanceof Bean);
-            assertTrue("DeSer failed ", ((Bean) ((List) beanList2).get(i))
+            assertTrue(((Bean) ((List) beanList2).get(i))
                     .getName().equals("joe" + i));
 
         }
@@ -207,7 +212,7 @@ public class JacksonMapperEnabledDefaultTypingTest extends BaseUnit4Test {
         String serRect = sc
                 .addAdapter("M4RMixin", Rectangle.class, RectangleMixin.class).ser(
                         filteredRectangle);
-        assertEquals("Ser failed ", "{\"width\":5}", serRect);
+        assertEquals("{\"width\":5}", serRect);
     }
     @Test
     public void testSerializeWith2Mixins() throws Exception {
@@ -218,16 +223,16 @@ public class JacksonMapperEnabledDefaultTypingTest extends BaseUnit4Test {
 
        String serRect =  sc.addAdapter("M4RMixin2", Rectangle.class,
                 RectangleMixin2.class).ser(filteredRectangle);
-        assertEquals("Ser failed ", "{\"name\":\"jim\",\"width\":5}", serRect);
+        assertEquals( "{\"name\":\"jim\",\"width\":5}", serRect);
 
         //
         String bean = sc.addAdapter("M4RBeanMixin", Bean.class,
                 BeanMixin.class).ser(filteredBean);;
         
         assertEquals(
-                "Ser filtered Bean failed ",
                 "{\"type\":\"org.apache.fulcrum.json.jackson.example.Bean\",\"name\":\"joe\"}",
-                bean);
+                bean,
+                "Ser filtered Bean failed ");
     }
     @Test
     public void testSerializeWithMixinAndFilter() throws Exception {
@@ -239,7 +244,6 @@ public class JacksonMapperEnabledDefaultTypingTest extends BaseUnit4Test {
         // profession was already set to ignore, does not change
         String bean = sc.serializeOnlyFilter(filteredBean, Bean.class, "profession");
         assertEquals(
-                "Ser filtered Bean failed ",
                 "{\"type\":\"org.apache.fulcrum.json.jackson.example.Bean\"}",
                 bean);
     }
@@ -255,9 +259,9 @@ public class JacksonMapperEnabledDefaultTypingTest extends BaseUnit4Test {
         // now profession is used after cleaning adapter
         String bean = sc.serializeOnlyFilter(filteredBean, Bean.class, "profession");
         assertEquals(
-                "Ser filtered Bean failed ",
                 "{\"type\":\"org.apache.fulcrum.json.jackson.example.Bean\",\"profession\":\"\"}",
-                bean);
+                bean,
+                "Serialization of beans failed ");
     }
     @Test
     public void testMultipleSerializingWithMixinAndFilter() throws Exception {
@@ -270,21 +274,21 @@ public class JacksonMapperEnabledDefaultTypingTest extends BaseUnit4Test {
         // if serialization is done Jackson clean cache
         String rectangle0 = sc.ser(filteredRectangle,Rectangle.class,true);
         assertEquals(
-                "Ser filtered Rectangle failed ",
                 "{\"name\":\"jim\",\"width\":5}",
-                rectangle0);
+                rectangle0,
+                "Ser filtered Rectangle0 failed ");
         // filtering out name, using width from mixin2 as a second filter
         String rectangle = sc.serializeOnlyFilter(filteredRectangle, Rectangle.class, true, "width");
         assertEquals(
-                "Ser filtered Rectangle failed ",
                 "{\"width\":5}",
-                rectangle);
+                rectangle,
+                "Ser filtered Rectangle failed ");
         // default for mixin
        String rectangle1 = sc.ser(filteredRectangle);
        assertEquals(
-              "Ser filtered Rectangle failed ",
               "{\"name\":\"jim\",\"width\":5}",
-              rectangle1);
+              rectangle1,
+              "Ser filtered Rectangle1 failed ");
     }
     @Test
     public void testSerializationCollectionWithMixin() throws Exception {
@@ -298,9 +302,9 @@ public class JacksonMapperEnabledDefaultTypingTest extends BaseUnit4Test {
         String result = sc.addAdapter("M4RMixin", Bean.class, BeanMixin.class)
                 .ser(beanList);
         assertEquals(
-                "Serialization of beans failed ",
                 "['java.util.ArrayList',[{'type':'org.apache.fulcrum.json.jackson.example.Bean','name':'joe0'},{'type':'org.apache.fulcrum.json.jackson.example.Bean','name':'joe1'},{'type':'org.apache.fulcrum.json.jackson.example.Bean','name':'joe2'},{'type':'org.apache.fulcrum.json.jackson.example.Bean','name':'joe3'},{'type':'org.apache.fulcrum.json.jackson.example.Bean','name':'joe4'},{'type':'org.apache.fulcrum.json.jackson.example.Bean','name':'joe5'},{'type':'org.apache.fulcrum.json.jackson.example.Bean','name':'joe6'},{'type':'org.apache.fulcrum.json.jackson.example.Bean','name':'joe7'},{'type':'org.apache.fulcrum.json.jackson.example.Bean','name':'joe8'},{'type':'org.apache.fulcrum.json.jackson.example.Bean','name':'joe9'}]]",
-                result.replace('"', '\''));
+                result.replace('"', '\''),
+                "Serialization of beans failed ");
     }
     @Test
     public void testDeSerializationCollectionWithMixin() throws Exception {
@@ -317,9 +321,9 @@ public class JacksonMapperEnabledDefaultTypingTest extends BaseUnit4Test {
         TypeReference typeRef = new TypeReference<List<Bean>>(){};
         List<Bean> beanList2 = (List<Bean>) ((Jackson2MapperService) sc)
                 .deSerCollection(result, typeRef, Bean.class);
-        assertTrue("DeSer failed ", beanList2.size() == 10);
+        assertTrue(beanList2.size() == 10, "DeSer failed ");
         for (Bean bean : beanList2) {
-            assertEquals("DeSer failed ", Bean.class, bean.getClass());
+            assertEquals( Bean.class, bean.getClass(), "DeSer failed ");
         }
     }
     @Test
@@ -337,7 +341,7 @@ public class JacksonMapperEnabledDefaultTypingTest extends BaseUnit4Test {
                 "M4BeanRMixin", Bean.class, BeanMixin.class);
         String serRect = sc.ser(components);
         assertEquals(
-                "Serialization failed ",
+
                 "['java.util.ArrayList',[{'type':'org.apache.fulcrum.json.jackson.example.Rectangle','width':25},{'type':'org.apache.fulcrum.json.jackson.example.Rectangle','width':250},{'type':'org.apache.fulcrum.json.jackson.example.Bean','name':'joe0'},{'type':'org.apache.fulcrum.json.jackson.example.Bean','name':'joe1'},{'type':'org.apache.fulcrum.json.jackson.example.Bean','name':'joe2'}]]",
                 serRect.replace('"', '\''));
     }

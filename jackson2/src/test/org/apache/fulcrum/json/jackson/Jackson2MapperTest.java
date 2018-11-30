@@ -18,36 +18,41 @@ package org.apache.fulcrum.json.jackson;
  * specific language governing permissions and limitations
  * under the License.
  */
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.apache.avalon.framework.logger.ConsoleLogger;
+import org.apache.avalon.framework.logger.Log4JLogger;
 import org.apache.avalon.framework.logger.Logger;
 import org.apache.fulcrum.json.JsonService;
 import org.apache.fulcrum.json.jackson.example.Bean;
 import org.apache.fulcrum.json.jackson.example.Rectangle;
-import org.apache.fulcrum.testcontainer.BaseUnit4Test;
-import org.junit.Before;
-import org.junit.Test;
-
+import org.apache.fulcrum.testcontainer.BaseUnit5Test;
+import org.apache.log4j.LogManager;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.platform.runner.JUnitPlatform;
+import org.junit.runner.RunWith;
 
 
 /**
  * More Jackson2 JSON Test
  * 
  * Test with clearing mixins
- * 
+
  * @author gk
  * @version $Id$
  */
-public class Jackson2MapperTest extends BaseUnit4Test {
+@RunWith(JUnitPlatform.class)
+public class Jackson2MapperTest extends BaseUnit5Test {
     
     private JsonService sc = null;
     Logger logger;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         sc = (JsonService) this.lookup(JsonService.ROLE);
-        logger = new ConsoleLogger(ConsoleLogger.LEVEL_DEBUG);
+        logger = new Log4JLogger(LogManager.getLogger(getClass().getName()) );
         // clear 
         ((Jackson2MapperService)sc).setMixins(null,null);
         logger.debug( "cleared mixins");
@@ -59,14 +64,15 @@ public class Jackson2MapperTest extends BaseUnit4Test {
         bean.setName("joe");
         bean.setAge(12);
         String filteredBean  = sc.serializeOnlyFilter(bean, Bean.class, "name");
-        assertEquals("Ser filtered Bean failed ", "{\"name\":\"joe\"}", filteredBean);
+        assertEquals( "{\"name\":\"joe\"}", filteredBean, "Ser filtered Bean failed ");
 
         Rectangle rectangle = new Rectangle(5, 10);
         rectangle.setName("jim");
         String filteredRectangle  = sc.serializeOnlyFilter(rectangle,
                 Rectangle.class, "w", "name");
-        assertEquals("Ser filtered Rectangle failed ",
-                "{\"w\":5,\"name\":\"jim\"}", filteredRectangle);
+        assertEquals(
+                "{\"w\":5,\"name\":\"jim\"}", filteredRectangle,
+                "Ser filtered Rectangle failed ");
     }
     
     // analog seralizeAllExcept 
@@ -80,29 +86,32 @@ public class Jackson2MapperTest extends BaseUnit4Test {
         rectangle.setName("jim");
         
         String filteredBean  = sc.serializeOnlyFilter(bean, Bean.class, "name");
-        assertEquals("global Ser filtered Bean failed ", "{\"name\":\"joe\"}", filteredBean);
+        assertEquals("{\"name\":\"joe\"}", filteredBean, "global Ser filtered Bean failed ");
 
         String filteredRectangle  = sc.serializeOnlyFilter(rectangle,
                 Rectangle.class, "w", "name");
-        assertEquals("global Ser filtered Rectangle failed ",
-                "{\"w\":5,\"name\":\"jim\"}", filteredRectangle);
+        assertEquals(
+                "{\"w\":5,\"name\":\"jim\"}", filteredRectangle,
+                "global Ser filtered Rectangle failed ");
         
         filteredBean  = ((Jackson2MapperService)sc).serializeOnlyFilter(bean, new Class[]{ Bean.class}, true, "age");
-        assertEquals("Another Global Ser filtered Bean failed ", "{\"age\":12}", filteredBean);
+        assertEquals("{\"age\":12}", filteredBean, "Another Global Ser filtered Bean failed ");
 
         filteredRectangle  = ((Jackson2MapperService)sc).serializeOnlyFilter( 
                rectangle, new Class[] { Rectangle.class}, true, "h", "name");
-        assertEquals("Local Ser filtered Rectangle failed ",
-                "{\"h\":10,\"name\":\"jim\"}", filteredRectangle);
+        assertEquals(
+                "{\"h\":10,\"name\":\"jim\"}", filteredRectangle,
+                "Local Ser filtered Rectangle failed ");
         
         // if refresh would be false, this would fail
         filteredBean  = sc.serializeOnlyFilter(bean, Bean.class, "name");
-        assertEquals("global Ser filtered Bean failed ", "{\"name\":\"joe\"}", filteredBean);
+        assertEquals("{\"name\":\"joe\"}", filteredBean,
+                     "global Ser filtered Bean failed ");
 
         filteredRectangle  = sc.serializeOnlyFilter(rectangle,
                 Rectangle.class, "w", "name");
-        assertEquals("global Ser filtered Rectangle failed ",
-                "{\"w\":5,\"name\":\"jim\"}", filteredRectangle);
+        assertEquals(
+                "{\"w\":5,\"name\":\"jim\"}", filteredRectangle, "global Ser filtered Rectangle failed ");
     }
 
 }

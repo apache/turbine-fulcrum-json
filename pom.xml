@@ -93,11 +93,28 @@
         </plugins>
     </build>
     <dependencies>
-     <dependency>
-            <groupId>org.apache.fulcrum</groupId>
-            <artifactId>fulcrum-testcontainer</artifactId>
-            <version>1.0.7</version>
-            <scope>test</scope>
+       <dependency>
+          <groupId>org.apache.fulcrum</groupId>
+          <artifactId>fulcrum-testcontainer</artifactId>
+          <version>1.0.8-SNAPSHOT</version>
+          <scope>test</scope>
+        </dependency>
+         <!-- Log4j2 should be used by default , remved optional -->
+        <dependency>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-api</artifactId>
+          <version>${log4j2.version}</version>
+        </dependency>
+        <dependency>
+           <groupId>org.apache.logging.log4j</groupId>
+           <artifactId>log4j-core</artifactId>
+           <version>${log4j2.version}</version>
+        </dependency>
+        <!-- log4j1.2 bridge instead of log4j -->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-1.2-api</artifactId>
+            <version>${log4j2.version}</version>
         </dependency>
     </dependencies>
    
@@ -143,13 +160,11 @@
     </profiles>
 
   <properties>
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
-    <java.version>1.8</java.version>
     <turbine.site.path>fulcrum/fulcrum-json</turbine.site.path>
     <turbine.scmPubCheckoutDirectory>${turbine.site.cache}/fulcrum/json</turbine.scmPubCheckoutDirectory>
     <turbine.site.cache>${project.build.directory}/turbine-sites</turbine.site.cache>
     <siteContent.path>${project.build.directory}/staging</siteContent.path><!-- default stagingSiteURL --> 
+    <log4j2.version>2.11.1</log4j2.version>
   </properties> 
     
 </project>

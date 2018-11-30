@@ -143,7 +143,4 @@ public class JsonPathGSONServiceTest extends BaseUnit4Test
           idx++;
       }
      }
-
-
-
 }

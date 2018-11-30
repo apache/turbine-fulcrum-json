@@ -1,5 +1,6 @@
 package org.apache.fulcrum.json.jackson;
 
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,44 +20,48 @@ package org.apache.fulcrum.json.jackson;
  * under the License.
  */
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.avalon.framework.logger.ConsoleLogger;
+import org.apache.avalon.framework.logger.Log4JLogger;
 import org.apache.avalon.framework.logger.Logger;
 import org.apache.fulcrum.json.JsonService;
 import org.apache.fulcrum.json.jackson.example.Bean;
-import org.apache.fulcrum.testcontainer.BaseUnit4Test;
+import org.apache.fulcrum.testcontainer.BaseUnit5Test;
+import org.apache.log4j.LogManager;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.platform.runner.JUnitPlatform;
+import org.junit.runner.RunWith;
 
 import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
 
 /**
  * Jackson2 JSON Test
  * 
- * Test without type setting 
- * 
+ * Test without type setting
+ *  
  * @author gk
  * @version $Id: JacksonMapperTest.java 1800753 2017-07-04 11:00:03Z gk $
  */
-public class JsonOrgJacksonMapperTest extends BaseUnit4Test {
+@RunWith(JUnitPlatform.class)
+public class JsonOrgJacksonMapperTest extends BaseUnit5Test {
     
     private JsonService sc = null;
     Logger logger;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         sc = (JsonService) this.lookup(JsonService.ROLE);
         sc.addAdapter(null, null,new JsonOrgModule());
         //((Jackson2MapperService)sc).registerModule(new JsonOrgModule());
-        logger = new ConsoleLogger(ConsoleLogger.LEVEL_DEBUG);
+        logger = new Log4JLogger(LogManager.getLogger(getClass().getName()) );
     }
     
     // support for org.json mapping 
@@ -76,8 +81,8 @@ public class JsonOrgJacksonMapperTest extends BaseUnit4Test {
          logger.debug("serList: "+ filteredSerList);
          JSONArray jsonOrgResult = sc.deSer(filteredSerList, JSONArray.class);//readValue(serList, JSONArray.class);
          logger.debug("jsonOrgResult: "+ jsonOrgResult.toString(2));
-         assertEquals("DeSer failed ", "jim jar", ((JSONObject)(jsonOrgResult.get(0))).get("name") );
-         assertEquals("DeSer failed ", 45, ((JSONObject)(jsonOrgResult.get(1))).get("age") );      
+         assertEquals("jim jar", ((JSONObject)(jsonOrgResult.get(0))).get("name"), "DeSer failed " );
+         assertEquals( 45, ((JSONObject)(jsonOrgResult.get(1))).get("age"), "DeSer failed " );
     }
     
     // support for org.json mapping 
@@ -95,7 +100,7 @@ public class JsonOrgJacksonMapperTest extends BaseUnit4Test {
          String[] filterAttr = {"name", "age" };
          JSONArray jsonArray =((Jackson2MapperService)sc).getMapper().convertValue( beanList, JSONArray .class );
          logger.debug("jsonArray: "+ jsonArray.toString(2));
-         assertEquals("Get JSONObject from jsonArray failed ", "jim jar", ((JSONObject)jsonArray.get( 0 )).get( "name" ));
+         assertEquals("jim jar", ((JSONObject)jsonArray.get( 0 )).get( "name" ), "Get JSONObject from jsonArray failed ");
     }
     
     // support for org.json mapping 
@@ -106,7 +111,7 @@ public class JsonOrgJacksonMapperTest extends BaseUnit4Test {
         bean.setAge(12);
         JSONObject jsonObject =((Jackson2MapperService)sc).getMapper().convertValue( bean, JSONObject.class );
         logger.debug("jsonObject: "+ jsonObject.toString(2));
-        assertEquals("Get name from jsonObject failed ", "joe", jsonObject.get( "name" ));
+        assertEquals("joe", jsonObject.get( "name" ),"Get name from jsonObject failed ");
     }
     
     @Test
@@ -121,8 +126,8 @@ public class JsonOrgJacksonMapperTest extends BaseUnit4Test {
         ((Jackson2MapperService)sc).initialize();// need to get fresh mapper
         String[] filterAttr = {"name" };
         String filteredBean = sc.serializeOnlyFilter(bean, Bean.class, filterAttr);
-        assertEquals("Ser filtered Bean failed ", "{\"name\":\"joe2\"}", filteredBean);
-        logger.debug("filteredBean: "+ filteredBean.toString());
+        logger.debug("filteredBean: "+ filteredBean);
+        assertEquals("{\"name\":\"joe2\"}", filteredBean, "Ser filtered Bean failed ");
     }
     
     @Test
@@ -139,12 +144,12 @@ public class JsonOrgJacksonMapperTest extends BaseUnit4Test {
         Map mapOfJsonObject = sc.deSer( serJsonObject, HashMap.class );
         String[] filterAttr = {"name" };
         String filteredJsonObject = sc.serializeOnlyFilter(mapOfJsonObject, filterAttr);
-        assertEquals("Ser filtered JSONObject failed ", "{\"name\":\"joe3\"}", filteredJsonObject);
-        logger.debug("filteredJsonObject: "+ filteredJsonObject.toString());
+        logger.debug("filteredJsonObject: "+ filteredJsonObject);
+        assertEquals("{\"name\":\"joe3\"}", filteredJsonObject, "Ser filtered JSONObject failed ");
         // works without init
         String filteredBean = sc.serializeOnlyFilter(bean, Bean.class, filterAttr);
-        assertEquals("Ser filtered Bean failed ", "{\"name\":\"joe3\"}", filteredBean);
-        logger.debug("filteredBean: "+ filteredBean.toString());
+        logger.debug("filteredBean: "+ filteredBean);
+        assertEquals("{\"name\":\"joe3\"}", filteredBean, "Ser filtered Bean failed ");
     }
 
 }
