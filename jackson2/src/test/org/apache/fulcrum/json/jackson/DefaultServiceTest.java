@@ -50,6 +50,7 @@ import org.apache.fulcrum.testcontainer.BaseUnit5Test;
 import org.apache.log4j.LogManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestReporter;
 import org.junit.platform.runner.JUnitPlatform;
 import org.junit.runner.RunWith;
 
@@ -314,7 +315,7 @@ public class DefaultServiceTest extends BaseUnit5Test {
 	 * @throws Exception generic exception
 	 */
 	@Test
-	public void testSerializationCollectioPrimitiveWrapper() throws Exception {
+	public void testSerializationCollectioPrimitiveWrapper(TestReporter testReporter) throws Exception {
 		List<Integer> intList = new ArrayList<Integer>();
 		for (int i = 0; i < 10; i++) {
 			Integer integer = new Integer(i * i);
@@ -323,7 +324,7 @@ public class DefaultServiceTest extends BaseUnit5Test {
 		String result = sc.serializeOnlyFilter(intList, Integer.class);
 		assertEquals("[0,1,4,9,16,25,36,49,64,81]", result, "Serialization of beans failed ");
 		// primitives could be deserialzed without type
-		Collection<Integer> result2 = checkDeserCollection(result, List.class, Integer.class);
+		Collection<Integer> result2 = checkDeserCollection(result, List.class, Integer.class, testReporter);
 		assertTrue( !result2.isEmpty(), "expect at least one entry ");
 		assertTrue( result2.iterator().next().getClass().isAssignableFrom(Integer.class), "result entry instance check");
 	}
@@ -553,7 +554,7 @@ public class DefaultServiceTest extends BaseUnit5Test {
      * @throws Exception generic exception
      */
     @Test
-    public void testSerializeCollectionWithOnlyFilterAndParentClass() throws Exception {
+    public void testSerializeCollectionWithOnlyFilterAndParentClass(TestReporter testReporter) throws Exception {
         List<BeanChild> beanList = new ArrayList<BeanChild>();
         for (int i = 0; i < 3; i++) {
             BeanChild bean = new BeanChild();
@@ -566,7 +567,7 @@ public class DefaultServiceTest extends BaseUnit5Test {
         // assertEquals("[{\"type\":\"\"},{\"type\":\"\"},{\"type\":\"\"}]",sc.serializeOnlyFilter(beanList,
         // BeanChild.class, true,"type"));
 
-        Collection<BeanChild> result2 = checkDeserCollection(jsonResult, List.class, BeanChild.class);
+        Collection<BeanChild> result2 = checkDeserCollection(jsonResult, List.class, BeanChild.class, testReporter);
         assertTrue( !result2.isEmpty());
         assertTrue(
                 result2.iterator().next().getClass().isAssignableFrom(BeanChild.class),
@@ -577,7 +578,7 @@ public class DefaultServiceTest extends BaseUnit5Test {
      * @throws Exception generic exception
      */
     @Test
-    public void testSerializeCollectionWithOnlyFilterAndExactClass() throws Exception {
+    public void testSerializeCollectionWithOnlyFilterAndExactClass(TestReporter testReporter) throws Exception {
         List<Bean> beanList = new ArrayList<Bean>();
         for (int i = 0; i < 3; i++) {
             Bean bean = new BeanChild();
@@ -589,7 +590,7 @@ public class DefaultServiceTest extends BaseUnit5Test {
         assertEquals("[{\"name\":\"bean0\"},{\"name\":\"bean1\"},{\"name\":\"bean2\"}]", jsonResult);
         // assertEquals("[{\"type\":\"\"},{\"type\":\"\"},{\"type\":\"\"}]",sc.serializeOnlyFilter(beanList,
         // BeanChild.class, true,"type"));
-        Collection<Bean> result2 = checkDeserCollection(jsonResult, List.class, Bean.class);
+        Collection<Bean> result2 = checkDeserCollection(jsonResult, List.class, Bean.class, testReporter);
         assertTrue( !result2.isEmpty(), "expect at least one entry ");
         assertTrue( result2.iterator().next().getClass().isAssignableFrom(Bean.class), "result entry instance check");
     }
@@ -598,7 +599,7 @@ public class DefaultServiceTest extends BaseUnit5Test {
      * @throws Exception generic exception
      */
     @Test
-    public void testSerializeCollectionWithOnlyFilterWithChildClass() throws Exception {
+    public void testSerializeCollectionWithOnlyFilterWithChildClass(TestReporter testReporter) throws Exception {
         List<Bean> beanList = new ArrayList<Bean>();
         for (int i = 0; i < 3; i++) {
             Bean bean = new Bean();
@@ -610,7 +611,7 @@ public class DefaultServiceTest extends BaseUnit5Test {
         assertEquals("[{\"name\":\"bean0\"},{\"name\":\"bean1\"},{\"name\":\"bean2\"}]", jsonResult);
         // assertEquals("[{\"type\":\"\"},{\"type\":\"\"},{\"type\":\"\"}]",sc.serializeOnlyFilter(beanList,
         // BeanChild.class, true,"type"));
-        Collection<Bean> result2 = checkDeserCollection(jsonResult, List.class, Bean.class);
+        Collection<Bean> result2 = checkDeserCollection(jsonResult, List.class, Bean.class, testReporter);
         assertTrue( !result2.isEmpty(), "expect at least one entry ");
         assertTrue( result2.iterator().next().getClass().isAssignableFrom(Bean.class), "result entry instance check");
     }
@@ -655,7 +656,7 @@ public class DefaultServiceTest extends BaseUnit5Test {
      * @throws Exception generic exception
      */
     @Test
-    public void testSerializeCollectionWithTypedReference() throws Exception {
+    public void testSerializeCollectionWithTypedReference(TestReporter testReporter) throws Exception {
 
         List<TypedRectangle> rectList = new ArrayList<TypedRectangle>();
         for (int i = 0; i < 2; i++) {
@@ -667,7 +668,7 @@ public class DefaultServiceTest extends BaseUnit5Test {
         String jsonResult = ((Jackson2MapperService) sc).serCollectionWithTypeReference(rectList, typeRef, false);
         logger.debug("aa:" + jsonResult);
         // could deserialize with type information
-        Collection<TypedRectangle> result2 = checkDeserCollection(jsonResult, List.class, TypedRectangle.class);
+        Collection<TypedRectangle> result2 = checkDeserCollection(jsonResult, List.class, TypedRectangle.class, testReporter);
         assertTrue( !result2.isEmpty(), "expect at least one entry ");
         assertTrue(
                 result2.iterator().next().getClass().isAssignableFrom(TypedRectangle.class),
@@ -712,10 +713,9 @@ public class DefaultServiceTest extends BaseUnit5Test {
     }
 
     private <U> Collection<U> checkDeserCollection(String serJson, Class<? extends Collection> collClass,
-            Class<U> entryClass) throws Exception {
+            Class<U> entryClass, TestReporter testReporter) throws Exception {
         Collection<U> result = ((Jackson2MapperService) sc).deSerCollectionWithType(serJson, collClass, entryClass);
-        // System.out.println("result:"+ result + " is of type: "+ result.getClass() +
-        // "and assignable from "+ collClass);
+        testReporter.publishEntry("result:"+ result + " is of type: "+ result.getClass() + "and assignable from "+ collClass);
         assertTrue(collClass.isAssignableFrom(result.getClass()),
                 "Result Instance Check failed for result class " + result.getClass() + " and target class: " + collClass);
         return result;

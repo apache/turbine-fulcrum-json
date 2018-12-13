@@ -25,14 +25,20 @@
 	    <File name="logfile" fileName="target/fulcrum-test.log">
           <PatternLayout pattern="%d [%t] %-5p %c - %m%n"/>
 	    </File>
+	    <File name="avalon" fileName="target/avalon-test.log">
+          <PatternLayout pattern="%d [%t] %-5p %c - %m%n"/>
+	    </File>
     </Appenders>
     <Loggers>
       <Logger name="org.apache.fulcrum" level="debug" additivity="false">
           <AppenderRef ref="console"/>
           <AppenderRef ref="logfile"/>
       </Logger>
+       <Logger name="org.apache.fulcrum.yaafi" level="debug" additivity="false">
+          <AppenderRef ref="avalon"/>
+      </Logger>
       <Logger name="avalon" level="debug" additivity="false">
-          <AppenderRef ref="console"/>
+          <AppenderRef ref="avalon"/>
       </Logger>
       <Logger name="org.apache.logging.log4j" level="info" additivity="false">
           <AppenderRef ref="logfile"/>
