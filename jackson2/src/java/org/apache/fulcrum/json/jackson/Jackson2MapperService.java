@@ -22,6 +22,7 @@ package org.apache.fulcrum.json.jackson;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -580,27 +581,39 @@ public class Jackson2MapperService extends AbstractLogEnabled implements JsonSer
 
         if (configuredAnnotationInspectors != null) {
             Configuration[] nameVal = configuredAnnotationInspectors.getChildren();
-            for (int i = 0; i < nameVal.length; i++) {
-                String key = nameVal[i].getName();
+            Arrays.stream( nameVal).forEach(c->
+            {
+                String key = c.getName();
                 getLogger().debug("configured key: " + key);
                 if (key.equals("features")) {
                     this.features = new HashMap<>();
                     this.featureTypes = new HashMap<>();
-                    Configuration[] localFeatures = nameVal[i].getChildren();
-                    for (int j = 0; j < localFeatures.length; j++) {
-                        boolean featureValue = localFeatures[j].getAttributeAsBoolean("value", false);
-                        String featureType = localFeatures[j].getAttribute("type");
-                        String feature = localFeatures[j].getValue();
-                        getLogger().debug("configuredAnnotationInspectors " + feature + ":" + featureValue);
-                        this.features.put(feature, featureValue);
-                        this.featureTypes.put(feature, featureType);
-                    }
+                    Arrays.stream( c.getChildren() ).forEach( lf -> {
+                        boolean featureValue = lf.getAttributeAsBoolean("value", false);
+                        String featureType = null;
+                        String feature = null;
+                        try {
+                            featureType = lf.getAttribute("type");
+                            feature = lf.getValue();
+                            getLogger().debug("configuredAnnotationInspectors " + feature + ":" + featureValue);
+                            this.features.put(feature, featureValue);
+                            this.featureTypes.put(feature, featureType);
+                        } catch (ConfigurationException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
                 } else {
-                    String val = nameVal[i].getValue();
-                    getLogger().debug("configuredAnnotationInspectors " + key + ":" + val);
-                    this.annotationInspectors.put(key, val);
+                    String val;
+                    try {
+                        val = c.getValue();
+                        getLogger().debug("configuredAnnotationInspectors " + key + ":" + val);
+                        this.annotationInspectors.put(key, val);
+                    } catch (ConfigurationException e) {
+                        throw new RuntimeException(e);
+                    }
+
                 }
-            }
+            });
         }
         final Configuration configuredDateFormat = conf.getChild(DATE_FORMAT, true);
         this.dateFormat = configuredDateFormat.getValue(DEFAULTDATEFORMAT);
@@ -698,18 +711,16 @@ public class Jackson2MapperService extends AbstractLogEnabled implements JsonSer
 
     private void initFeatures() throws Exception {
         if (features != null && !features.isEmpty()) {
-            
-            for (Entry<String, Boolean> entry : features.entrySet()) {
+            features.entrySet().stream().forEach( entry -> {
                 String featureKey = entry.getKey();
                 Boolean featureValue = entry.getValue();    
                 String featureType = featureTypes.get(featureKey);
                 Class<?> configFeature = null;
                 try {
                     getLogger().debug("initializing featureType:  " + featureType);
-                    configFeature = Class.forName(featureType);
+                    configFeature = loadClass(featureType); 
                 } catch (Exception e) {
-                    throw new Exception("JsonMapperService: Error instantiating " + featureType + " for " + featureKey,
-                            e);
+                    throw new RuntimeException("JsonMapperService: Error instantiating " + featureType + " for " + featureKey, e);
                 }
                 ConfigFeature feature = null;
                 if (!StringUtils.isEmpty(featureKey) && featureValue != null) {
@@ -748,11 +759,11 @@ public class Jackson2MapperService extends AbstractLogEnabled implements JsonSer
                             mapper.configure(genFeature, featureValue);
                         }
                     } catch (Exception e) {
-                        throw new Exception("JsonMapperService: Error instantiating feature " + featureKey + " with  "
+                        throw new RuntimeException("JsonMapperService: Error instantiating feature " + featureKey + " with  "
                                 + featureValue, e);
                     }
                 }
-            }
+            });   
         }
     }
 
@@ -792,6 +803,32 @@ public class Jackson2MapperService extends AbstractLogEnabled implements JsonSer
         if (secondary instanceof LogEnabled) {
             ((LogEnabled) secondary).enableLogging(getLogger().getChildLogger(secondary.getClass().getSimpleName()));
             getLogger().info("setting secondary introspector logger: " + secondary.getClass().getSimpleName());
+        }
+    }
+    
+    /**
+     * Loads the named class using the default class loader.
+     *
+     * @param className the name of the class to load.
+     * @return {@inheritDoc} the loaded class.
+     * @throws ClassNotFoundException if the class was not found.
+     */
+    @SuppressWarnings("unchecked")
+    protected <T> Class<T> loadClass(String className) throws ClassNotFoundException {
+        ClassLoader loader = this.getClass().getClassLoader();
+        try {
+            Class<T> clazz;
+
+            if (loader != null) {
+                clazz = (Class<T>) loader.loadClass(className);
+            } else {
+                clazz = (Class<T>) Class.forName(className);
+            }
+
+            return clazz;
+        } catch (ClassNotFoundException x) {
+            /* Give up. */
+            throw x;
         }
     }
 

@@ -93,7 +93,7 @@ public class SimpleNameIntrospector extends NopAnnotationIntrospector implements
     public Object findFilterId(Annotated ac) {
         Object id = super.findFilterId(ac);
         // Let's default to current behavior if annotation is found:
-        //Object id = super.findFilterId(ac);
+        // Object id = super.findFilterId(ac);
         // but use simple class name if not
         if (id == null) {
             String name = ac.getName();
