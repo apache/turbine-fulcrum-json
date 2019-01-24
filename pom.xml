@@ -43,8 +43,8 @@
         <id>turbine.apache.org</id>
         <name>Fulcrum JSON Website</name>
         <url>http://turbine.apache.org/fulcrum/fulcrum-json/</url>
-      </site>    
-     </distributionManagement>      
+      </site>
+     </distributionManagement>
 
 
     <developers>
@@ -117,48 +117,7 @@
             <version>${log4j2.version}</version>
         </dependency>
     </dependencies>
-   
-     <profiles>
-        <profile>
-            <id>apache-release</id>
-            <build>
-                <plugins>
-                  <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-assembly-plugin</artifactId>
-                    <executions>
-                      <execution>
-                        <id>fulcrum-source-release-assembly</id>
-                        <phase>package</phase>
-                        <goals>
-                          <goal>single</goal>
-                        </goals>
-                        <configuration>
-                          <runOnlyAtExecutionRoot>true</runOnlyAtExecutionRoot>
-                          <descriptors>
-                            <descriptor>src/assembly/project.xml</descriptor>
-                          </descriptors>
-                          <tarLongFileMode>gnu</tarLongFileMode>
-                        </configuration>
-                      </execution>
-                    </executions>
-                  </plugin>                   
-                    <plugin>
-                      <artifactId>maven-site-plugin</artifactId>
-                      <executions>
-                          <execution>
-                            <phase>package</phase>
-                              <goals>
-                                  <goal>site</goal>
-                              </goals>
-                          </execution>
-                      </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
-
+    
   <properties>
     <turbine.site.path>fulcrum/fulcrum-json</turbine.site.path>
     <turbine.scmPubCheckoutDirectory>${turbine.site.cache}/fulcrum/json</turbine.scmPubCheckoutDirectory>
