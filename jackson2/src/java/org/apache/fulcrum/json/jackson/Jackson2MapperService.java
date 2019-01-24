@@ -14,7 +14,6 @@ package org.apache.fulcrum.json.jackson;
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
  */
@@ -141,11 +140,11 @@ public class Jackson2MapperService extends AbstractLogEnabled implements JsonSer
 
     /**
      * 
-     * @param src
-     * @param filter
+     * @param src the object to be serailized as JSON
+     * @param filter may be null, then sserialize without otherwise set into cache service and as filter provider.
      * @param cleanCache cleans the jackson cache
-     * @return
-     * @throws Exception
+     * @return the serialzed JSON string
+     * @throws Exception exception
      */
     public String ser(Object src, FilterProvider filter, Boolean cleanCache) throws Exception {
         String serResult = null;
@@ -256,14 +255,14 @@ public class Jackson2MapperService extends AbstractLogEnabled implements JsonSer
     
     /**
      * 
-     * @param src
-     * @param collectionType
-     * @param cleanCache cleans jackson serializer cache, after 
-     * @return
-     * @throws Exception
+     * @param src the collection to be serialized 
+     * @param collectionType the {@link TypeReference}.
+     * @param cleanCache cleans jackson serializer cache 
+     * @return the serialized JSON string
+     * @throws JsonProcessingException JSON processing error
      */
     public <T> String serCollectionWithTypeReference(Collection<T> src, TypeReference collectionType,
-                                                     Boolean cleanCache) throws Exception {
+                                                     Boolean cleanCache) throws JsonProcessingException {
          String res = mapper.writerFor(collectionType).writeValueAsString(src);
          if (cleanCache) {
              cacheService.cleanSerializerCache(mapper);
