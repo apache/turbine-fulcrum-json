@@ -26,11 +26,12 @@
   <body>
   <release version="2.0.0" date="in SVN">
     <action type="update" dev="gk">
-        - Java 8 compatiblity, updated SNAPSHOT version 1.1.2-SNAPSHOT to 2.0.0-SNAPSHOT.
-        - replace Log4j with Log4j2, add support for JUnit 5
+        Java 8 compatiblity, updated SNAPSHOT version 1.1.2-SNAPSHOT to 2.0.0-SNAPSHOT.
+        Replace Log4j with Log4j2, add support for JUnit 5, update tests
       </action>
-    <action type="update" dev="gk">
-        Jackson 2: Update to version 2.9.7, use non deprecated methods, add tests, cleanup test packages
+     <action type="update" dev="gk">
+        Jackson 2: Update to version 2.9.7, use non deprecated methods, add tests, cleanup test packages, 
+        jackson-datatype-json-org update to 2.8.11.
       </action>
       <action type="update" dev="painter">
         Dependency Updates
