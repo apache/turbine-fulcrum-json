@@ -1,5 +1,8 @@
 package org.apache.fulcrum.json.jackson;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,8 +22,6 @@ package org.apache.fulcrum.json.jackson;
  * under the License.
  */
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -34,11 +35,11 @@ import org.apache.avalon.framework.logger.Logger;
 import org.apache.fulcrum.json.JsonService;
 import org.apache.fulcrum.json.Rectangle;
 import org.apache.fulcrum.json.TestClass;
-import org.apache.fulcrum.testcontainer.BaseUnit4Test;
+import org.apache.fulcrum.testcontainer.BaseUnit5Test;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * Jackson1 JSON Test
@@ -46,12 +47,12 @@ import org.junit.Test;
  * @author gk
  * @version $Id$
  */
-public class JacksonMapperTest extends BaseUnit4Test {
+public class JacksonMapperTest extends BaseUnit5Test {
     private JsonService sc = null;
     private final String preDefinedOutput = "{\"container\":{\"cf\":\"Config.xml\"},\"configurationName\":\"Config.xml\",\"name\":\"mytest\"}";
     Logger logger;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         sc = (JsonService) this.lookup(JsonService.ROLE);
         logger = new ConsoleLogger(ConsoleLogger.LEVEL_DEBUG);
@@ -59,15 +60,15 @@ public class JacksonMapperTest extends BaseUnit4Test {
     @Test
     public void testSerialize() throws Exception {
         String serJson = sc.ser(new TestClass("mytest"));
-        assertEquals("Serialization failed ", preDefinedOutput, serJson);
+        assertEquals(preDefinedOutput, serJson, "Serialization failed ");
     }
     @Test
     public void testSerializeDateWithDefaultDateFormat() throws Exception {
         Map<String, Date> map = new HashMap<String, Date>();
         map.put("date", Calendar.getInstance().getTime());
         String serJson = sc.ser(map);
-        assertTrue("Serialize with Adapater failed ",
-                serJson.matches("\\{\"date\":\"\\d\\d/\\d\\d/\\d{4}\"\\}"));
+        assertTrue(serJson.matches("\\{\"date\":\"\\d\\d/\\d\\d/\\d{4}\"\\}"),
+                "Serialize with Adapater failed");
 
     }
     @Test
@@ -76,14 +77,14 @@ public class JacksonMapperTest extends BaseUnit4Test {
         Map<String, Integer> map = new HashMap<String, Integer>();
         map.put("name", 5001);
         Map deserMap = (Map) sc.deSer(sc.ser(map), Map.class);
-        assertEquals("Integer DeSer failed ", 5001, deserMap.get("name"));
+        assertEquals(5001, deserMap.get("name"), "Integer DeSer failed");
 
     }
     @Test
     public void testSerializeSingleObjectExcludeWithMixins() throws Exception {
         sc.addAdapter("M4RMixin", Rectangle.class, Mixin.class);
         String serRect = sc.ser(new Rectangle(25, 3));
-        assertEquals("DeSer failed ", "{\"width\":25}", serRect);
+        assertEquals("{\"width\":25}", serRect, "DeSer failed");
 
     }
     @Test
@@ -92,15 +93,15 @@ public class JacksonMapperTest extends BaseUnit4Test {
         Bean filteredBean = new Bean();
         filteredBean.setName("joe");
         String bean = sc.serializeOnlyFilter(filteredBean, Bean.class, "name");
-        assertEquals("Ser filtered Bean failed ", "{\"name\":\"joe\"}", bean);
+        assertEquals("{\"name\":\"joe\"}", bean, "Ser filtered Bean failed ");
         logger.debug("bean: " + bean);
 
         Rectangle filteredRectangle = new Rectangle(5, 10);
         filteredRectangle.setName("jim");
         String rectangle = sc.serializeOnlyFilter(filteredRectangle,
                 Rectangle.class, "w", "name");
-        assertEquals("Ser filtered Rectangle failed ",
-                "{\"w\":5,\"name\":\"jim\"}", rectangle);
+        assertEquals( "{\"w\":5,\"name\":\"jim\"}", rectangle,
+                "Ser filtered Rectangle failed ");
         logger.debug("rectangle: " + rectangle);
 
     }
@@ -108,7 +109,7 @@ public class JacksonMapperTest extends BaseUnit4Test {
     public void testDeSerialize() throws Exception {
         String serJson = sc.ser(new TestClass("mytest"));
         Object deson = sc.deSer(serJson, TestClass.class);
-        assertEquals("DeSer failed ", TestClass.class, deson.getClass());
+        assertEquals(TestClass.class, deson.getClass(), "DeSer failed ");
     }
 
 //    public void testDeserializationCollection() throws Exception {
@@ -136,7 +137,7 @@ public class JacksonMapperTest extends BaseUnit4Test {
         String serRect = sc
                 .addAdapter("M4RMixin", Rectangle.class, Mixin.class).ser(
                         filteredRectangle);
-        assertEquals("Ser failed ", "{\"width\":5}", serRect);
+        assertEquals("{\"width\":5}", serRect, "Ser failed ");
     }
     @Test
     public void testMixis2() throws Exception {
@@ -147,10 +148,12 @@ public class JacksonMapperTest extends BaseUnit4Test {
 
         String serRect = sc.addAdapter("M4RMixin2", Rectangle.class,
                 Mixin2.class).ser(filteredRectangle);
-        assertEquals("Ser failed ", "{\"name\":\"jim\",\"width\":5}", serRect);
+        assertEquals("{\"name\":\"jim\",\"width\":5}", serRect,
+                "Ser failed ");
 
         String bean = sc.serializeOnlyFilter(filteredBean, Bean.class, "name");
-        assertEquals("Ser filtered Bean failed ", "{\"name\":\"joe\"}", bean);
+        assertEquals("{\"name\":\"joe\"}", bean, 
+                "Ser filtered Bean failed ");
     }
     @Test
     public void testFilteredCollectionOfBeans() throws Exception {
@@ -167,8 +170,8 @@ public class JacksonMapperTest extends BaseUnit4Test {
         Object objResult = ((JacksonMapperService) sc).deSer(result,
                 List.class, Bean.class);
         List<Bean> beanList2 = (List<Bean>) objResult;
-        assertTrue("DeSer failed ", beanList2 instanceof List);
-        assertTrue("DeSer failed ", beanList2.size() == 10);
+        assertTrue(beanList2 instanceof List, "DeSer Type failed ");
+        assertTrue(beanList2.size() == 10, "DeSer size failed ");
         for (Bean bean : beanList2) {
             logger.debug("deser bean: " + bean.getName() + " is "
                     + bean.getAge());
@@ -189,8 +192,8 @@ public class JacksonMapperTest extends BaseUnit4Test {
         Object objResult = ((JacksonMapperService) sc).deSer(result,
                 List.class, Bean.class);
         List<Bean> beanList2 = (List<Bean>) objResult;
-        assertTrue("DeSer failed ", beanList2 instanceof List);
-        assertTrue("DeSer failed ", beanList2.size() == 10);
+        assertTrue(beanList2 instanceof List, "DeSer failed ");
+        assertTrue(beanList2.size() == 10, "DeSer failed ");
         for (Bean bean : beanList2) {
             logger.debug("deser bean: " + bean.getName() + " is "
                     + bean.getAge());

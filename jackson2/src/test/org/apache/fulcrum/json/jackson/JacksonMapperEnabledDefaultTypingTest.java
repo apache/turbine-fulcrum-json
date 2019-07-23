@@ -18,6 +18,7 @@ package org.apache.fulcrum.json.jackson;
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 

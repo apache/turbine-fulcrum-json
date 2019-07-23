@@ -33,5 +33,5 @@ public abstract class BeanMixin {
     String profession; // exclude
 
     @JsonProperty
-    abstract String getName();//
+    abstract String getName();
 }

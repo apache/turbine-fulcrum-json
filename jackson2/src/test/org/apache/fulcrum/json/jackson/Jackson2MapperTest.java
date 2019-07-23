@@ -20,7 +20,6 @@ package org.apache.fulcrum.json.jackson;
  */
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.apache.avalon.framework.logger.ConsoleLogger;
 import org.apache.avalon.framework.logger.Log4JLogger;
 import org.apache.avalon.framework.logger.Logger;
 import org.apache.fulcrum.json.JsonService;
@@ -29,7 +28,6 @@ import org.apache.fulcrum.json.jackson.example.Rectangle;
 import org.apache.fulcrum.testcontainer.BaseUnit5Test;
 import org.apache.log4j.LogManager;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.runner.JUnitPlatform;
 import org.junit.runner.RunWith;

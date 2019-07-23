@@ -21,7 +21,7 @@
    <parent>
        <artifactId>turbine-parent</artifactId>
        <groupId>org.apache.turbine</groupId>
-       <version>5</version>
+       <version>6</version>
        <relativePath />
    </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -34,19 +34,18 @@
     <scm>
       <connection>scm:svn:http://svn.apache.org/repos/asf/turbine/fulcrum/trunk/json/</connection>
       <developerConnection>scm:svn:https://svn.apache.org/repos/asf/turbine/fulcrum/trunk/json/</developerConnection>
-      <url>http://svn.apache.org/viewvc/turbine/fulcrum/trunk/json/</url>
+      <url>https://svn.apache.org/viewvc/turbine/fulcrum/trunk/json/</url>
     </scm>
 
     <!-- Required for staging to work -->
-     <distributionManagement>
-    <site>
-        <id>turbine.apache.org</id>
-        <name>Fulcrum JSON Website</name>
-        <url>http://turbine.apache.org/fulcrum/fulcrum-json/</url>
-      </site>
-     </distributionManagement>
-
-
+    <distributionManagement>
+      <site>
+          <id>turbine.apache.org</id>
+          <name>Fulcrum JSON Website</name>
+          <url>https://turbine.apache.org/fulcrum/fulcrum-json/</url>
+        </site>
+   </distributionManagement>
+   
     <developers>
         <developer>
           <id>gk</id>
@@ -92,6 +91,7 @@
             </plugin>
         </plugins>
     </build>
+    
     <dependencies>
        <dependency>
           <groupId>org.apache.fulcrum</groupId>
@@ -99,31 +99,28 @@
           <version>1.0.8</version>
           <scope>test</scope>
         </dependency>
-         <!-- Log4j2 should be used by default , remved optional -->
+         <!-- Log4j2 should be used by default, removed optional -->
         <dependency>
           <groupId>org.apache.logging.log4j</groupId>
           <artifactId>log4j-api</artifactId>
-          <version>${log4j2.version}</version>
+          <version>${turbine.log4j2.version}</version>
         </dependency>
         <dependency>
            <groupId>org.apache.logging.log4j</groupId>
            <artifactId>log4j-core</artifactId>
-           <version>${log4j2.version}</version>
+           <version>${turbine.log4j2.version}</version>
         </dependency>
         <!-- log4j1.2 bridge instead of log4j -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-1.2-api</artifactId>
-            <version>${log4j2.version}</version>
+            <version>${turbine.log4j2.version}</version>
         </dependency>
     </dependencies>
-    
-  <properties>
-    <turbine.site.path>fulcrum/fulcrum-json</turbine.site.path>
-    <turbine.scmPubCheckoutDirectory>${turbine.site.cache}/fulcrum/json</turbine.scmPubCheckoutDirectory>
-    <turbine.site.cache>${project.build.directory}/turbine-sites</turbine.site.cache>
-    <siteContent.path>${project.build.directory}/staging</siteContent.path><!-- default stagingSiteURL --> 
-    <log4j2.version>2.11.1</log4j2.version>
-  </properties> 
+     
+    <properties>
+      <turbine.site.path>fulcrum/fulcrum-json</turbine.site.path>
+      <turbine.scmPubCheckoutDirectory>${turbine.site.cache}/fulcrum/json</turbine.scmPubCheckoutDirectory>
+    </properties>
     
 </project>

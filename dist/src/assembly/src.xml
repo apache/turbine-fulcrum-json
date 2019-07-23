@@ -31,9 +31,10 @@
       <useAllReactorProjects>true</useAllReactorProjects>
       <!--excludes>
          <exclude>org.apache.fulcrum:fulcrum-json-dist</exclude>
-     </excludes-->
+      </excludes-->
       <sources>
         <outputDirectoryMapping>${module.basedir.name}</outputDirectoryMapping>
+        <excludeSubModuleDirectories>false</excludeSubModuleDirectories>
         <fileSets>
           <fileSet>
             <excludes>

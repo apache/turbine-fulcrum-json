@@ -78,6 +78,7 @@
                 </goals>
                 <configuration>
                     <runOnlyAtExecutionRoot>false</runOnlyAtExecutionRoot>
+                    <!--outputDirectory>${file.separator}/${project.artifactId}-${project.version}</outputDirectory-->
                     <descriptors>
                       <descriptor>src/assembly/bin.xml</descriptor>
                       <descriptor>src/assembly/src.xml</descriptor>
