@@ -128,4 +128,33 @@
         With Jackson 2.8, Java 7 languages features will be allowed -->
         <jackson2.version>2.9.9</jackson2.version>
     </properties>
+    <profiles>
+      <profile>
+        <id>jkd-12-compile</id>
+        <activation>
+          <jdk>12</jdk>
+        </activation>
+        <build>
+          <pluginManagement>
+            <plugins>
+              <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                  <release>8</release>
+                </configuration>
+              </plugin>
+            </plugins>
+          </pluginManagement>
+        </build>
+        <dependencies>
+            <!-- removal of jaxb in java 12: https://docs.oracle.com/en/java/javase/12/migrate/index.html -->
+            <dependency>
+                <groupId>org.glassfish.jaxb</groupId>
+                <artifactId>jaxb-runtime</artifactId>
+                <version>2.4.0-b180830.0438</version>
+            </dependency>
+        </dependencies>
+      </profile>
+    </profiles>
 </project>

@@ -94,4 +94,34 @@
         <!-- 1.9.13, released 14-Jul-2013: latest version see https://github.com/FasterXML/jackson -->
         <jackson.version>1.9.13</jackson.version>
     </properties>
+    
+   <profiles>
+      <profile>
+        <id>jkd-12-compile</id>
+        <activation>
+          <jdk>12</jdk>
+        </activation>
+        <build>
+          <pluginManagement>
+            <plugins>
+              <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                  <release>8</release>
+                </configuration>
+              </plugin>
+            </plugins>
+          </pluginManagement>
+        </build>
+        <dependencies>
+            <!-- removal of jaxb in java 12: https://docs.oracle.com/en/java/javase/12/migrate/index.html -->
+            <dependency>
+                <groupId>org.glassfish.jaxb</groupId>
+                <artifactId>jaxb-runtime</artifactId>
+                <version>2.4.0-b180830.0438</version>
+            </dependency>
+        </dependencies>
+      </profile>
+    </profiles>
 </project>

@@ -176,9 +176,9 @@ public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test exte
     // timezone handling example
     @Test
     public void testDeSerializeTZDate() throws Exception { 
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm a Z");
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm Z");
         sc.setDateFormat(df);
-        DateKeyMixin serObject =sc.deSer(  "{\"mydate\":[\"java.util.Date\",\"1999-04-10 10:10 PM -0500\"]}"
+        DateKeyMixin serObject =sc.deSer(  "{\"mydate\":[\"java.util.Date\",\"1999-04-10 10:10 -0500\"]}"
                 , DateKeyMixin.class);
         assertTrue(serObject.mydate instanceof Date);
         
