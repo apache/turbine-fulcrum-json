@@ -45,7 +45,7 @@ import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
 /**
  * Jackson2 JSON Test
  * 
- * Test without type setting
+ * Test without type setting with {@link JsonOrgModule} adapter activated.
  *  
  * @author gk
  * @version $Id: JacksonMapperTest.java 1800753 2017-07-04 11:00:03Z gk $

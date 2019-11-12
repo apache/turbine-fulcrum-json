@@ -36,7 +36,7 @@ import org.junit.runner.RunWith;
 /**
  * More Jackson2 JSON Test
  * 
- * Test with clearing mixins
+ * Test without defaultTyping with clearing mixins
 
  * @author gk
  * @version $Id$

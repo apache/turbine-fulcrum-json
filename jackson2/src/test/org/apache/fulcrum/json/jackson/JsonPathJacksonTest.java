@@ -53,7 +53,7 @@ import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
 /**
  * Jackson2 JSON Test
  * 
- * Test without type setting 
+ * Test without type setting using {@link JsonPath}.
  * 
  * @author gk
  * @version $Id$

@@ -53,6 +53,9 @@ import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
 
 
 /**
+ *
+ * Test with defaultTyping activated.
+ *
  * Jackson2 JSON Test with EnabledDefaultTyping {@link DefaultTyping#OBJECT_AND_NON_CONCRETE}
  * 
  * cft. http://wiki.fasterxml.com/JacksonPolymorphicDeserialization

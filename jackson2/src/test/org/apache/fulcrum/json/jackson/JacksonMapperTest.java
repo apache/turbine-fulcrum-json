@@ -85,14 +85,14 @@ public class JacksonMapperTest extends BaseUnit5Test {
     }
     @Test
     public void testSerializeDateWithDefaultDateFormat() throws Exception {
-        Map<String, Date> map = new HashMap<String, Date>();
+        Map<String, Date> map = new HashMap<>();
         map.put("date", Calendar.getInstance().getTime());
         String serJson = sc.ser(map);
         assertTrue(serJson.matches("\\{\"date\":\"\\d\\d/\\d\\d/\\d{4}\"\\}"), "Serialize with Adapater failed ");
     }
     @Test
     public void testDeSerializeDate() throws Exception {
-        Map<String, Date> map = new HashMap<String, Date>();
+        Map<String, Date> map = new HashMap<>();
         map.put("date", Calendar.getInstance().getTime());
         String serJson = ((Jackson2MapperService) sc).ser(map, Map.class);
         Map serDate = sc.deSer(serJson, Map.class);
@@ -118,7 +118,7 @@ public class JacksonMapperTest extends BaseUnit5Test {
     @Test
     public void testSerializationCollectionWithFilter() throws Exception {
 
-        List<Bean> beanList = new ArrayList<Bean>();
+        List<Bean> beanList = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
             Bean filteredBean = new Bean();
             filteredBean.setName("joe" + i);

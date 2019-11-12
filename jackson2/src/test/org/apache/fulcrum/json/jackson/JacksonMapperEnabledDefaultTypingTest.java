@@ -51,7 +51,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
 
 /**
- * Jackson2 JSON Test with EnabledDefaultTyping {@link DefaultTyping#NON_FINAL} the most verbose type information.  
+ *
+ * Test with defaultTyping activated.
+ *
+ * Jackson2 JSON Test with EnabledDefaultTyping {@link DefaultTyping#NON_FINAL} the most verbose type information.
  * 
  * cft. http://wiki.fasterxml.com/JacksonPolymorphicDeserialization
  * 
