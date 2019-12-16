@@ -182,7 +182,14 @@ public class Jackson2MapperService extends AbstractLogEnabled implements JsonSer
         return reader.readValue(json);
     }
 
-    public <T> T deSer(Object src, Class<T> type) throws Exception {
+    /**
+     * basically wrapper for {@link ObjectMapper#convertValue(Object, Class)}.
+     * 
+     * @param src Object
+     * @param type target Object
+     * @return
+     */
+    public <T> T deSer(Object src, Class<T> type) {
         return mapper.convertValue(src, type);
     }
 
@@ -234,7 +241,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements JsonSer
 
     public <T> Collection<T> deSerCollectionWithTypeReference(String json, TypeReference<T> collectionType)
             throws Exception {
-        return mapper.readValue(json, collectionType);
+        return (Collection<T>) mapper.readValue(json, collectionType);
     }
   
     public <T> Collection<T> deSerCollectionWithType(String json, Class<? extends Collection> collectionClass,
@@ -246,7 +253,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements JsonSer
     public <T> Collection<T> deSerCollection(String json, Object collectionType, Class<T> elementType)
             throws Exception {
         if (collectionType instanceof TypeReference) {
-            return mapper.readValue(json, (TypeReference<T>) collectionType);
+            return deSerCollectionWithTypeReference(json, (TypeReference<T>) collectionType);
         } else {
             return mapper.readValue(json, mapper.getTypeFactory()
                     .constructCollectionType(((Collection<T>) collectionType).getClass(), elementType));
