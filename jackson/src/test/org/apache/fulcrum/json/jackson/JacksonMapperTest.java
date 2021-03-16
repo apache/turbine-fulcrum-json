@@ -40,6 +40,8 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.platform.runner.JUnitPlatform;
+import org.junit.runner.RunWith;
 
 /**
  * Jackson1 JSON Test
@@ -47,6 +49,7 @@ import org.junit.jupiter.api.Test;
  * @author gk
  * @version $Id$
  */
+@RunWith(JUnitPlatform.class)
 public class JacksonMapperTest extends BaseUnit5Test {
     private JsonService sc = null;
     private final String preDefinedOutput = "{\"container\":{\"cf\":\"Config.xml\"},\"configurationName\":\"Config.xml\",\"name\":\"mytest\"}";

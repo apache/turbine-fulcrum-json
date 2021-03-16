@@ -124,7 +124,7 @@ public class DefaultServiceTest extends BaseUnit5Test {
 		ObjectMapper objectMapper = new ObjectMapper(new MappingJsonFactory(((Jackson2MapperService) sc).getMapper()));
 		// use other configuration
 		if (withType)
-			objectMapper.enableDefaultTypingAsProperty(DefaultTyping.NON_FINAL, "type");
+			objectMapper.activateDefaultTypingAsProperty(objectMapper.getPolymorphicTypeValidator(), DefaultTyping.NON_FINAL, "type");
 		AnnotationIntrospector ai = objectMapper.getSerializationConfig().getAnnotationIntrospector();
 		// AnnotationIntrospector is by default JacksonAnnotationIntrospector
 		assertTrue(ai != null && ai instanceof JacksonAnnotationIntrospector, "Expected Default JacksonAnnotationIntrospector");
@@ -265,7 +265,6 @@ public class DefaultServiceTest extends BaseUnit5Test {
 	 */
 	@Test
 	public void testSerializeExcludeField() throws Exception {
-
 		String serJson = sc.serializeAllExceptFilter(new TestClass("mytest"), "configurationName");
 		assertEquals("{\"container\":{\"cf\":\"Config.xml\"},\"name\":\"mytest\"}", serJson, "Serialization failed ");
 		sc.addAdapter("Mixin Adapter", TestClass.class, TextClassMixin.class);
@@ -617,6 +616,7 @@ public class DefaultServiceTest extends BaseUnit5Test {
 
     /**
      * @throws Exception generic exception
+     * 
      */
     @Test
     public void testSerializeCollectionWithOnlyFilterAndType() throws Exception {
@@ -627,7 +627,7 @@ public class DefaultServiceTest extends BaseUnit5Test {
             rectList.add(filteredRect);
         }
         Class<?> clazz = Class.forName("org.apache.fulcrum.json.jackson.mixins.TypedRectangle");
-        // no type cft. https://github.com/FasterXML/jackson-databind/issues/303 !!
+        // 
         String jsonResult = sc.serializeOnlyFilter(rectList, clazz, true, "w");
         assertEquals("[{\"w\":0},{\"w\":1}]", jsonResult);
         // could not deserialize easily with missing property type
@@ -635,8 +635,14 @@ public class DefaultServiceTest extends BaseUnit5Test {
 
     /**
      * @throws Exception generic exception
+     * 
+     * This test was a workaround for no type cft. https://github.com/FasterXML/jackson-databind/issues/303
+     * 
+     * and is not supported in v > 10.2 (assign a type to Object). Use e.g. type references
+     * 
+     * {@link #testSerializeCollectionWithTypedReference(TestReporter)} or write a custom serializer 
      */
-    @Test
+    @Deprecated
     public void testSerializeCollectionWithOnlyFilterAndMixin() throws Exception {
 
         List<TypedRectangle> rectList = new ArrayList<TypedRectangle>();
@@ -645,10 +651,12 @@ public class DefaultServiceTest extends BaseUnit5Test {
             rectList.add(filteredRect);
         }
         Class<?> clazz = Class.forName("org.apache.fulcrum.json.jackson.mixins.TypedRectangle");
-        sc.addAdapter("Collection Adapter", Object.class, TypedRectangle.Mixins.class);
+        sc.addAdapter("Collection Adapter", Object.class, TypedRectangle.class);
+        System.out.println( "********++********** sc" + sc );
+        String result = sc.serializeOnlyFilter(rectList, clazz, true, "w");
         assertEquals(
                 "[\"java.util.ArrayList\",[{\"type\":\"org.apache.fulcrum.json.jackson.mixins.TypedRectangle\",\"w\":0},{\"type\":\"org.apache.fulcrum.json.jackson.mixins.TypedRectangle\",\"w\":1}]]",
-                sc.serializeOnlyFilter(rectList, clazz, true, "w"));
+                result);
     }
 
     /**
