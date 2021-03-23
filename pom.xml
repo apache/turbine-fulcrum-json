@@ -96,7 +96,7 @@
        <dependency>
           <groupId>org.apache.fulcrum</groupId>
           <artifactId>fulcrum-testcontainer</artifactId>
-          <version>1.0.8</version>
+          <version>1.0.9</version>
           <scope>test</scope>
         </dependency>
          <!-- Log4j2 should be used by default, removed optional -->
@@ -104,17 +104,26 @@
           <groupId>org.apache.logging.log4j</groupId>
           <artifactId>log4j-api</artifactId>
           <version>${turbine.log4j2.version}</version>
+          <scope>test</scope>
         </dependency>
         <dependency>
            <groupId>org.apache.logging.log4j</groupId>
            <artifactId>log4j-core</artifactId>
            <version>${turbine.log4j2.version}</version>
+           <scope>test</scope>
         </dependency>
         <!-- log4j1.2 bridge instead of log4j -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-1.2-api</artifactId>
             <version>${turbine.log4j2.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-runner</artifactId>
+            <version>1.7.1</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
      

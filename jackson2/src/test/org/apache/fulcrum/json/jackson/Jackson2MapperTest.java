@@ -29,8 +29,6 @@ import org.apache.fulcrum.testcontainer.BaseUnit5Test;
 import org.apache.log4j.LogManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 
 
 /**
@@ -41,7 +39,6 @@ import org.junit.runner.RunWith;
  * @author gk
  * @version $Id$
  */
-@RunWith(JUnitPlatform.class)
 public class Jackson2MapperTest extends BaseUnit5Test {
     
     private JsonService sc = null;

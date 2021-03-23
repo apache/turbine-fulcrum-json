@@ -41,8 +41,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 
 import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
 import com.jayway.jsonpath.Configuration;
@@ -58,7 +56,6 @@ import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
  * @author gk
  * @version $Id$
  */
-@RunWith(JUnitPlatform.class)
 public class JsonPathJacksonTest extends BaseUnit5Test {
     
     private JsonService sc = null;

@@ -50,8 +50,6 @@ import org.apache.log4j.LogManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestReporter;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -72,7 +70,6 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
  * @author gk
  * @version $Id$
  */
-@RunWith(JUnitPlatform.class)
 public class DefaultServiceTest extends BaseUnit5Test {
     
 	private JsonService sc = null;

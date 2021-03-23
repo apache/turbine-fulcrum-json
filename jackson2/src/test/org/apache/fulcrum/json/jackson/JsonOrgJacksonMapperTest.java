@@ -37,8 +37,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 
 import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
 
@@ -48,9 +46,8 @@ import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
  * Test without type setting with {@link JsonOrgModule} adapter activated.
  *  
  * @author gk
- * @version $Id: JacksonMapperTest.java 1800753 2017-07-04 11:00:03Z gk $
+ * @version $Id$
  */
-@RunWith(JUnitPlatform.class)
 public class JsonOrgJacksonMapperTest extends BaseUnit5Test {
     
     private JsonService sc = null;

@@ -46,7 +46,6 @@ import org.apache.fulcrum.testcontainer.BaseUnit5Test;
 import org.apache.log4j.LogManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
 import org.junit.runner.RunWith;
 
 import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
@@ -65,7 +64,6 @@ import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
  * @author gk
  * @version $Id$
  */
-@RunWith(JUnitPlatform.class)
 public class JacksonMapperEnabledDefaultTyping_OBJECT_AND_NON_CONCRETE_Test extends BaseUnit5Test {
     private JsonService sc = null;
     private final String preDefinedOutput = "{\"container\":{\"type\":\"java.util.HashMap\",\"cf\":\"Config.xml\"},\"configurationName\":\"Config.xml\",\"name\":\"mytest\"}";
