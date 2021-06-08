@@ -46,7 +46,6 @@ import org.apache.fulcrum.testcontainer.BaseUnit5Test;
 import org.apache.log4j.LogManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 
 import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
 
@@ -58,8 +57,6 @@ import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
  * Jackson2 JSON Test with EnabledDefaultTyping {@link DefaultTyping#OBJECT_AND_NON_CONCRETE}
  * 
  * cft. http://wiki.fasterxml.com/JacksonPolymorphicDeserialization
- * 
- * adding {@literal @}{@link RunWith} annotation with {@link JUnitPlatform} allows intellij/eclipse IDE recognize it's a test
  * 
  * @author gk
  * @version $Id$

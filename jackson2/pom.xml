@@ -61,7 +61,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.9</version>
+            <version>3.12.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.avalon.framework</groupId>
@@ -99,7 +99,7 @@
           <artifactId>jackson-datatype-json-org</artifactId>
           <version>${jackson2.version}</version>
           <optional>true</optional>
-         <!--  v 2.8.11 had still geronimo as dependency, since 2.9.6 update to org.json 201718, 20180813, which have still incompatible license: https://www.apache.org/legal/resolved.html#json: 
+         <!--  v 2.8.11 had still geronimo as dependency, since 2.9.6 update to org.json ... 20190722, which has still incompatible license: https://www.apache.org/legal/resolved.html#json: 
           exclude it and include geronimo json alternatively  -->
           <exclusions>
                 <exclusion>
@@ -117,7 +117,7 @@
         <dependency>
             <groupId>com.jayway.jsonpath</groupId>
             <artifactId>json-path</artifactId>
-            <version>2.3.0</version>
+            <version>2.6.0</version>
             <optional>true</optional>
             <!--  as we are using jackson -->
             <exclusions>
@@ -130,7 +130,7 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-nop</artifactId>
-            <version>1.7.25</version>
+            <version>1.7.30</version>
             <optional>true</optional>
             <scope>test</scope>
         </dependency>
@@ -138,27 +138,14 @@
     <properties>
         <!-- 2.7.x hase Java 7 baseline, but is compiled with Java 6 support, cft. https://github.com/FasterXML/jackson/wiki/Jackson-Release-2.7.
         With Jackson 2.8, Java 7 languages features will be allowed -->
-        <jackson2.version>2.12.2</jackson2.version>
+        <jackson2.version>2.12.3</jackson2.version>
     </properties>
     <profiles>
       <profile>
         <id>jkd-12-compile</id>
         <activation>
-          <jdk>12</jdk>
+          <jdk>[12,)</jdk>
         </activation>
-        <build>
-          <pluginManagement>
-            <plugins>
-              <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                  <release>8</release>
-                </configuration>
-              </plugin>
-            </plugins>
-          </pluginManagement>
-        </build>
         <dependencies>
             <!-- removal of jaxb in java 12: https://docs.oracle.com/en/java/javase/12/migrate/index.html -->
             <dependency>

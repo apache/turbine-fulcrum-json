@@ -223,6 +223,10 @@ public class JSONConcurrentJunit5Test extends BaseUnit5Test {
         }
     }
 
+    /**
+     *  Repeated Test
+     * @param testReporter to report
+     */
     @RepeatedTest(10)
     public void testsRunInParallel(TestReporter testReporter) {
         // Parallel among methods in a class in one thread pool
@@ -245,6 +249,10 @@ public class JSONConcurrentJunit5Test extends BaseUnit5Test {
 //		assertThat(fOne, is(not(fThree)));
     }
 
+    /**
+     * 
+     * @param testReporter to reportfrom assets
+     */
     @RepeatedTest(3)
     public void testsRunInSameThread(TestReporter testReporter) {
         // Parallel among methods in a class in one thread pool
@@ -270,6 +278,11 @@ public class JSONConcurrentJunit5Test extends BaseUnit5Test {
         return listener.getSummary();
     }
 
+    /**
+     * 
+     * @param testReporter to report summary, threads and failures
+     * @param summary to get failures and test count
+     */
     private void defaultAsserts(TestReporter testReporter, TestExecutionSummary summary) {
         List<Failure> failures = summary.getFailures();
         assertNotNull(summary.getTestsFoundCount() > 0, "No Tests found");

@@ -307,7 +307,9 @@ public class DefaultServiceTest extends BaseUnit5Test {
 	}
 
 	/**
-	 * @throws Exception generic exception
+	 * 
+	 * @param testReporter to report test infos (may propagate)
+	 * @throws Exception custom  from ser
 	 */
 	@Test
 	public void testSerializationCollectioPrimitiveWrapper(TestReporter testReporter) throws Exception {
@@ -544,12 +546,14 @@ public class DefaultServiceTest extends BaseUnit5Test {
                                                                                                             // filter
         assertEquals("{\"name\":\"bean0\"}", sc.serializeOnlyFilter(bean, Object.class, true, "name"));
     }
-
+    
     /**
-     * @throws Exception generic exception
+     * 
+     * @param testReporter to report test infos (may propagate)
+     * @throws Exception from ser/deser
      */
     @Test
-    public void testSerializeCollectionWithOnlyFilterAndParentClass(TestReporter testReporter) throws Exception {
+    public void testSerializeCollectionWithOnlyFilterAndParentClass(TestReporter testReporter) throws Exception  {
         List<BeanChild> beanList = new ArrayList<BeanChild>();
         for (int i = 0; i < 3; i++) {
             BeanChild bean = new BeanChild();
@@ -570,7 +574,9 @@ public class DefaultServiceTest extends BaseUnit5Test {
     }
 
     /**
-     * @throws Exception generic exception
+     * 
+     * @param testReporter to report test infos (may propagate)
+     * @throws Exception generic type from ser/deser
      */
     @Test
     public void testSerializeCollectionWithOnlyFilterAndExactClass(TestReporter testReporter) throws Exception {
@@ -591,7 +597,9 @@ public class DefaultServiceTest extends BaseUnit5Test {
     }
 
     /**
-     * @throws Exception generic exception
+     * 
+     * @param testReporter to report test infos (may propagate)
+     * @throws Exception generic type from ser/deser
      */
     @Test
     public void testSerializeCollectionWithOnlyFilterWithChildClass(TestReporter testReporter) throws Exception {
@@ -631,13 +639,14 @@ public class DefaultServiceTest extends BaseUnit5Test {
     }
 
     /**
-     * @throws Exception generic exception
      * 
      * This test was a workaround for no type cft. https://github.com/FasterXML/jackson-databind/issues/303
      * 
-     * and is not supported in v > 10.2 (assign a type to Object). Use e.g. type references
+     * and is not supported in v &gt; 10.2 (assign a type to Object). Use e.g. type references
      * 
-     * {@link #testSerializeCollectionWithTypedReference(TestReporter)} or write a custom serializer 
+     * {@link #testSerializeCollectionWithTypedReference(TestReporter)} or write a custom serializer
+     * 
+     * @throws Exception generic type
      */
     @Deprecated
     public void testSerializeCollectionWithOnlyFilterAndMixin() throws Exception {
@@ -657,7 +666,9 @@ public class DefaultServiceTest extends BaseUnit5Test {
     }
 
     /**
-     * @throws Exception generic exception
+     * 
+     * @param testReporter to report test infos (may propagate)
+     * @throws Exception generic type  from ser/deser
      */
     @Test
     public void testSerializeCollectionWithTypedReference(TestReporter testReporter) throws Exception {
