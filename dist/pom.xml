@@ -45,11 +45,11 @@
       <artifactId>fulcrum-json-gson</artifactId>
       <version>${project.version}</version>
     </dependency>
-    <dependency>
+    <!--dependency>
        <groupId>org.apache.fulcrum</groupId>
       <artifactId>fulcrum-json-jackson</artifactId>
       <version>${project.version}</version>
-    </dependency>
+    </dependency-->
     <dependency>
        <groupId>org.apache.fulcrum</groupId>
       <artifactId>fulcrum-json-jackson2</artifactId>
