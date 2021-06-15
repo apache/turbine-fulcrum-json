@@ -219,7 +219,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements JsonSer
                     "registering module " + module );
             mapper.registerModule((Module) module);
         } else {
-            throw new Exception("expecting module type" + Module.class);
+            throw new ClassCastException("expecting module type " + Module.class);
         }
         return this;
     }
@@ -428,7 +428,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements JsonSer
             pf = SimpleBeanPropertyFilter.filterOutAllExcept("dummy");
         }
         if (filterClasses == null)
-            throw new Exception("You have to provide some class to apply the filtering!");
+            throw new AssertionError("You have to provide some class to apply the filtering!");
         return filter(src, filterClasses, null, pf, refresh);
     }
 
@@ -673,7 +673,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements JsonSer
             try {
                 characterEscapes = (CharacterEscapes) Class.forName(escapeCharsClass).getConstructor().newInstance();
             } catch (Exception e) {
-                throw new Exception(
+                throw new InstantiationException(
                         "JsonMapperService: Error instantiating " + escapeCharsClass + " for " + ESCAPE_CHAR_CLASS);
             }
         }
@@ -700,7 +700,7 @@ public class Jackson2MapperService extends AbstractLogEnabled implements JsonSer
                 djpw = new DefaultJsonPathWrapper(this.mapper);
                 getLogger().debug("******** initialized new jsonPath defaults: " + djpw.getJsonPathDefault());
             } catch (Exception e) {
-                throw new Exception(
+                throw new AssertionError(
                         "JsonMapperService: Error instantiating " + djpw + " using useJsonPath=" + useJsonPath);
             }
 
@@ -725,12 +725,13 @@ public class Jackson2MapperService extends AbstractLogEnabled implements JsonSer
                 try {
                     getLogger().debug("initializing featureType:  " + featureType);
                     configFeature = loadClass(featureType); 
-                } catch (Exception e) {
-                    throw new RuntimeException("JsonMapperService: Error instantiating " + featureType + " for " + featureKey, e);
+                } catch (ClassNotFoundException e) {
+                    throw new AssertionError("JsonMapperService: Error instantiating " + featureType + " for " + featureKey, e);
                 }
                 ConfigFeature feature = null;
                 if (!StringUtils.isEmpty(featureKey) && featureValue != null) {
-                    try {
+                   try 
+                   {
                         if (configFeature.equals(SerializationFeature.class)) {
                             feature = SerializationFeature.valueOf(featureKey);
                             mapper.configure((SerializationFeature) feature, featureValue);
@@ -764,10 +765,11 @@ public class Jackson2MapperService extends AbstractLogEnabled implements JsonSer
                             getLogger().info("initializing parser feature: " + genFeature + " with " + featureValue);
                             mapper.configure(genFeature, featureValue);
                         }
-                    } catch (Exception e) {
-                        throw new RuntimeException("JsonMapperService: Error instantiating feature " + featureKey + " with  "
-                                + featureValue, e);
-                    }
+                   } catch (Exception e) {
+                       throw new RuntimeException("JsonMapperService: Error instantiating feature " + featureKey + " with  "
+                               + featureValue , e);
+                   }
+                    
                 }
             });   
         }
@@ -781,13 +783,13 @@ public class Jackson2MapperService extends AbstractLogEnabled implements JsonSer
                 try {
                     primary = (AnnotationIntrospector) Class.forName(avClass).getConstructor().newInstance();
                 } catch (Exception e) {
-                    throw new Exception("JsonMapperService: Error instantiating " + avClass + " for " + key);
+                    throw new InstantiationException("JsonMapperService: Error instantiating " + avClass + " for " + key);
                 }
             } else if (key.equals("secondary") && avClass != null) {
                 try {
                     secondary = (AnnotationIntrospector) Class.forName(avClass).getConstructor().newInstance();
                 } catch (Exception e) {
-                    throw new Exception("JsonMapperService: Error instantiating " + avClass + " for " + key);
+                    throw new InstantiationException("JsonMapperService: Error instantiating " + avClass + " for " + key);
                 }
             }
         }

@@ -299,8 +299,8 @@ public class GSONBuilderService extends AbstractLogEnabled implements
                                 adapterClass);
 
                     } catch (Exception e) {
-                        throw new Exception(
-                                "JsonMapperService: Error instantiating "
+                        throw new InstantiationException(
+                                "JsonMapperService: Error instantiating one of the adapters: "
                                         + avClass + " for " + forClass);
                     }
                 }

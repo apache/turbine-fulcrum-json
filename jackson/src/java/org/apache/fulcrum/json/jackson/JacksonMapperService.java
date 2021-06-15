@@ -409,7 +409,7 @@ public class JacksonMapperService extends AbstractLogEnabled implements
                     primary = (AnnotationIntrospector) Class.forName(avClass).getConstructor()
                             .newInstance();
                 } catch (Exception e) {
-                    throw new Exception(
+                    throw new InstantiationException(
                             "JsonMapperService: Error instantiating " + avClass
                                     + " for " + key);
                 }
@@ -418,7 +418,7 @@ public class JacksonMapperService extends AbstractLogEnabled implements
                     secondary = (AnnotationIntrospector) Class.forName(avClass).getConstructor()
                             .newInstance();
                 } catch (Exception e) {
-                    throw new Exception(
+                    throw new InstantiationException(
                             "JsonMapperService: Error instantiating " + avClass
                                     + " for " + key);
                 }
@@ -458,7 +458,7 @@ public class JacksonMapperService extends AbstractLogEnabled implements
                         assert mapper.getSerializationConfig().isEnabled(
                                 feature) == featureValue;
                     } catch (Exception e) {
-                        throw new Exception(
+                        throw new AssertionError(
                                 "JsonMapperService: Error instantiating feature "
                                         + featureKey + " with  " + featureValue,
                                 e);
