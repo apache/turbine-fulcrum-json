@@ -25,8 +25,6 @@
 
   <body>
   <release version="2.0.1" date="in SVN">
-    
-    
     <action type="update" dev="gk">
      Update Jackson to v2.12.3, GSON to 2.8.7, commons-lang3 to 3.12.0, json-path to 2.6.0, slf4j-noop to 1.7.30
    </action>
@@ -43,10 +41,10 @@
     <action type="update" dev="gk">
     - add jaxb dependency for jackson2 module as it is not in java12, 
     - fix dateformat test
-    - include jackson-datatype-json-org, but exclude incompatible org.json and it's license.
+    - update jackson-datatype-json-org and exclude incompatible org.json and it's license.
     </action>
     </release>
-  <release version="2.0.0" date="in SVN">
+  <release version="2.0.0" date="2019-01-25">
     <action type="update" dev="gk">
         Java 8 compatiblity, updated SNAPSHOT version 1.1.2-SNAPSHOT to 2.0.0-SNAPSHOT.
         Replace Log4j with Log4j2, add support for JUnit 5, update tests
