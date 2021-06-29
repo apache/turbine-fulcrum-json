@@ -65,30 +65,40 @@
           <skip>true</skip>
         </configuration>
       </plugin>
-      <plugin>
-        <!-- build the source and binary distribution packages -->
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <executions>
-            <execution>
-                <id>fulcrum-release-assembly</id>
-                <phase>package</phase>
-                <goals>
-                    <goal>single</goal>
-                </goals>
-                <configuration>
-                    <runOnlyAtExecutionRoot>false</runOnlyAtExecutionRoot>
-                    <!--outputDirectory>${file.separator}/${project.artifactId}-${project.version}</outputDirectory-->
-                    <descriptors>
-                      <descriptor>src/assembly/bin.xml</descriptor>
-                      <descriptor>src/assembly/src.xml</descriptor>
-                    </descriptors>
-                    <tarLongFileFormat>gnu</tarLongFileFormat>
-                </configuration>
-            </execution>
-        </executions>
-    </plugin>
+
     </plugins>
   </build>
+  
+   <profiles>
+        <profile>
+            <id>apache-release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <!-- build the source and binary distribution packages -->
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>fulcrum-release-assembly</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>single</goal>
+                                </goals>
+                                <configuration>
+                                    <runOnlyAtExecutionRoot>false</runOnlyAtExecutionRoot>
+                                    <descriptors>
+                                      <descriptor>src/assembly/bin.xml</descriptor>
+                                      <descriptor>src/assembly/src.xml</descriptor>
+                                    </descriptors>
+                                    <tarLongFileFormat>gnu</tarLongFileFormat>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>
