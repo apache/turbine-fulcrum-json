@@ -1,0 +1,14 @@
+target/
+*.log
+
+.classpath
+.project
+.settings/
+
+# Idea IntelliJ
+*.ipr
+*.iws
+*.iml
+.idea/
+
+pom.xml.*

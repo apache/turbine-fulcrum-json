@@ -27,10 +27,9 @@
     <name>Fulcrum JSON Jackson 2.x Impl</name>
     
     <url>http://turbine.apache.org/fulcrum/fulcrum-json/fulcrum-json-jackson2</url>
+    
     <scm>
-        <connection>scm:svn:http://svn.apache.org/repos/asf/turbine/fulcrum/trunk/json/</connection>
-        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/turbine/fulcrum/trunk/json/</developerConnection>
-        <url>https://svn.apache.org/viewvc/turbine/fulcrum/trunk/json/</url>
+      <url>https://github.com/apache/${turbine.site.path}/tree/${project.scm.tag}/jackson2</url>
     </scm>
 
     <build>

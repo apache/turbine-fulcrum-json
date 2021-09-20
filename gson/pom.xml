@@ -27,11 +27,11 @@
     <name>Fulcrum JSON GSON Impl</name>
     
     <url>http://turbine.apache.org/fulcrum/fulcrum-json/fulcrum-json-gson</url>
+    
     <scm>
-        <connection>scm:svn:http://svn.apache.org/repos/asf/turbine/fulcrum/trunk/json/</connection>
-        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/turbine/fulcrum/trunk/json/</developerConnection>
-        <url>https://svn.apache.org/viewvc/turbine/fulcrum/trunk/json/</url>
+      <url>https://github.com/apache/${turbine.site.path}/tree/${project.scm.tag}/gson</url>
     </scm>
+
 
     <build>
         <sourceDirectory>${basedir}/src/java/</sourceDirectory>

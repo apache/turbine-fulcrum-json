@@ -30,6 +30,10 @@
 
   <name>Fulcrum JSON Jar Distribution</name>
   
+  <scm>
+      <url>https://github.com/apache/${turbine.site.path}/tree/${project.scm.tag}/dist</url>
+    </scm>
+  
   <!-- NOTE: These dependency declarations are only required to sort this project to the 
        end of the line in the multimodule build ensuring that this
        distribution project builds AFTER them ...

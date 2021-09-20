@@ -21,7 +21,7 @@
    <parent>
        <artifactId>turbine-parent</artifactId>
        <groupId>org.apache.turbine</groupId>
-       <version>8</version>
+       <version>9-SNAPSHOT</version>
        <relativePath />
    </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -34,15 +34,16 @@
     <scm>
       <connection>scm:git:https://gitbox.apache.org/repos/asf/turbine-fulcrum-json.git</connection>
       <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/turbine-fulcrum-json.git</developerConnection>
-      <url>https://gitbox.apache.org/repos/asf/turbine-fulcrum-json.git</url>
+      <url>https://github.com/apache/${turbine.site.path}/tree/${project.scm.tag}</url>
+      <tag>master</tag><!-- or HEAD -->
     </scm>
 
-    <!-- Required for staging to work -->
+    <!-- distributionManagement id and url defined in parent, adapt turbine.site.path -->
     <distributionManagement>
       <site>
-          <id>turbine.apache.org</id>
           <name>Fulcrum JSON Website</name>
-          <url>https://turbine.apache.org/fulcrum/fulcrum-json/</url>
+           <id>apache.org</id>
+          <url>https://github.com/apache/turbine-fulcrum-json/</url>
         </site>
    </distributionManagement>
    
@@ -82,15 +83,58 @@
         <testSourceDirectory>${basedir}/src/test</testSourceDirectory>
         <plugins>
             <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-scm-publish-plugin</artifactId>
-              <configuration>
-                <content>${siteContent.path}</content>
-                <tryUpdate>false</tryUpdate>
-              </configuration>
-            </plugin>
+                  <groupId>org.apache.maven.plugins</groupId>
+                  <artifactId>maven-scm-publish-plugin</artifactId>
+                  <configuration>
+                    <content>${siteContent.path}</content>
+                    <tryUpdate>false</tryUpdate>
+                    <scmBranch>asf-site</scmBranch>
+                  </configuration>
+                </plugin>
         </plugins>
     </build>
+    
+    <reporting>
+        <plugins>
+               <plugin>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <!-- to generate only in root -->
+                    <reportSets>
+                      <reportSet>
+                        <id>aggregate</id>
+                        <inherited>false</inherited>        
+                        <reports>
+                          <report>aggregate</report>
+                        </reports>
+                      </reportSet>
+                      <reportSet>
+                        <id>default</id>
+                        <reports>
+                          <report>javadoc</report>
+                          <report>test-javadoc</report>
+                        </reports>
+                      </reportSet>
+                    </reportSets>
+                    <configuration>
+                        <skipModules>dist</skipModules>
+                    </configuration>
+                </plugin>
+                 <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jxr-plugin</artifactId>
+                    <reportSets>
+                      <reportSet>
+                        <id>aggregate</id>
+                        <inherited>false</inherited>
+                        <reports>
+                          <report>aggregate</report>
+                        </reports>
+                      </reportSet>
+                    </reportSets>
+                  </plugin>
+         </plugins>
+    </reporting>
     
     <dependencies>
        <dependency>
@@ -128,7 +172,7 @@
     </dependencies>
      
     <properties>
-      <turbine.site.path>fulcrum/fulcrum-json</turbine.site.path>
+      <turbine.site.path>turbine-fulcrum-json</turbine.site.path>
       <turbine.scmPubCheckoutDirectory>${turbine.site.cache}/fulcrum/json</turbine.scmPubCheckoutDirectory>
     </properties>
     

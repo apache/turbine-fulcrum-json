@@ -24,7 +24,9 @@
   </properties>
 
   <body>
-  <release version="2.0.1" date="in SVN">
+   <release version="2.0.1" date="in VC">
+   </release>
+  <release version="2.0.1" date="2021-06-29">
     <action type="update" dev="gk">
      Update Jackson to v2.12.3, GSON to 2.8.7, commons-lang3 to 3.12.0, json-path to 2.6.0, slf4j-noop to 1.7.30
    </action>

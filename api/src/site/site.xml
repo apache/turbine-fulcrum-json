@@ -23,7 +23,7 @@
   name="Fulcrum JSON API">
 
 <body>	
-	<menu ref="reports"></menu>
+	<menu ref="reports" inherit="top"></menu>
 </body>
 
 </project>
