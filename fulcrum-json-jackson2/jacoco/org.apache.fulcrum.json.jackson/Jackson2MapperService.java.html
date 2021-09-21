@@ -1,0 +1,890 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Jackson2MapperService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Fulcrum JSON Jackson 2.x Impl</a> &gt; <a href="index.source.html" class="el_package">org.apache.fulcrum.json.jackson</a> &gt; <span class="el_source">Jackson2MapperService.java</span></div><h1>Jackson2MapperService.java</h1><pre class="source lang-java linenums">package org.apache.fulcrum.json.jackson;
+
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * &quot;License&quot;); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import org.apache.avalon.framework.activity.Initializable;
+import org.apache.avalon.framework.configuration.Configurable;
+import org.apache.avalon.framework.configuration.Configuration;
+import org.apache.avalon.framework.configuration.ConfigurationException;
+import org.apache.avalon.framework.logger.AbstractLogEnabled;
+import org.apache.avalon.framework.logger.LogEnabled;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.fulcrum.json.JsonService;
+import org.apache.fulcrum.json.jackson.filters.CustomModuleWrapper;
+import org.apache.fulcrum.json.jackson.jsonpath.DefaultJsonPathWrapper;
+
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonParser.Feature;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.SerializableString;
+import com.fasterxml.jackson.core.io.CharacterEscapes;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.AnnotationIntrospector;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.Module;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
+import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.cfg.ConfigFeature;
+import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
+import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.ser.FilterProvider;
+import com.fasterxml.jackson.databind.ser.PropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
+
+/**
+ * 
+ * 
+ * By default multiple serialization of the same object in a single thread is
+ * not supported (e.g filter + mixin or default + filter for the same bean /
+ * object).
+ * 
+ * By default a filter is defined by its {@link Class#getName()}.
+ * 
+ * Note: If using {@link SimpleNameIntrospector}, filter caches are set by class
+ * id. Caching is enabled by default, if not (a) by setting
+ * {@link #cacheFilters} to &lt;code&gt;false&lt;/code&gt;. By setting (b) the Boolean
+ * parameter clean
+ * {@link #serializeAllExceptFilter(Object, Class, Boolean, String...)} or
+ * {@link #serializeOnlyFilter(Object, Class, Boolean, String...)} you could
+ * clean the filter. If caching is disabled each filter will be unregistered and
+ * the cache cleaned.
+ * 
+ * @author &lt;a href=&quot;mailto:gk@apache.org&quot;&gt;Georg Kallidis&lt;/a&gt;
+ * @version $Id$
+ * 
+ */
+<span class="pc bpc" id="L91" title="1 of 2 branches missed.">public class Jackson2MapperService extends AbstractLogEnabled implements JsonService, Initializable, Configurable {</span>
+
+    private static final String DEFAULT_TYPING = &quot;defaultTyping&quot;;
+    private static final String CACHE_FILTERS = &quot;cacheFilters&quot;;
+    private static final String DATE_FORMAT = &quot;dateFormat&quot;;
+    private static final String ESCAPE_CHARS = &quot;escapeCharsGlobal&quot;;
+    private static final String ESCAPE_CHAR_CLASS = &quot;escapeCharsClass&quot;;
+    private static final String USE_JSON_PATH = &quot;useJsonPath&quot;;
+    ObjectMapper mapper;
+    AnnotationIntrospector primary; // support default
+    AnnotationIntrospector secondary;
+
+    private static final String ANNOTATIONINSPECTOR = &quot;annotationInspectors&quot;;
+
+<span class="fc" id="L105">    private Map&lt;String, String&gt; annotationInspectors = null;</span>
+<span class="fc" id="L106">    private Map&lt;String, Boolean&gt; features = null;</span>
+<span class="fc" id="L107">    private Map&lt;String, String&gt; featureTypes = null;</span>
+
+    private String dateFormat;
+
+    /**
+     * Default dateformat is &lt;code&gt;MM/dd/yyyy&lt;/code&gt;, could be overwritten in
+     * {@link #setDateFormat(DateFormat)}.
+     */
+    public static final String DEFAULTDATEFORMAT = &quot;MM/dd/yyyy&quot;;
+
+    
+<span class="fc" id="L118">    private boolean cacheFilters = true; // true -&gt; this is by default true in jackson, if not using</span>
+                                            // multiple serialization in one thread
+<span class="fc" id="L120">    String[] defaultTypeDefs = null;</span>
+    private CacheService cacheService;
+<span class="fc" id="L122">    private boolean escapeCharsGlobal = false; // to be backward compatible, but should be true, then escaping to avoid</span>
+                                                // XSS payload by default
+<span class="fc" id="L124">    private boolean useJsonPath = false;</span>
+<span class="fc" id="L125">    private String escapeCharsClass = null;</span>
+
+    @Override
+    public String ser(Object src) throws Exception {
+<span class="nc" id="L129">        return ser(src, false);</span>
+    }
+
+    @Override
+    public &lt;T&gt; String ser(Object src, Class&lt;T&gt; type) throws Exception {
+<span class="nc" id="L134">        return ser(src, type, false);</span>
+    }
+
+    public String ser(Object src, FilterProvider filter) throws Exception {
+<span class="nc" id="L138">        return ser(src, filter, false);</span>
+    }
+
+    /**
+     * 
+     * @param src the object to be serailized as JSON
+     * @param filter may be null, then sserialize without otherwise set into cache service and as filter provider.
+     * @param cleanCache cleans the jackson cache
+     * @return the serialzed JSON string
+     * @throws Exception exception
+     */
+    public String ser(Object src, FilterProvider filter, Boolean cleanCache) throws Exception {
+<span class="fc" id="L150">        String serResult = null;</span>
+<span class="pc bpc" id="L151" title="1 of 2 branches missed.">        if (src == null) {</span>
+<span class="nc" id="L152">            getLogger().info(&quot;no serializable object.&quot;);</span>
+<span class="nc" id="L153">            return serResult;</span>
+        }
+<span class="pc bpc" id="L155" title="1 of 2 branches missed.">        if (filter == null) {</span>
+<span class="nc" id="L156">            getLogger().debug(&quot;ser class::&quot; + src.getClass() + &quot; without filter.&quot;);</span>
+<span class="nc" id="L157">            return ser(src);</span>
+        } else {
+<span class="fc" id="L159">            getLogger().debug(&quot;add filter for cache filter Class &quot; + src.getClass().getName());</span>
+<span class="fc" id="L160">            setCustomIntrospectorWithExternalFilterId(src.getClass(), null); // filter class</span>
+<span class="pc bpc" id="L161" title="1 of 2 branches missed.">            if (isCacheFilters()) {</span>
+<span class="fc" id="L162">                cacheService.getFilters().put(src.getClass().getName(), filter);</span>
+            }
+        }
+<span class="fc" id="L165">        getLogger().debug(&quot;ser class::&quot; + src.getClass() + &quot; with filter &quot; + filter);</span>
+<span class="fc" id="L166">        mapper.setFilterProvider(filter);</span>
+<span class="fc" id="L167">        String res = mapper.writer(filter).writeValueAsString(src);</span>
+<span class="pc bpc" id="L168" title="1 of 2 branches missed.">        if (cleanCache) {</span>
+<span class="fc" id="L169">            cacheService.cleanSerializerCache(mapper);</span>
+        }
+<span class="fc" id="L171">        return res;</span>
+    }
+
+    @Override
+    public &lt;T&gt; T deSer(String json, Class&lt;T&gt; type) throws Exception {
+<span class="nc" id="L176">        ObjectReader reader = null;</span>
+<span class="nc bnc" id="L177" title="All 2 branches missed.">        if (type != null)</span>
+<span class="nc" id="L178">            reader = mapper.readerFor(type);</span>
+        else
+<span class="nc" id="L180">            reader = mapper.reader();</span>
+
+<span class="nc" id="L182">        return reader.readValue(json);</span>
+    }
+
+    /**
+     * basically wrapper for {@link ObjectMapper#convertValue(Object, Class)}.
+     * 
+     * @param src Object
+     * @param type target Object
+     * @return
+     */
+    public &lt;T&gt; T deSer(Object src, Class&lt;T&gt; type) {
+<span class="nc" id="L193">        return mapper.convertValue(src, type);</span>
+    }
+
+    /**
+     * Add a named module or a {@link Module}.
+     * 
+     * @param name   Name of the module, optional. Could be null, if module is a
+     *               {@link Module}.
+     * 
+     * @param target Target class, optional. Could be null, if module is a
+     *               {@link Module}.
+     * 
+     * @param module Either an Jackson Module @link {@link Module} or an custom
+     *               wrapper @link CustomModuleWrapper.
+     */
+    @Override
+    public JsonService addAdapter(String name, Class target, Object module)
+            throws Exception {
+<span class="nc bnc" id="L211" title="All 2 branches missed.">        if (module instanceof CustomModuleWrapper) {</span>
+<span class="nc" id="L212">            CustomModuleWrapper cmw = (CustomModuleWrapper) module;</span>
+<span class="nc" id="L213">            Module cm = new CustomModule(name, target, cmw.getSer(),</span>
+<span class="nc" id="L214">                    cmw.getDeSer());</span>
+<span class="nc" id="L215">            getLogger().debug(&quot;registering custom module &quot; + cm + &quot;  for: &quot; + target);</span>
+<span class="nc" id="L216">            mapper.registerModule(cm);</span>
+<span class="nc bnc" id="L217" title="All 2 branches missed.">        } else if (module instanceof Module) {</span>
+<span class="nc" id="L218">            getLogger().debug(</span>
+                    &quot;registering module &quot; + module );
+<span class="nc" id="L220">            mapper.registerModule((Module) module);</span>
+        } else {
+<span class="nc" id="L222">            throw new ClassCastException(&quot;expecting module type &quot; + Module.class);</span>
+        }
+<span class="nc" id="L224">        return this;</span>
+    }
+    
+    public Class&lt;?&gt; showMixinForClass(Class target) {
+<span class="nc" id="L228">        Class&lt;?&gt; mixin =  mapper.findMixInClassFor( target );</span>
+<span class="nc" id="L229">        getLogger().debug(&quot;find mixin for target &quot; + target + &quot; -&gt; mixin: &quot; + mixin);</span>
+<span class="nc" id="L230">        return mixin;</span>
+    }
+    
+    public &lt;T&gt; List&lt;T&gt; deSerList(String json, Class&lt;? extends List&gt; targetList, Class&lt;T&gt; elementType) throws Exception {
+<span class="nc" id="L234">        return mapper.readValue(json, mapper.getTypeFactory().constructParametricType(targetList, elementType));</span>
+    }
+
+    public &lt;T, U&gt; Map&lt;T, U&gt; deSerMap(String json, Class&lt;? extends Map&gt; mapClass, Class&lt;T&gt; keyClass, Class&lt;U&gt; valueClass)
+            throws Exception {
+<span class="nc" id="L239">        return mapper.readValue(json, mapper.getTypeFactory().constructMapType(mapClass, keyClass, valueClass));</span>
+    }
+
+    public &lt;T&gt; Collection&lt;T&gt; deSerCollectionWithTypeReference(String json, TypeReference&lt;T&gt; collectionType)
+            throws Exception {
+<span class="nc" id="L244">        return (Collection&lt;T&gt;) mapper.readValue(json, collectionType);</span>
+    }
+  
+    public &lt;T&gt; Collection&lt;T&gt; deSerCollectionWithType(String json, Class&lt;? extends Collection&gt; collectionClass,
+            Class&lt;T&gt; type) throws Exception {
+<span class="nc" id="L249">        return mapper.readValue(json, mapper.getTypeFactory().constructCollectionType(collectionClass, type));</span>
+    }
+    
+    @Override
+    public &lt;T&gt; Collection&lt;T&gt; deSerCollection(String json, Object collectionType, Class&lt;T&gt; elementType)
+            throws Exception {
+<span class="nc bnc" id="L255" title="All 2 branches missed.">        if (collectionType instanceof TypeReference) {</span>
+<span class="nc" id="L256">            return deSerCollectionWithTypeReference(json, (TypeReference&lt;T&gt;) collectionType);</span>
+        } else {
+<span class="nc" id="L258">            return mapper.readValue(json, mapper.getTypeFactory()</span>
+<span class="nc" id="L259">                    .constructCollectionType(((Collection&lt;T&gt;) collectionType).getClass(), elementType));</span>
+        }
+    }
+    
+    /**
+     * 
+     * @param src the collection to be serialized 
+     * @param collectionType the {@link TypeReference}.
+     * @param cleanCache cleans jackson serializer cache 
+     * @return the serialized JSON string
+     * @throws JsonProcessingException JSON processing error
+     */
+    public &lt;T&gt; String serCollectionWithTypeReference(Collection&lt;T&gt; src, TypeReference collectionType,
+                                                     Boolean cleanCache) throws JsonProcessingException {
+<span class="nc" id="L273">         String res = mapper.writerFor(collectionType).writeValueAsString(src);</span>
+<span class="nc bnc" id="L274" title="All 2 branches missed.">         if (cleanCache) {</span>
+<span class="nc" id="L275">             cacheService.cleanSerializerCache(mapper);</span>
+         }
+<span class="nc" id="L277">         return res;</span>
+     }
+    
+     /**
+     * @param name   name of the module
+     * @param target target class
+     * @param mixin  provide mixin as class. Deregistering module could be only done
+     *               by setting this parameter to null.
+     * 
+     * @see #addAdapter(String, Class, Object)
+     */
+    @Override
+    public JsonService addAdapter(String name, Class target, Class mixin) throws Exception {
+<span class="nc" id="L290">        getLogger().debug(</span>
+                &quot;registering unversioned simple mixin module named &quot; + name + &quot; of type &quot; + mixin + &quot;  for: &quot; + target);
+<span class="nc" id="L292">        mapper.addMixIn(target, mixin);</span>
+<span class="nc" id="L293">        return this;</span>
+    }
+
+    /**
+     * set a single mixin. convenience method, calls
+     * {@link ObjectMapper#registerModule(Module)}
+     * 
+     * @param src    he object to be serialized
+     * @param name   the name for the mixin
+     * @param target the target class for the mixin
+     * @param mixin  the mixin class
+     * @return serialized result
+     * @throws JsonProcessingException if not properly processed
+     */
+    @SuppressWarnings(&quot;rawtypes&quot;)
+    public String withMixinModule(Object src, String name, Class target, Class mixin) throws JsonProcessingException {
+<span class="nc" id="L309">        Module mx = new MixinModule(name, target, mixin);</span>
+<span class="nc" id="L310">        getLogger().debug(&quot;registering module &quot; + mx + &quot;, mixin: &quot; + mixin);</span>
+<span class="nc" id="L311">        return mapper.registerModule(mx).writer().writeValueAsString(src);</span>
+    }
+
+    /**
+     * This is a convenience method with read, but the old mixins will be cleared
+     * {@link ObjectMapper#setMixIns(Map)}
+     * 
+     * @param src    the object to be serialized
+     * @param target the target class for the mixin
+     * @param mixin  the mixin class
+     * @return serialized result
+     * @throws JsonProcessingException if fail
+     */
+    @SuppressWarnings(&quot;rawtypes&quot;)
+    public String withSetMixins(Object src, Class target, Class mixin) throws JsonProcessingException {
+<span class="nc" id="L326">        return setMixins(target, mixin).writer().writeValueAsString(src);</span>
+    }
+
+    /**
+     * @param target The target class
+     * @param mixin  the mixin class
+     * @return an objectmapper
+     */
+    @SuppressWarnings(&quot;rawtypes&quot;)
+    public ObjectMapper setMixins(Class target, Class mixin) {
+<span class="nc" id="L336">        Map&lt;Class&lt;?&gt;, Class&lt;?&gt;&gt; sourceMixins = null;</span>
+<span class="nc bnc" id="L337" title="All 2 branches missed.">        if (target != null) {</span>
+<span class="nc" id="L338">            sourceMixins = new HashMap&lt;&gt;(1);</span>
+<span class="nc" id="L339">            sourceMixins.put(target, mixin);</span>
+        }
+<span class="nc" id="L341">        getLogger().debug(&quot;complete reset mixins for target &quot; + target + &quot;, mixin: &quot; + mixin);</span>
+<span class="nc" id="L342">        return mapper.setMixIns(sourceMixins);</span>
+    }
+
+    @Override
+    public String serializeAllExceptFilter(Object src, String... filterAttr) throws Exception {
+<span class="nc" id="L347">        return serializeAllExceptFilter(src, src.getClass(), true, filterAttr);</span>
+    }
+
+    @Override
+    public synchronized String serializeAllExceptFilter(Object src, Boolean cache, String... filterAttr)
+            throws Exception {
+<span class="nc" id="L353">        return serializeAllExceptFilter(src, src.getClass(), cache, filterAttr);</span>
+    }
+
+    public synchronized &lt;T&gt; String serializeAllExceptFilter(Object src, Class&lt;T&gt;[] filterClasses, String... filterAttr)
+            throws Exception {
+<span class="nc" id="L358">        return serializeAllExceptFilter(src, filterClasses, true, filterAttr);</span>
+    }
+
+    @Override
+    public synchronized &lt;T&gt; String serializeAllExceptFilter(Object src, Class&lt;T&gt; filterClass, String... filterAttr)
+            throws Exception {
+<span class="nc" id="L364">        return serializeAllExceptFilter(src, filterClass, true, filterAttr);</span>
+    }
+
+    @Override
+    public &lt;T&gt; String serializeAllExceptFilter(Object src, Class&lt;T&gt; filterClass, Boolean cleanFilter,
+            String... filterAttr) throws Exception {
+<span class="nc" id="L370">        return serializeAllExceptFilter(src, new Class[] { filterClass }, cleanFilter, filterAttr);</span>
+    }
+
+    /**
+     * 
+     * @param src           the object to be serailized, may be a list
+     * @param filterClasses the same object class or a detail class, which should be
+     *                      filtered
+     * @param               &lt;T&gt; class type
+     * @param clean         cleaning the cache after serialization
+     * @param filterAttr    attributes to be filtered for filtered class
+     * @return the serailized string
+     * @throws Exception generic exception
+     */
+    public synchronized &lt;T&gt; String serializeAllExceptFilter(Object src, Class&lt;T&gt;[] filterClasses, Boolean clean,
+            String... filterAttr) throws Exception {
+<span class="nc" id="L386">        PropertyFilter pf = null;</span>
+<span class="nc bnc" id="L387" title="All 2 branches missed.">        if (filterAttr != null)</span>
+<span class="nc" id="L388">            pf = SimpleBeanPropertyFilter.serializeAllExcept(filterAttr);</span>
+<span class="nc bnc" id="L389" title="All 2 branches missed.">        else if (filterClasses == null) { // no filter</span>
+<span class="nc" id="L390">            return ser(src, clean);</span>
+            // should be better:
+            // return filter(src, new Class&lt;?&gt;[] { src.getClass() }, filterClasses, pf,
+            // clean);
+        }
+<span class="nc" id="L395">        return filter(src, new Class&lt;?&gt;[] { filterClasses[0] }, filterClasses, pf, clean);</span>
+    }
+
+    @Override
+    public String serializeOnlyFilter(Object src, String... filterAttrs) throws Exception {
+<span class="nc" id="L400">        return serializeOnlyFilter(src, src.getClass(), true, filterAttrs);</span>
+    }
+
+    @Override
+    public synchronized String serializeOnlyFilter(Object src, Boolean cache, String... filterAttr) throws Exception {
+<span class="nc" id="L405">        return serializeOnlyFilter(src, src.getClass(), cache, filterAttr);</span>
+    }
+
+    @Override
+    public synchronized &lt;T&gt; String serializeOnlyFilter(Object src, Class&lt;T&gt; filterClass, String... filterAttr)
+            throws Exception {
+<span class="nc" id="L411">        return serializeOnlyFilter(src, filterClass, true, filterAttr);</span>
+    }
+
+    @Override
+    public synchronized &lt;T&gt; String serializeOnlyFilter(Object src, Class&lt;T&gt; filterClass, Boolean refresh,
+            String... filterAttr) throws Exception {
+<span class="fc" id="L417">        return serializeOnlyFilter(src, new Class[] { filterClass }, refresh, filterAttr);</span>
+    }
+
+    public synchronized &lt;T&gt; String serializeOnlyFilter(Object src, Class&lt;T&gt;[] filterClasses, Boolean refresh,
+            String... filterAttr) throws Exception {
+<span class="fc" id="L422">        PropertyFilter pf = null;</span>
+<span class="pc bpc" id="L423" title="3 of 6 branches missed.">        if (filterAttr != null &amp;&amp; filterAttr.length &gt; 0 &amp;&amp; !&quot;&quot;.equals(filterAttr[0])) {</span>
+<span class="fc" id="L424">            pf = SimpleBeanPropertyFilter.filterOutAllExcept(filterAttr);</span>
+<span class="fc" id="L425">            getLogger().debug(&quot;setting filteroutAllexcept filter for size of filterAttr: &quot; + filterAttr.length);</span>
+        } else {
+<span class="nc" id="L427">            getLogger().warn(&quot;no filter attributes set!&quot;);</span>
+<span class="nc" id="L428">            pf = SimpleBeanPropertyFilter.filterOutAllExcept(&quot;dummy&quot;);</span>
+        }
+<span class="pc bpc" id="L430" title="1 of 2 branches missed.">        if (filterClasses == null)</span>
+<span class="nc" id="L431">            throw new AssertionError(&quot;You have to provide some class to apply the filtering!&quot;);</span>
+<span class="fc" id="L432">        return filter(src, filterClasses, null, pf, refresh);</span>
+    }
+
+    @Override
+    public String ser(Object src, Boolean cleanCache) throws Exception {
+<span class="nc bnc" id="L437" title="All 4 branches missed.">        if (isCacheFilters() &amp;&amp; cacheService.getFilters().containsKey(src.getClass().getName())) {</span>
+<span class="nc" id="L438">            getLogger().warn(&quot;Found registered filter - using instead of default view filter for class:&quot;</span>
+<span class="nc" id="L439">                    + src.getClass().getName());</span>
+<span class="nc" id="L440">            SimpleFilterProvider filter = (SimpleFilterProvider) cacheService.getFilters()</span>
+<span class="nc" id="L441">                    .get(src.getClass().getName());</span>
+<span class="nc" id="L442">            return ser(src, filter, cleanCache);// mapper.writerWithView(src.getClass()).writeValueAsString(src);</span>
+        }
+<span class="nc" id="L444">        String res = mapper.writerWithView(Object.class).writeValueAsString(src);</span>
+<span class="nc bnc" id="L445" title="All 4 branches missed.">        if (cleanCache != null &amp;&amp; cleanCache) {</span>
+<span class="nc" id="L446">            cacheService.cleanSerializerCache(mapper);</span>
+        }
+<span class="nc" id="L448">        return res;</span>
+    }
+
+    @Override
+    public &lt;T&gt; String ser(Object src, Class&lt;T&gt; type, Boolean cleanCache) throws Exception {
+<span class="nc" id="L453">        getLogger().info(&quot;serializing object:&quot; + src + &quot; for type &quot; + type);</span>
+<span class="nc bnc" id="L454" title="All 6 branches missed.">        if (isCacheFilters() &amp;&amp; src != null &amp;&amp; cacheService.getFilters().containsKey(src.getClass().getName())) {</span>
+<span class="nc" id="L455">            getLogger().warn(&quot;Found registered filter - could not use custom view and custom filter for class:&quot;</span>
+<span class="nc" id="L456">                    + src.getClass().getName());</span>
+            // throw new
+            // Exception(&quot;Found registered filter - could not use custom view and custom
+            // filter for class:&quot;+
+            // src.getClass().getName());
+<span class="nc" id="L461">            SimpleFilterProvider filter = (SimpleFilterProvider) cacheService.getFilters()</span>
+<span class="nc" id="L462">                    .get(src.getClass().getName());</span>
+<span class="nc" id="L463">            return ser(src, filter);</span>
+        }
+
+<span class="nc bnc" id="L466" title="All 2 branches missed.">        String res = (type != null) ? mapper.writerWithView(type).writeValueAsString(src)</span>
+<span class="nc" id="L467">                : mapper.writeValueAsString(src);</span>
+<span class="nc bnc" id="L468" title="All 2 branches missed.">        if (cleanCache) {</span>
+<span class="nc" id="L469">            cacheService.cleanSerializerCache(mapper);</span>
+        }
+<span class="nc" id="L471">        return res;</span>
+    }
+
+    /**
+     * 
+     * @param src            The source Object to be filtered.
+     * @param filterClass    This Class array contains at least one element. If no
+     *                       class is provided it is the class type of the source
+     *                       object. The filterClass is to become the key of the
+     *                       filter object cache.
+     * @param excludeClasses The classes to be excluded, optionally used only for
+     *                       methods like
+     *                       {@link #serializeAllExceptFilter(Object, Class[], String...)}.
+     * @param pf             Expecting a property filter from e.g @link
+     *                       {@link SimpleBeanPropertyFilter}.
+     * @param clean          if &lt;code&gt;true&lt;/code&gt; does not reuse the filter object
+     *                       (no cashing).
+     * @return The serialized Object as String
+     * @throws Exception
+     */
+    private &lt;T&gt; String filter(Object src, Class&lt;?&gt;[] filterClasses, Class&lt;T&gt;[] excludeClasses, PropertyFilter pf,
+            Boolean clean) throws Exception {
+<span class="fc" id="L493">        FilterProvider filter = null;</span>
+<span class="pc bpc" id="L494" title="1 of 2 branches missed.">        if (filterClasses.length &gt; 0) {</span>
+<span class="fc" id="L495">            filter = retrieveFilter(pf, filterClasses[0], excludeClasses);</span>
+        }
+<span class="fc" id="L497">        getLogger().info(&quot;filtering with filter &quot; + filter);</span>
+<span class="fc" id="L498">        String serialized = ser(src, filter, clean);</span>
+<span class="pc bpc" id="L499" title="2 of 4 branches missed.">        if (!isCacheFilters() || clean) {</span>
+<span class="pc bpc" id="L500" title="1 of 2 branches missed.">            if (filterClasses.length &gt; 0) {</span>
+<span class="pc bpc" id="L501" title="1 of 2 branches missed.">                boolean exclude = (excludeClasses != null) ? true : false;</span>
+<span class="fc" id="L502">                cacheService.removeFilter(filterClasses[0], exclude);</span>
+            }
+        }
+<span class="fc" id="L505">        return serialized;</span>
+    }
+
+    private &lt;T&gt; SimpleFilterProvider retrieveFilter(PropertyFilter pf, Class&lt;?&gt; filterClass,
+            Class&lt;T&gt;[] excludeClasses) {
+<span class="fc" id="L510">        SimpleFilterProvider filter = null;</span>
+<span class="pc bpc" id="L511" title="1 of 2 branches missed.">        if (pf != null) {</span>
+<span class="fc" id="L512">            filter = new SimpleFilterProvider();</span>
+<span class="fc" id="L513">            filter.setDefaultFilter(pf);</span>
+        }
+<span class="pc bpc" id="L515" title="1 of 2 branches missed.">        if (isCacheFilters()) {</span>
+<span class="pc bpc" id="L516" title="1 of 2 branches missed.">            if (!cacheService.getFilters().containsKey(filterClass.getName())) {</span>
+<span class="fc" id="L517">                getLogger().debug(&quot;add filter for cache filter Class &quot; + filterClass.getName());</span>
+<span class="fc" id="L518">                setCustomIntrospectorWithExternalFilterId(filterClass, excludeClasses); // filter class</span>
+<span class="pc bpc" id="L519" title="1 of 2 branches missed.">                if (pf != null) {</span>
+<span class="fc" id="L520">                    cacheService.getFilters().put(filterClass.getName(), filter);</span>
+                }
+            } else {
+<span class="nc" id="L523">                filter = (SimpleFilterProvider) cacheService.getFilters().get(filterClass.getName());</span>
+                // setCustomIntrospectorWithExternalFilterId(filterClass); // filter
+                // class
+            }
+        }
+<span class="fc" id="L528">        getLogger().debug(&quot;set filter:&quot; + filter);</span>
+<span class="fc" id="L529">        return filter;</span>
+    }
+
+    /**
+     * @param filterClass
+     *                          &lt;li&gt;Adding filterClass into
+     *                          {@link SimpleNameIntrospector#setFilteredClass(Class)}
+     *                          enables the filtering process.
+     * @param externalFilterIds
+     *                          &lt;li&gt;Adding externalFilterIs to
+     *                          {@link SimpleNameIntrospector#setExternalFilterExcludeClasses(Class...)}
+     *                          excludes these classes.
+     */
+    private &lt;T&gt; void setCustomIntrospectorWithExternalFilterId(Class&lt;?&gt; filterClass,
+            Class&lt;T&gt;[] externalFilterClassIds) {
+<span class="pc bpc" id="L544" title="1 of 2 branches missed.">        if (primary instanceof SimpleNameIntrospector) {</span>
+            // first one is required that we get to the PropertyFilter
+<span class="fc" id="L546">            ((SimpleNameIntrospector) primary).setFilteredClasses(filterClass);</span>
+<span class="pc bpc" id="L547" title="1 of 2 branches missed.">            if (externalFilterClassIds != null) {</span>
+<span class="nc" id="L548">                ((SimpleNameIntrospector) primary).setIsExludeType(true);</span>
+<span class="nc bnc" id="L549" title="All 2 branches missed.">                for (Class&lt;T&gt; filterClazz : externalFilterClassIds) {</span>
+<span class="nc" id="L550">                    getLogger().debug(&quot;added class for filters &quot; + filterClazz);</span>
+                }
+<span class="nc" id="L552">                ((SimpleNameIntrospector) primary).setExternalFilterExcludeClasses(externalFilterClassIds);</span>
+            }
+        }
+<span class="fc" id="L555">    }</span>
+
+    public Jackson2MapperService registerModule(Module module) {
+<span class="nc" id="L558">        mapper.registerModule(module);</span>
+<span class="nc" id="L559">        return this;</span>
+    }
+
+    public &lt;T&gt; void addSimpleModule(SimpleModule module, Class&lt;T&gt; type, JsonSerializer&lt;T&gt; ser) {
+<span class="nc" id="L563">        module.addSerializer(type, ser);</span>
+<span class="nc" id="L564">    }</span>
+
+    public &lt;T&gt; void addSimpleModule(SimpleModule module, Class&lt;T&gt; type, JsonDeserializer&lt;T&gt; deSer) {
+<span class="nc" id="L567">        module.addDeserializer(type, deSer);</span>
+<span class="nc" id="L568">    }</span>
+
+    /**
+     * Default Dateformat: {@link #DEFAULTDATEFORMAT}
+     */
+    @Override
+    public void setDateFormat(final DateFormat df) {
+<span class="nc" id="L575">        mapper.setDateFormat(df);</span>
+<span class="nc" id="L576">    }</span>
+
+    /**
+     * Avalon component lifecycle method
+     */
+    @Override
+    public void configure(Configuration conf) throws ConfigurationException {
+<span class="fc" id="L583">        getLogger().debug(&quot;conf.getName()&quot; + conf.getName());</span>
+<span class="fc" id="L584">        this.annotationInspectors = new HashMap&lt;&gt;();</span>
+
+<span class="fc" id="L586">        final Configuration configuredAnnotationInspectors = conf.getChild(ANNOTATIONINSPECTOR, false);</span>
+
+<span class="pc bpc" id="L588" title="1 of 2 branches missed.">        if (configuredAnnotationInspectors != null) {</span>
+<span class="fc" id="L589">            Configuration[] nameVal = configuredAnnotationInspectors.getChildren();</span>
+<span class="fc" id="L590">            Arrays.stream( nameVal).forEach(c-&gt;</span>
+            {
+<span class="fc" id="L592">                String key = c.getName();</span>
+<span class="fc" id="L593">                getLogger().debug(&quot;configured key: &quot; + key);</span>
+<span class="fc bfc" id="L594" title="All 2 branches covered.">                if (key.equals(&quot;features&quot;)) {</span>
+<span class="fc" id="L595">                    this.features = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L596">                    this.featureTypes = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L597">                    Arrays.stream( c.getChildren() ).forEach( lf -&gt; {</span>
+<span class="fc" id="L598">                        boolean featureValue = lf.getAttributeAsBoolean(&quot;value&quot;, false);</span>
+<span class="fc" id="L599">                        String featureType = null;</span>
+<span class="fc" id="L600">                        String feature = null;</span>
+                        try {
+<span class="fc" id="L602">                            featureType = lf.getAttribute(&quot;type&quot;);</span>
+<span class="fc" id="L603">                            feature = lf.getValue();</span>
+<span class="fc" id="L604">                            getLogger().debug(&quot;configuredAnnotationInspectors &quot; + feature + &quot;:&quot; + featureValue);</span>
+<span class="fc" id="L605">                            this.features.put(feature, featureValue);</span>
+<span class="fc" id="L606">                            this.featureTypes.put(feature, featureType);</span>
+<span class="nc" id="L607">                        } catch (ConfigurationException e) {</span>
+<span class="nc" id="L608">                            throw new RuntimeException(e);</span>
+<span class="fc" id="L609">                        }</span>
+<span class="fc" id="L610">                    });</span>
+                } else {
+                    String val;
+                    try {
+<span class="fc" id="L614">                        val = c.getValue();</span>
+<span class="fc" id="L615">                        getLogger().debug(&quot;configuredAnnotationInspectors &quot; + key + &quot;:&quot; + val);</span>
+<span class="fc" id="L616">                        this.annotationInspectors.put(key, val);</span>
+<span class="nc" id="L617">                    } catch (ConfigurationException e) {</span>
+<span class="nc" id="L618">                        throw new RuntimeException(e);</span>
+<span class="fc" id="L619">                    }</span>
+
+                }
+<span class="fc" id="L622">            });</span>
+        }
+<span class="fc" id="L624">        final Configuration configuredDateFormat = conf.getChild(DATE_FORMAT, true);</span>
+<span class="fc" id="L625">        this.dateFormat = configuredDateFormat.getValue(DEFAULTDATEFORMAT);</span>
+
+<span class="fc" id="L627">        final Configuration configuredKeepFilter = conf.getChild(CACHE_FILTERS, false);</span>
+<span class="pc bpc" id="L628" title="1 of 2 branches missed.">        if (configuredKeepFilter != null) {</span>
+<span class="nc" id="L629">            setCacheFilters( configuredKeepFilter.getValueAsBoolean());</span>
+        }
+<span class="fc" id="L631">        final Configuration configuredEscapeChars = conf.getChild(ESCAPE_CHARS, false);</span>
+<span class="pc bpc" id="L632" title="1 of 2 branches missed.">        if (configuredEscapeChars != null) {</span>
+<span class="fc" id="L633">            this.escapeCharsGlobal = configuredEscapeChars.getValueAsBoolean();</span>
+        }
+<span class="fc" id="L635">        final Configuration configuredEscapeCharClass = conf.getChild(ESCAPE_CHAR_CLASS, false);</span>
+<span class="pc bpc" id="L636" title="1 of 2 branches missed.">        if (configuredEscapeCharClass != null) {</span>
+<span class="nc" id="L637">            this.escapeCharsClass = configuredEscapeCharClass.getValue();</span>
+        }
+
+<span class="fc" id="L640">        final Configuration configuredDefaultType = conf.getChild(DEFAULT_TYPING, false);</span>
+<span class="pc bpc" id="L641" title="1 of 2 branches missed.">        if (configuredDefaultType != null) {</span>
+<span class="nc" id="L642">            defaultTypeDefs = new String[] { configuredDefaultType.getAttribute(&quot;type&quot;),</span>
+<span class="nc" id="L643">                    configuredDefaultType.getAttribute(&quot;key&quot;) };</span>
+        }
+<span class="fc" id="L645">        final Configuration configuredjsonPath = conf.getChild(USE_JSON_PATH, false);</span>
+<span class="pc bpc" id="L646" title="1 of 2 branches missed.">        if (configuredjsonPath != null) {</span>
+<span class="fc" id="L647">            this.useJsonPath = configuredjsonPath.getValueAsBoolean();</span>
+        }
+<span class="fc" id="L649">    }</span>
+
+    @Override
+    public void initialize() throws Exception {
+<span class="fc" id="L653">        mapper = new ObjectMapper(null, null, null);// add configurable JsonFactory,.. later?</span>
+
+<span class="fc" id="L655">        initAnnotationInspectors();</span>
+
+<span class="fc" id="L657">        initFeatures();</span>
+
+<span class="fc" id="L659">        initDefaultTyping();</span>
+
+<span class="fc" id="L661">        getLogger().info(&quot;setting date format to:&quot; + dateFormat);</span>
+<span class="fc" id="L662">        getLogger().info(&quot;cacheFilters is:&quot; + isCacheFilters());</span>
+<span class="pc bpc" id="L663" title="1 of 2 branches missed.">        if (!isCacheFilters()) {</span>
+<span class="nc" id="L664">            mapper.configure(SerializationFeature.FLUSH_AFTER_WRITE_VALUE, true);</span>
+        }
+
+<span class="fc" id="L667">        mapper.setDateFormat(new SimpleDateFormat(dateFormat));</span>
+
+<span class="pc bpc" id="L669" title="1 of 2 branches missed.">        if (escapeCharsGlobal) {</span>
+<span class="fc" id="L670">            mapper.getFactory().setCharacterEscapes(characterEscapes);</span>
+        }
+<span class="pc bpc" id="L672" title="1 of 2 branches missed.">        if (escapeCharsClass != null) {</span>
+            try {
+<span class="nc" id="L674">                characterEscapes = (CharacterEscapes) Class.forName(escapeCharsClass).getConstructor().newInstance();</span>
+<span class="nc" id="L675">            } catch (Exception e) {</span>
+<span class="nc" id="L676">                throw new InstantiationException(</span>
+                        &quot;JsonMapperService: Error instantiating &quot; + escapeCharsClass + &quot; for &quot; + ESCAPE_CHAR_CLASS);
+<span class="nc" id="L678">            }</span>
+        }
+
+<span class="fc" id="L681">        getLogger().debug(&quot;initialized mapper:&quot; + mapper);</span>
+
+<span class="fc" id="L683">        mapper.getSerializerProvider().setNullValueSerializer(new JsonSerializer&lt;Object&gt;() {</span>
+            @Override
+            public void serialize(Object value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
+<span class="nc" id="L686">                jgen.writeString(&quot;&quot;);</span>
+
+<span class="nc" id="L688">            }</span>
+        });
+<span class="fc" id="L690">        cacheService = new CacheService(primary);</span>
+<span class="pc bpc" id="L691" title="1 of 2 branches missed.">        if (cacheService instanceof LogEnabled) {</span>
+<span class="fc" id="L692">            cacheService.enableLogging(getLogger().getChildLogger(cacheService.getClass().getSimpleName()));</span>
+<span class="fc" id="L693">            getLogger().info(&quot;setting cacheService logger: &quot; + cacheService.getClass().getSimpleName());</span>
+        }
+
+<span class="pc bpc" id="L696" title="1 of 2 branches missed.">        if (useJsonPath) {</span>
+            // set it before runtime
+<span class="fc" id="L698">            DefaultJsonPathWrapper djpw = null;</span>
+            try {
+<span class="fc" id="L700">                djpw = new DefaultJsonPathWrapper(this.mapper);</span>
+<span class="fc" id="L701">                getLogger().debug(&quot;******** initialized new jsonPath defaults: &quot; + djpw.getJsonPathDefault());</span>
+<span class="nc" id="L702">            } catch (Exception e) {</span>
+<span class="nc" id="L703">                throw new AssertionError(</span>
+                        &quot;JsonMapperService: Error instantiating &quot; + djpw + &quot; using useJsonPath=&quot; + useJsonPath);
+<span class="fc" id="L705">            }</span>
+
+        }
+<span class="fc" id="L708">    }</span>
+
+    private void initDefaultTyping() {
+<span class="pc bpc" id="L711" title="3 of 4 branches missed.">        if (defaultTypeDefs != null &amp;&amp; defaultTypeDefs.length == 2) {</span>
+<span class="nc" id="L712">            DefaultTyping defaultTyping = DefaultTyping.valueOf(defaultTypeDefs[0]);</span>
+<span class="nc" id="L713">            mapper.enableDefaultTypingAsProperty(defaultTyping, defaultTypeDefs[1]);</span>
+<span class="nc" id="L714">            getLogger().info(&quot;default typing is &quot; + defaultTypeDefs[0] + &quot; with key:&quot; + defaultTypeDefs[1]);</span>
+        }
+<span class="fc" id="L716">    }</span>
+
+    private void initFeatures() throws Exception {
+<span class="pc bpc" id="L719" title="2 of 4 branches missed.">        if (features != null &amp;&amp; !features.isEmpty()) {</span>
+<span class="fc" id="L720">            features.entrySet().stream().forEach( entry -&gt; {</span>
+<span class="fc" id="L721">                String featureKey = entry.getKey();</span>
+<span class="fc" id="L722">                Boolean featureValue = entry.getValue();    </span>
+<span class="fc" id="L723">                String featureType = featureTypes.get(featureKey);</span>
+<span class="fc" id="L724">                Class&lt;?&gt; configFeature = null;</span>
+                try {
+<span class="fc" id="L726">                    getLogger().debug(&quot;initializing featureType:  &quot; + featureType);</span>
+<span class="fc" id="L727">                    configFeature = loadClass(featureType); </span>
+<span class="nc" id="L728">                } catch (ClassNotFoundException e) {</span>
+<span class="nc" id="L729">                    throw new AssertionError(&quot;JsonMapperService: Error instantiating &quot; + featureType + &quot; for &quot; + featureKey, e);</span>
+<span class="fc" id="L730">                }</span>
+<span class="fc" id="L731">                ConfigFeature feature = null;</span>
+<span class="pc bpc" id="L732" title="2 of 4 branches missed.">                if (!StringUtils.isEmpty(featureKey) &amp;&amp; featureValue != null) {</span>
+                   try 
+                   {
+<span class="fc bfc" id="L735" title="All 2 branches covered.">                        if (configFeature.equals(SerializationFeature.class)) {</span>
+<span class="fc" id="L736">                            feature = SerializationFeature.valueOf(featureKey);</span>
+<span class="fc" id="L737">                            mapper.configure((SerializationFeature) feature, featureValue);</span>
+<span class="pc bpc" id="L738" title="1 of 2 branches missed.">                            assert mapper.getSerializationConfig()</span>
+<span class="pc bpc" id="L739" title="1 of 2 branches missed.">                                    .isEnabled((SerializationFeature) feature) == featureValue;</span>
+<span class="fc" id="L740">                            getLogger().info(&quot;initialized serconfig mapper feature: &quot; + feature + &quot; with &quot;</span>
+<span class="fc" id="L741">                                    + mapper.getSerializationConfig().isEnabled((SerializationFeature) feature));</span>
+<span class="fc bfc" id="L742" title="All 2 branches covered.">                        } else if (configFeature.equals(DeserializationFeature.class)) {</span>
+<span class="fc" id="L743">                            feature = DeserializationFeature.valueOf(featureKey);</span>
+<span class="fc" id="L744">                            mapper.configure((DeserializationFeature) feature, featureValue);</span>
+<span class="pc bpc" id="L745" title="1 of 2 branches missed.">                            assert mapper.getDeserializationConfig()</span>
+<span class="pc bpc" id="L746" title="1 of 2 branches missed.">                                    .isEnabled((DeserializationFeature) feature) == featureValue;</span>
+<span class="fc" id="L747">                            getLogger().info(&quot;initialized deserconfig mapper feature: &quot; + feature + &quot; with &quot;</span>
+<span class="fc" id="L748">                                    + mapper.getDeserializationConfig().isEnabled((DeserializationFeature) feature));</span>
+<span class="fc bfc" id="L749" title="All 2 branches covered.">                        } else if (configFeature.equals(MapperFeature.class)) {</span>
+<span class="fc" id="L750">                            feature = MapperFeature.valueOf(featureKey);</span>
+<span class="fc" id="L751">                            mapper.configure((MapperFeature) feature, featureValue);</span>
+<span class="pc bpc" id="L752" title="2 of 4 branches missed.">                            assert mapper.getDeserializationConfig().isEnabled((MapperFeature) feature) == featureValue;</span>
+<span class="pc bpc" id="L753" title="2 of 4 branches missed.">                            assert mapper.getSerializationConfig().isEnabled((MapperFeature) feature) == featureValue;</span>
+<span class="fc" id="L754">                            getLogger().info(&quot;initialized serconfig mapper feature: &quot; + feature + &quot; with &quot;</span>
+<span class="fc" id="L755">                                    + mapper.getDeserializationConfig().isEnabled((MapperFeature) feature));</span>
+<span class="fc" id="L756">                            getLogger().info(&quot;initialized deserconfig mapper feature: &quot; + feature + &quot; with &quot;</span>
+<span class="fc" id="L757">                                    + mapper.getSerializationConfig().isEnabled((MapperFeature) feature));</span>
+<span class="pc bpc" id="L758" title="1 of 2 branches missed.">                        } else if (configFeature.equals(JsonParser.class)) {</span>
+<span class="fc" id="L759">                            Feature parserFeature = JsonParser.Feature.valueOf(featureKey);</span>
+<span class="fc" id="L760">                            getLogger().info(&quot;initializing parser feature: &quot; + parserFeature + &quot; with &quot; + featureValue);</span>
+<span class="fc" id="L761">                            mapper.configure(parserFeature, featureValue);</span>
+<span class="pc bnc" id="L762" title="All 2 branches missed.">                        } else if (configFeature.equals(JsonGenerator.class)) {</span>
+<span class="nc" id="L763">                            com.fasterxml.jackson.core.JsonGenerator.Feature genFeature = JsonGenerator.Feature</span>
+<span class="nc" id="L764">                                    .valueOf(featureKey);</span>
+<span class="nc" id="L765">                            getLogger().info(&quot;initializing parser feature: &quot; + genFeature + &quot; with &quot; + featureValue);</span>
+<span class="nc" id="L766">                            mapper.configure(genFeature, featureValue);</span>
+                        }
+<span class="nc" id="L768">                   } catch (Exception e) {</span>
+<span class="nc" id="L769">                       throw new RuntimeException(&quot;JsonMapperService: Error instantiating feature &quot; + featureKey + &quot; with  &quot;</span>
+                               + featureValue , e);
+<span class="fc" id="L771">                   }</span>
+                    
+                }
+<span class="fc" id="L774">            });   </span>
+        }
+<span class="fc" id="L776">    }</span>
+
+    private void initAnnotationInspectors() throws Exception {
+<span class="fc bfc" id="L779" title="All 2 branches covered.">        for (Entry&lt;String, String&gt; entry : annotationInspectors.entrySet()) {</span>
+<span class="fc" id="L780">            String key = entry.getKey();</span>
+<span class="fc" id="L781">            String avClass = entry.getValue();</span>
+<span class="pc bpc" id="L782" title="1 of 4 branches missed.">            if (key.equals(&quot;primary&quot;) &amp;&amp; !StringUtils.isEmpty(avClass)) {</span>
+                try {
+<span class="fc" id="L784">                    primary = (AnnotationIntrospector) Class.forName(avClass).getConstructor().newInstance();</span>
+<span class="nc" id="L785">                } catch (Exception e) {</span>
+<span class="nc" id="L786">                    throw new InstantiationException(&quot;JsonMapperService: Error instantiating &quot; + avClass + &quot; for &quot; + key);</span>
+<span class="fc" id="L787">                }</span>
+<span class="pc bpc" id="L788" title="2 of 4 branches missed.">            } else if (key.equals(&quot;secondary&quot;) &amp;&amp; avClass != null) {</span>
+                try {
+<span class="fc" id="L790">                    secondary = (AnnotationIntrospector) Class.forName(avClass).getConstructor().newInstance();</span>
+<span class="nc" id="L791">                } catch (Exception e) {</span>
+<span class="nc" id="L792">                    throw new InstantiationException(&quot;JsonMapperService: Error instantiating &quot; + avClass + &quot; for &quot; + key);</span>
+<span class="fc" id="L793">                }</span>
+            }
+<span class="fc" id="L795">        }</span>
+<span class="pc bpc" id="L796" title="1 of 2 branches missed.">        if (primary == null) {</span>
+<span class="nc" id="L797">            primary = new JacksonAnnotationIntrospector(); // support default</span>
+<span class="nc" id="L798">            getLogger().info(&quot;using default introspector:&quot; + primary.getClass().getName());</span>
+<span class="nc" id="L799">            mapper.setAnnotationIntrospector(primary);</span>
+<span class="pc bpc" id="L800" title="2 of 4 branches missed.">        } else if (primary != null &amp;&amp; secondary != null) {</span>
+<span class="fc" id="L801">            AnnotationIntrospector pair = new AnnotationIntrospectorPair(primary, secondary);</span>
+<span class="fc" id="L802">            mapper.setAnnotationIntrospector(pair);</span>
+<span class="fc" id="L803">        } else {</span>
+<span class="nc" id="L804">            mapper.setAnnotationIntrospector(primary);</span>
+        }
+
+<span class="pc bpc" id="L807" title="1 of 2 branches missed.">        if (primary instanceof LogEnabled) {</span>
+<span class="fc" id="L808">            ((LogEnabled) primary).enableLogging(getLogger().getChildLogger(primary.getClass().getSimpleName()));</span>
+<span class="fc" id="L809">            getLogger().info(&quot;setting primary introspector logger: &quot; + primary.getClass().getSimpleName());</span>
+        }
+<span class="pc bpc" id="L811" title="1 of 2 branches missed.">        if (secondary instanceof LogEnabled) {</span>
+<span class="nc" id="L812">            ((LogEnabled) secondary).enableLogging(getLogger().getChildLogger(secondary.getClass().getSimpleName()));</span>
+<span class="nc" id="L813">            getLogger().info(&quot;setting secondary introspector logger: &quot; + secondary.getClass().getSimpleName());</span>
+        }
+<span class="fc" id="L815">    }</span>
+    
+    /**
+     * Loads the named class using the default class loader.
+     *
+     * @param className the name of the class to load.
+     * @return {@inheritDoc} the loaded class.
+     * @throws ClassNotFoundException if the class was not found.
+     */
+    @SuppressWarnings(&quot;unchecked&quot;)
+    protected &lt;T&gt; Class&lt;T&gt; loadClass(String className) throws ClassNotFoundException {
+<span class="fc" id="L826">        ClassLoader loader = this.getClass().getClassLoader();</span>
+        try {
+            Class&lt;T&gt; clazz;
+
+<span class="pc bpc" id="L830" title="1 of 2 branches missed.">            if (loader != null) {</span>
+<span class="fc" id="L831">                clazz = (Class&lt;T&gt;) loader.loadClass(className);</span>
+            } else {
+<span class="nc" id="L833">                clazz = (Class&lt;T&gt;) Class.forName(className);</span>
+            }
+
+<span class="fc" id="L836">            return clazz;</span>
+<span class="nc" id="L837">        } catch (ClassNotFoundException x) {</span>
+            /* Give up. */
+<span class="nc" id="L839">            throw x;</span>
+        }
+    }
+
+    public ObjectMapper getMapper() {
+<span class="fc" id="L844">        return mapper;</span>
+    }
+
+    public void setMapper(ObjectMapper mapper) {
+<span class="nc" id="L848">        this.mapper = mapper;</span>
+<span class="nc" id="L849">    }</span>
+
+    public boolean isCacheFilters() {
+<span class="fc" id="L852">        return cacheFilters;</span>
+    }
+
+    public void setCacheFilters(boolean cacheFilters) {
+<span class="nc" id="L856">        this.cacheFilters = cacheFilters;</span>
+<span class="nc bnc" id="L857" title="All 2 branches missed.">        if (!cacheFilters)</span>
+<span class="nc" id="L858">            mapper.configure(SerializationFeature.FLUSH_AFTER_WRITE_VALUE, true);</span>
+<span class="nc" id="L859">    }</span>
+
+<span class="fc" id="L861">    static CharacterEscapes characterEscapes = new CharacterEscapes() {</span>
+        private static final long serialVersionUID = 1L;
+        private final int[] asciiEscapes;
+        { // instance init
+<span class="fc" id="L865">            int[] esc = standardAsciiEscapesForJSON();</span>
+            // this avoids to get evaluated immediately
+<span class="fc" id="L867">            esc['&lt;'] = CharacterEscapes.ESCAPE_STANDARD;</span>
+<span class="fc" id="L868">            esc['&gt;'] = CharacterEscapes.ESCAPE_STANDARD;</span>
+<span class="fc" id="L869">            esc['&amp;'] = CharacterEscapes.ESCAPE_STANDARD;</span>
+<span class="fc" id="L870">            esc['\''] = CharacterEscapes.ESCAPE_STANDARD;</span>
+            // esc['/'] = '/'; //CharacterEscapes.ESCAPE_CUSTOM;
+<span class="fc" id="L872">            asciiEscapes = esc;</span>
+<span class="fc" id="L873">        }</span>
+
+        @Override
+        public int[] getEscapeCodesForAscii() {
+<span class="fc" id="L877">            return asciiEscapes;</span>
+        }
+
+        @Override
+        public SerializableString getEscapeSequence(final int ch) {
+//            if ( ch == '/') { 
+//                return new SerializedString(&quot;\\\\/&quot;);
+//            } else {
+<span class="nc" id="L885">            return null;</span>
+//            }
+        }
+    };
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>

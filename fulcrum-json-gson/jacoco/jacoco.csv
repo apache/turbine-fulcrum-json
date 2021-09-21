@@ -1,0 +1,9 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+Fulcrum JSON GSON Impl,org.apache.fulcrum.json.gson,DateTypeAdapter,18,43,2,2,7,12,3,6,1,6
+Fulcrum JSON GSON Impl,org.apache.fulcrum.json.gson,DateTypeAdapter.new TypeAdapterFactory() {...},10,3,2,0,1,1,2,1,1,1
+Fulcrum JSON GSON Impl,org.apache.fulcrum.json.gson,GSONBuilderService,192,273,13,7,38,55,20,15,10,15
+Fulcrum JSON GSON Impl,org.apache.fulcrum.json.gson,GSONBuilderService.new ExclusionStrategy() {...},14,99,4,8,1,15,3,7,0,4
+Fulcrum JSON GSON Impl,org.apache.fulcrum.json.gson,GSONBuilderService.2.new Callable() {...},0,12,0,0,0,2,0,2,0,2
+Fulcrum JSON GSON Impl,org.apache.fulcrum.json.gson,GSONBuilderService.new ExclusionStrategy() {...},0,53,0,6,0,11,0,7,0,4
+Fulcrum JSON GSON Impl,org.apache.fulcrum.json.gson,GSONBuilderService.new Configuration.Defaults() {...},0,37,0,0,0,7,0,4,0,4
+Fulcrum JSON GSON Impl,org.apache.fulcrum.json.gson,GSONBuilderService.new TypeToken() {...},6,0,0,0,1,0,1,0,1,0

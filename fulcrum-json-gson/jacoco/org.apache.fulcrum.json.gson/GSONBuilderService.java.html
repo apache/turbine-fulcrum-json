@@ -1,0 +1,439 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GSONBuilderService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Fulcrum JSON GSON Impl</a> &gt; <a href="index.source.html" class="el_package">org.apache.fulcrum.json.gson</a> &gt; <span class="el_source">GSONBuilderService.java</span></div><h1>GSONBuilderService.java</h1><pre class="source lang-java linenums">    package org.apache.fulcrum.json.gson;
+
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * &quot;License&quot;); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import java.lang.reflect.Type;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.EnumSet;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Set;
+import java.util.concurrent.Callable;
+
+import org.apache.avalon.framework.activity.Initializable;
+import org.apache.avalon.framework.configuration.Configurable;
+import org.apache.avalon.framework.configuration.Configuration;
+import org.apache.avalon.framework.configuration.ConfigurationException;
+import org.apache.avalon.framework.logger.AbstractLogEnabled;
+import org.apache.fulcrum.json.JsonService;
+
+import com.google.gson.ExclusionStrategy;
+import com.google.gson.FieldAttributes;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+import com.jayway.jsonpath.Option;
+import com.jayway.jsonpath.spi.json.GsonJsonProvider;
+import com.jayway.jsonpath.spi.json.JsonProvider;
+import com.jayway.jsonpath.spi.mapper.GsonMappingProvider;
+import com.jayway.jsonpath.spi.mapper.MappingProvider;
+
+/**
+ * 
+ * By default multiple serialization of the same object in a single thread is
+ * not support (e.g adapter + default for the same bean / object).
+ * 
+ * 
+ * @author gk
+ * @version $Id$
+ * 
+ */
+<span class="fc" id="L63">public class GSONBuilderService extends AbstractLogEnabled implements</span>
+        JsonService, Initializable, Configurable {
+
+    private static final String GLOBAL_ADAPTERS = &quot;globalAdapters&quot;;
+
+    private static final String DATE_FORMAT = &quot;dateFormat&quot;;
+    
+    private static final String USEJSONPATH = &quot;useJsonPath&quot;;
+
+    private String dateFormat;
+
+<span class="fc" id="L74">    private Hashtable&lt;String, String&gt; adapters = null;</span>
+
+<span class="fc" id="L76">    private boolean useJsonPath = false;</span>
+    
+    GsonBuilder gson;
+
+    @Override
+    public String ser(Object src) throws Exception {
+<span class="fc" id="L82">        getLogger().debug(&quot;ser&quot; + src);</span>
+<span class="fc" id="L83">        return gson.create().toJson(src);</span>
+    }
+
+    @Override
+    public &lt;T&gt; String ser(Object src, Class&lt;T&gt; type) throws Exception {
+<span class="nc" id="L88">        getLogger().debug(&quot;ser::&quot; + src + &quot; with type&quot; + type);</span>
+
+<span class="nc" id="L90">        Type collectionType = new TypeToken&lt;T&gt;() {</span>
+<span class="nc" id="L91">        }.getType();</span>
+<span class="nc" id="L92">        return gson.create().toJson(src, collectionType);</span>
+    }
+
+    @Override
+    public &lt;T&gt; T deSer(String json, Class&lt;T&gt; type) throws Exception {
+        // TODO Auto-generated method stub
+<span class="fc" id="L98">        getLogger().debug(&quot;deser:&quot; + json);</span>
+<span class="fc" id="L99">        return gson.create().fromJson(json, type);</span>
+    }
+    
+    @Override
+    public &lt;T&gt; Collection&lt;T&gt; deSerCollection(String json, Object collectionType,
+            Class&lt;T&gt; elementType) throws Exception {
+<span class="fc" id="L105">        getLogger().debug(&quot;deser:&quot; + json);</span>
+<span class="fc" id="L106">        getLogger().debug(&quot;collectionType:&quot; + collectionType);</span>
+<span class="fc" id="L107">        return  gson.create().fromJson(json, (Type)collectionType);</span>
+    }
+
+    @Override
+    public String serializeOnlyFilter(Object src, String... filterAttr)
+            throws Exception {
+<span class="fc" id="L113">        return  gson</span>
+<span class="fc" id="L114">                .addSerializationExclusionStrategy(</span>
+<span class="fc" id="L115">                        include(null,filterAttr)).create().toJson(src);</span>
+    }
+
+    @Override
+    public String serializeOnlyFilter(Object src, Boolean notused,
+            String... filterAttr) throws Exception {
+<span class="nc" id="L121">        return  gson</span>
+<span class="nc" id="L122">                .addSerializationExclusionStrategy(</span>
+<span class="nc" id="L123">                        include(null,filterAttr)).create().toJson(src);</span>
+    }
+
+    @Override
+    public &lt;T&gt; String serializeOnlyFilter(Object src, Class&lt;T&gt; filterClass,
+            String... filterAttr) throws Exception {
+<span class="fc" id="L129">        return  gson</span>
+<span class="fc" id="L130">        .addSerializationExclusionStrategy(</span>
+<span class="fc" id="L131">                include(filterClass, filterAttr)).create().toJson(src);</span>
+    }
+    
+    @Override
+    public &lt;T&gt; String serializeOnlyFilter(Object arg0, Class&lt;T&gt; arg1,
+            Boolean arg2, String... arg3) throws Exception {
+<span class="nc" id="L137">        throw new Exception(&quot;Not yet implemented!&quot;);</span>
+    }
+
+    /**
+     * registering an adapter 
+     * 
+     * @see GsonBuilder#registerTypeAdapter(Type, Object)
+     */
+    @Override
+    public JsonService addAdapter(String name, Class target, Object adapter)
+            throws Exception {
+<span class="fc" id="L148">        gson.registerTypeAdapter(target, adapter);</span>
+<span class="fc" id="L149">        return this;</span>
+    }
+
+    /**
+     * registering an adapter. Unregistering could be only done by reinitialize {@link GsonBuilder} 
+     * using @link {@link GSONBuilderService#initialize()}, although a new Adapter with the same target overwrites the previously defined.
+     * 
+     * @see GsonBuilder#registerTypeAdapter(Type, Object)
+     */
+    @Override
+    public JsonService addAdapter(String name, Class target, Class adapter)
+            throws Exception {
+<span class="fc" id="L161">        gson.registerTypeAdapter(target, adapter.getConstructor().newInstance());</span>
+<span class="fc" id="L162">        return null;</span>
+    }
+
+    @Override
+    public &lt;T&gt; String serializeAllExceptFilter(Object src,
+            Class&lt;T&gt; filterClass, String... filterAttr) throws Exception {
+<span class="fc" id="L168">        return gson</span>
+<span class="fc" id="L169">                .addSerializationExclusionStrategy(</span>
+<span class="fc" id="L170">                        exclude(filterClass, filterAttr)).create().toJson(src);</span>
+    }
+    
+    @Override
+    public &lt;T&gt; String serializeAllExceptFilter(Object src, Class&lt;T&gt; filterClass,
+            Boolean clearCache, String... filterAttr) throws Exception {
+<span class="nc" id="L176">        throw new Exception(&quot;Not yet implemented!&quot;);</span>
+    }
+    
+    @Override
+    public String serializeAllExceptFilter(Object src, String... filterAttr)
+            throws Exception {
+<span class="fc" id="L182">        return gson</span>
+<span class="fc" id="L183">                .addSerializationExclusionStrategy(</span>
+<span class="fc" id="L184">                        exclude(null, filterAttr)).create().toJson(src);</span>
+    }
+
+    @Override
+    public String serializeAllExceptFilter(Object src, Boolean notused,
+            String... filterAttr) throws Exception {
+<span class="nc" id="L190">        return gson</span>
+<span class="nc" id="L191">                .addSerializationExclusionStrategy(</span>
+<span class="nc" id="L192">                        exclude(null, filterAttr)).create().toJson(src);</span>
+    }
+    
+    @Override
+    public String ser(Object src, Boolean refreshCache) throws Exception {
+<span class="nc" id="L197">        throw new Exception(&quot;Not implemented!&quot;);</span>
+    }
+
+    @Override
+    public &lt;T&gt; String ser(Object src, Class&lt;T&gt; type, Boolean refreshCache)
+            throws Exception {
+<span class="nc" id="L203">        throw new Exception(&quot;Not implemented!&quot;);</span>
+    }
+
+    public JsonService registerTypeAdapter(Object serdeser, Type type) {
+<span class="nc" id="L207">        gson.registerTypeAdapter(type, serdeser);</span>
+<span class="nc" id="L208">        return this;</span>
+    }
+    
+    /**
+     * Alternative method to calling {@link #registerTypeAdapter(Object, Type)}
+     * Note: Always use either this direct format call or the other adapter register call,
+     * otherwise inconsistencies may occur!
+     * 
+     * @param dfStr date format string
+     */
+    public void setDateFormat(final String dfStr) {
+<span class="nc" id="L219">        gson.setDateFormat(dfStr);</span>
+<span class="nc" id="L220">    }</span>
+
+    /* (non-Javadoc)
+     * @see org.apache.fulcrum.json.JsonService#setDateFormat(java.text.DateFormat)
+     */
+    @Override
+    public void setDateFormat(final DateFormat df) {
+<span class="fc" id="L227">        DateTypeAdapter dateTypeAdapter = new DateTypeAdapter();</span>
+<span class="fc" id="L228">        dateTypeAdapter.setCustomDateFormat(df);</span>
+<span class="fc" id="L229">        gson.registerTypeAdapter(Date.class,dateTypeAdapter);</span>
+<span class="fc" id="L230">    }</span>
+
+    public void getJsonService() throws InstantiationException {
+        // gson.registerTypeAdapter(Date.class, ser).
+        // addSerializationExclusionStrategy( exclude(ObjectKey.class) ).
+        // addSerializationExclusionStrategy( exclude(ComboKey.class) );
+        // return gson.create().toJson( src );
+<span class="nc" id="L237">    }</span>
+
+    /* (non-Javadoc)
+     * @see org.apache.avalon.framework.configuration.Configurable#configure(org.apache.avalon.framework.configuration.Configuration)
+     */
+    @Override
+    public void configure(Configuration conf) throws ConfigurationException {
+
+<span class="fc" id="L245">        getLogger().debug(&quot;conf.getName()&quot; + conf.getName());</span>
+<span class="fc" id="L246">        final Configuration configuredDateFormat = conf.getChild(DATE_FORMAT,</span>
+                false);
+<span class="pc bpc" id="L248" title="1 of 2 branches missed.">        if (configuredDateFormat != null) {</span>
+<span class="fc" id="L249">            this.dateFormat = configuredDateFormat.getValue();// DEFAULTDATEFORMAT);</span>
+        }
+<span class="fc" id="L251">        final Configuration configuredAdapters = conf.getChild(GLOBAL_ADAPTERS,</span>
+                true);
+<span class="pc bpc" id="L253" title="1 of 2 branches missed.">        if (configuredAdapters != null) {</span>
+<span class="fc" id="L254">            Configuration[] nameVal = configuredAdapters.getChildren();</span>
+<span class="pc bpc" id="L255" title="1 of 2 branches missed.">            for (int i = 0; i &lt; nameVal.length; i++) {</span>
+<span class="nc" id="L256">                String key = nameVal[i].getName();</span>
+<span class="nc" id="L257">                getLogger().debug(&quot;configured key: &quot; + key);</span>
+<span class="nc bnc" id="L258" title="All 2 branches missed.">                if (key.equals(&quot;adapter&quot;)) {</span>
+<span class="nc" id="L259">                    String forClass = nameVal[i].getAttribute(&quot;forClass&quot;);</span>
+<span class="nc" id="L260">                    this.adapters = new Hashtable&lt;String, String&gt;();</span>
+<span class="nc" id="L261">                    this.adapters.put(forClass, nameVal[i].getValue());</span>
+                }
+            }
+        }
+        // TODO provide configurable Type Adapters
+<span class="fc" id="L266">        final Configuration configuredjsonPath = conf.getChild(</span>
+                USEJSONPATH, false);
+<span class="pc bpc" id="L268" title="1 of 2 branches missed.">        if (configuredjsonPath != null) {</span>
+<span class="fc" id="L269">            this.useJsonPath  = configuredjsonPath.getValueAsBoolean();</span>
+        }
+<span class="fc" id="L271">    }</span>
+
+    /* (non-Javadoc)
+     * @see org.apache.avalon.framework.activity.Initializable#initialize()
+     */
+    @Override
+    public void initialize() throws Exception {
+<span class="fc" id="L278">        gson = new GsonBuilder();</span>
+<span class="fc" id="L279">        getLogger().debug(&quot;initialized: gson:&quot; + gson);</span>
+<span class="pc bpc" id="L280" title="1 of 2 branches missed.">        if (dateFormat != null) {</span>
+<span class="fc" id="L281">            getLogger().info(&quot;setting date format to: &quot; + dateFormat);</span>
+<span class="fc" id="L282">            setDateFormat(new SimpleDateFormat(dateFormat));</span>
+            //setDateFormat(dateFormat);
+        }
+
+<span class="pc bpc" id="L286" title="1 of 2 branches missed.">        if (adapters != null) {</span>
+<span class="nc" id="L287">            Enumeration&lt;String&gt; enumKey = adapters.keys();</span>
+<span class="nc bnc" id="L288" title="All 2 branches missed.">            while (enumKey.hasMoreElements()) {</span>
+<span class="nc" id="L289">                String forClass = enumKey.nextElement();</span>
+<span class="nc" id="L290">                String avClass = adapters.get(forClass);</span>
+<span class="nc bnc" id="L291" title="All 2 branches missed.">                if (avClass != null) {</span>
+                    try {
+<span class="nc" id="L293">                        getLogger().debug(</span>
+                                &quot;initializing: adapters &quot; + avClass
+                                        + &quot; forClass:&quot; + forClass);
+<span class="nc" id="L296">                        Class adapterForClass = Class.forName(forClass);</span>
+<span class="nc" id="L297">                        Class adapterClass = Class.forName(avClass);</span>
+<span class="nc" id="L298">                        addAdapter(&quot;Test Adapter&quot;, adapterForClass,</span>
+                                adapterClass);
+
+<span class="nc" id="L301">                    } catch (Exception e) {</span>
+<span class="nc" id="L302">                        throw new InstantiationException(</span>
+                                &quot;JsonMapperService: Error instantiating one of the adapters: &quot;
+                                        + avClass + &quot; for &quot; + forClass);
+<span class="nc" id="L305">                    }</span>
+                }
+<span class="nc" id="L307">            }</span>
+        }
+        
+<span class="pc bpc" id="L310" title="1 of 2 branches missed.">        if (useJsonPath) {</span>
+            // set it before runtime
+<span class="fc" id="L312">            com.jayway.jsonpath.Configuration.setDefaults(new com.jayway.jsonpath.Configuration.Defaults() {</span>
+                
+<span class="fc" id="L314">                private Callable&lt;Gson&gt; gsonFuture = new Callable&lt;Gson&gt;() {</span>
+                    @Override
+                    public Gson call() {
+<span class="fc" id="L317">                        return GSONBuilderService.this.gson.create();</span>
+                    }
+                };
+
+<span class="fc" id="L321">                private final JsonProvider jsonProvider = new GsonJsonProvider(GSONBuilderService.this.gson.create());</span>
+<span class="fc" id="L322">                private final MappingProvider mappingProvider = new GsonMappingProvider(gsonFuture);</span>
+
+                @Override
+                public JsonProvider jsonProvider() {
+<span class="fc" id="L326">                    return jsonProvider;</span>
+                }
+
+                @Override
+                public MappingProvider mappingProvider() {
+<span class="fc" id="L331">                    return mappingProvider;</span>
+                }
+
+                @Override
+                public Set&lt;Option&gt; options() {
+<span class="fc" id="L336">                    return EnumSet.noneOf(Option.class);</span>
+                }
+            });
+        }
+<span class="fc" id="L340">    }</span>
+
+    /**
+     * Simple Exclusion strategy to filter class or fields used by this service
+     * for serialization (not yet deserialization).
+     * 
+     * @param clazz
+     *            The class to be filtered out.
+     * @param filterAttrs
+     *            The fieldnames to be filtered as string
+     * @return the strategy applied by GSON
+     */
+    private ExclusionStrategy exclude(Class clazz, String... filterAttrs) {
+<span class="fc" id="L353">        return new ExclusionStrategy() {</span>
+
+            public Class&lt;?&gt; excludedThisClass;
+            public HashSet&lt;String&gt; excludedAttributes;
+
+            private ExclusionStrategy init(Class&lt;?&gt; excludedThisClass,
+                    String... filterAttrs) {
+<span class="fc" id="L360">                this.excludedThisClass = excludedThisClass;</span>
+<span class="fc bfc" id="L361" title="All 2 branches covered.">                if (filterAttrs != null) {</span>
+<span class="fc" id="L362">                    this.excludedAttributes = new HashSet&lt;String&gt;(</span>
+                            filterAttrs.length);
+<span class="fc" id="L364">                    Collections.addAll(this.excludedAttributes, filterAttrs);</span>
+                } else
+<span class="fc" id="L366">                    this.excludedAttributes = new HashSet&lt;String&gt;();</span>
+
+<span class="fc" id="L368">                return this;</span>
+            }
+
+            @Override
+            public boolean shouldSkipClass(Class&lt;?&gt; clazz) {
+<span class="fc bfc" id="L373" title="All 2 branches covered.">                return (excludedThisClass != null) ? excludedThisClass</span>
+<span class="fc" id="L374">                        .equals(clazz) : false;</span>
+            }
+
+            @Override
+            public boolean shouldSkipField(FieldAttributes paramFieldAttributes) {
+                // return paramFieldAttributes.getDeclaringClass() ==
+                // excludedThisClass &amp;&amp;
+                // excludesAttributes.contains(paramFieldAttributes.getName());
+<span class="fc bfc" id="L382" title="All 2 branches covered.">                return !excludedAttributes.isEmpty() ? this.excludedAttributes</span>
+<span class="fc" id="L383">                        .contains(paramFieldAttributes.getName()) : false;</span>
+            }
+<span class="fc" id="L385">        }.init(clazz, filterAttrs);</span>
+    }
+    
+    /**
+     * @param clazz the class to exclude
+     * @param filterAttrs bean elements not to be serialized
+     * @return
+     */
+    private ExclusionStrategy include(Class clazz, String... filterAttrs) {
+<span class="fc" id="L394">        return new ExclusionStrategy() {</span>
+
+            private Class&lt;?&gt; includeThisClass;
+            private HashSet&lt;String&gt; includedAttributes;
+
+            private ExclusionStrategy init(Class&lt;?&gt; includeThisClass,
+                    String... filterAttrs) {
+<span class="fc" id="L401">                this.includeThisClass = includeThisClass;</span>
+<span class="pc bpc" id="L402" title="1 of 2 branches missed.">                if (filterAttrs != null) {</span>
+<span class="fc" id="L403">                    this.includedAttributes = new HashSet&lt;String&gt;(</span>
+                            filterAttrs.length);
+<span class="fc" id="L405">                    getLogger().debug(&quot; ... adding includedAttributes:&quot; + filterAttrs.length);</span>
+<span class="fc" id="L406">                    Collections.addAll(this.includedAttributes, filterAttrs);</span>
+<span class="fc bfc" id="L407" title="All 2 branches covered.">                    for (String includedAttribute : includedAttributes) {</span>
+<span class="fc" id="L408">                        getLogger().debug(&quot;includedAttribute:&quot; +includedAttribute);</span>
+<span class="fc" id="L409">                    }</span>
+                } else
+<span class="nc" id="L411">                    this.includedAttributes = new HashSet&lt;String&gt;();</span>
+
+<span class="fc" id="L413">                return this;</span>
+            }
+
+            /**
+             * skip is current class is not equal provided class
+             */
+            @Override
+            public boolean shouldSkipClass(Class&lt;?&gt; clazz) {
+<span class="fc" id="L421">                getLogger().debug(includeThisClass+ &quot;: comparing include class:&quot; + clazz);</span>
+<span class="pc bpc" id="L422" title="1 of 2 branches missed.">                return includeThisClass != null ? !includeThisClass</span>
+<span class="pc bnc" id="L423" title="All 2 branches missed.">                        .equals(clazz) : false;</span>
+            }
+
+            /**
+             * skip if current field attribute is not included are skip else
+             */
+            @Override
+            public boolean shouldSkipField(FieldAttributes paramFieldAttributes) { 
+<span class="fc bfc" id="L431" title="All 2 branches covered.">                return !includedAttributes.isEmpty() ? !this.includedAttributes</span>
+<span class="fc bfc" id="L432" title="All 2 branches covered.">                        .contains(paramFieldAttributes.getName()) : true;        </span>
+
+            }
+<span class="fc" id="L435">        }.init(clazz, filterAttrs);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>

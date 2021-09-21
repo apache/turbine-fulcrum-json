@@ -1,0 +1,5 @@
+org.apache.fulcrum.json.jackson
+org.apache.fulcrum.json.jackson.concurrent
+org.apache.fulcrum.json.jackson.example
+org.apache.fulcrum.json.jackson.mixins
+org.apache.fulcrum.json.jackson.serializers

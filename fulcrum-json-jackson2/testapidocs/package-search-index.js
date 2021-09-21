@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","url":"allpackages-index.html"},{"l":"org.apache.fulcrum.json.jackson"},{"l":"org.apache.fulcrum.json.jackson.concurrent"},{"l":"org.apache.fulcrum.json.jackson.example"},{"l":"org.apache.fulcrum.json.jackson.mixins"},{"l":"org.apache.fulcrum.json.jackson.serializers"}]

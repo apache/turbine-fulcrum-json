@@ -1,0 +1,1 @@
+typeSearchIndex = [{"l":"All Classes","url":"allclasses-index.html"},{"p":"org.apache.fulcrum.json.gson","l":"DateTypeAdapter"},{"p":"org.apache.fulcrum.json.gson","l":"GSONBuilderService"}]

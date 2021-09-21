@@ -1,0 +1,1 @@
+memberSearchIndex = [{"p":"org.apache.fulcrum.json","c":"DummTest","l":"DummTest()","url":"%3Cinit%3E()"},{"p":"org.apache.fulcrum.json","c":"DummTest","l":"testDummy()"}]

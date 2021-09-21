@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CustomModuleWrapper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Fulcrum JSON Jackson 2.x Impl</a> &gt; <a href="index.source.html" class="el_package">org.apache.fulcrum.json.jackson.filters</a> &gt; <span class="el_source">CustomModuleWrapper.java</span></div><h1>CustomModuleWrapper.java</h1><pre class="source lang-java linenums">package org.apache.fulcrum.json.jackson.filters;
+
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * &quot;License&quot;); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import org.apache.fulcrum.json.jackson.CustomModule;
+
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+
+/**
+ * Provides a wrapper module as a helper class for the inner class {@link CustomModule}.
+ * 
+ * @author gkallidis
+ *
+ * @param &lt;T&gt; the class to wrap
+ */
+public class CustomModuleWrapper&lt;T&gt; {
+	
+	// serializer and deserializer objects
+<span class="nc" id="L37">    StdSerializer&lt;T&gt; ser = null;</span>
+<span class="nc" id="L38">    StdDeserializer&lt;T&gt; deSer = null;</span>
+
+    /**
+     * Constructor for the custom module wrapper
+     * 
+     * @param ser the standard serializer
+     * @param deSer the standard de-serializer
+     */
+<span class="nc" id="L46">    public CustomModuleWrapper(StdSerializer&lt;T&gt; ser, StdDeserializer&lt;T&gt; deSer) {</span>
+<span class="nc" id="L47">        this.ser = ser;</span>
+<span class="nc" id="L48">        this.deSer = deSer;</span>
+<span class="nc" id="L49">    }</span>
+
+    /**
+     * @return the serializer
+     */
+    public StdSerializer&lt;T&gt; getSer() {
+<span class="nc" id="L55">        return ser;</span>
+    }
+
+    /**
+     * @param ser set the standard serializer
+     */
+    public void setSer(StdSerializer&lt;T&gt; ser) {
+<span class="nc" id="L62">        this.ser = ser;</span>
+<span class="nc" id="L63">    }</span>
+
+    /**
+     * @return the de-serializer in use
+     */
+    public StdDeserializer&lt;T&gt; getDeSer() {
+<span class="nc" id="L69">        return deSer;</span>
+    }
+
+    /**
+     * @param deSer standard deserializer
+     */
+    public void setDeSer(StdDeserializer&lt;T&gt; deSer) {
+<span class="nc" id="L76">        this.deSer = deSer;</span>
+<span class="nc" id="L77">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>

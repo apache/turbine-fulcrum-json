@@ -1,0 +1,5 @@
+org.apache.fulcrum.json
+org.apache.fulcrum.json.gson
+org.apache.fulcrum.json.jackson
+org.apache.fulcrum.json.jackson.filters
+org.apache.fulcrum.json.jackson.jsonpath

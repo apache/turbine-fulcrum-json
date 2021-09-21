@@ -1,0 +1,275 @@
+<!DOCTYPE HTML>
+<html lang="de">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<main role="main">
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span><a id="line.1">package org.apache.fulcrum.json.jackson;</a>
+<span class="sourceLineNo">002</span><a id="line.2"></a>
+<span class="sourceLineNo">003</span><a id="line.3">/*</a>
+<span class="sourceLineNo">004</span><a id="line.4"> * Licensed to the Apache Software Foundation (ASF) under one</a>
+<span class="sourceLineNo">005</span><a id="line.5"> * or more contributor license agreements.  See the NOTICE file</a>
+<span class="sourceLineNo">006</span><a id="line.6"> * distributed with this work for additional information</a>
+<span class="sourceLineNo">007</span><a id="line.7"> * regarding copyright ownership.  The ASF licenses this file</a>
+<span class="sourceLineNo">008</span><a id="line.8"> * to you under the Apache License, Version 2.0 (the</a>
+<span class="sourceLineNo">009</span><a id="line.9"> * "License"); you may not use this file except in compliance</a>
+<span class="sourceLineNo">010</span><a id="line.10"> * with the License.  You may obtain a copy of the License at</a>
+<span class="sourceLineNo">011</span><a id="line.11"> *</a>
+<span class="sourceLineNo">012</span><a id="line.12"> *   http://www.apache.org/licenses/LICENSE-2.0</a>
+<span class="sourceLineNo">013</span><a id="line.13"> *</a>
+<span class="sourceLineNo">014</span><a id="line.14"> * Unless required by applicable law or agreed to in writing,</a>
+<span class="sourceLineNo">015</span><a id="line.15"> * software distributed under the License is distributed on an</a>
+<span class="sourceLineNo">016</span><a id="line.16"> * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</a>
+<span class="sourceLineNo">017</span><a id="line.17"> * KIND, either express or implied.  See the License for the</a>
+<span class="sourceLineNo">018</span><a id="line.18"> * specific language governing permissions and limitations</a>
+<span class="sourceLineNo">019</span><a id="line.19"> * under the License.</a>
+<span class="sourceLineNo">020</span><a id="line.20"> */</a>
+<span class="sourceLineNo">021</span><a id="line.21"></a>
+<span class="sourceLineNo">022</span><a id="line.22">import java.util.List;</a>
+<span class="sourceLineNo">023</span><a id="line.23">import java.util.concurrent.CopyOnWriteArrayList;</a>
+<span class="sourceLineNo">024</span><a id="line.24">import java.util.concurrent.atomic.AtomicBoolean;</a>
+<span class="sourceLineNo">025</span><a id="line.25"></a>
+<span class="sourceLineNo">026</span><a id="line.26">import org.apache.avalon.framework.logger.LogEnabled;</a>
+<span class="sourceLineNo">027</span><a id="line.27">import org.apache.avalon.framework.logger.Logger;</a>
+<span class="sourceLineNo">028</span><a id="line.28"></a>
+<span class="sourceLineNo">029</span><a id="line.29">import com.fasterxml.jackson.databind.introspect.Annotated;</a>
+<span class="sourceLineNo">030</span><a id="line.30">import com.fasterxml.jackson.databind.introspect.AnnotatedClass;</a>
+<span class="sourceLineNo">031</span><a id="line.31">import com.fasterxml.jackson.databind.introspect.NopAnnotationIntrospector;</a>
+<span class="sourceLineNo">032</span><a id="line.32">import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;</a>
+<span class="sourceLineNo">033</span><a id="line.33"></a>
+<span class="sourceLineNo">034</span><a id="line.34">/**</a>
+<span class="sourceLineNo">035</span><a id="line.35"> * The intent of this custom introspector is to provide filtering capabilities</a>
+<span class="sourceLineNo">036</span><a id="line.36"> * by using String parameters (properties and class types), which could be</a>
+<span class="sourceLineNo">037</span><a id="line.37"> * adjusted e.g. from a scriptable context (velocity template). </a>
+<span class="sourceLineNo">038</span><a id="line.38"> * Class Type Filtering currently not supported except for Exclude Filter: {@link Jackson2MapperService#serializeAllExceptFilter(Object, Class, Boolean, String...)}.</a>
+<span class="sourceLineNo">039</span><a id="line.39"> * </a>
+<span class="sourceLineNo">040</span><a id="line.40"> * </a>
+<span class="sourceLineNo">041</span><a id="line.41"> * @author gk</a>
+<span class="sourceLineNo">042</span><a id="line.42"> * @version $Id$</a>
+<span class="sourceLineNo">043</span><a id="line.43"> * </a>
+<span class="sourceLineNo">044</span><a id="line.44"> */</a>
+<span class="sourceLineNo">045</span><a id="line.45">public class SimpleNameIntrospector extends NopAnnotationIntrospector implements LogEnabled {</a>
+<span class="sourceLineNo">046</span><a id="line.46">    /**</a>
+<span class="sourceLineNo">047</span><a id="line.47">     * </a>
+<span class="sourceLineNo">048</span><a id="line.48">     */</a>
+<span class="sourceLineNo">049</span><a id="line.49">    private static final long serialVersionUID = 1L;</a>
+<span class="sourceLineNo">050</span><a id="line.50">    </a>
+<span class="sourceLineNo">051</span><a id="line.51">    private List&lt;Class&lt;?&gt;&gt; filteredClasses = new CopyOnWriteArrayList&lt;&gt;();</a>
+<span class="sourceLineNo">052</span><a id="line.52">    private List&lt;String&gt; externalFilterExcludeClasses = new CopyOnWriteArrayList&lt;&gt;();</a>
+<span class="sourceLineNo">053</span><a id="line.53">    private List&lt;String&gt; externalFilterIncludeClasses = new CopyOnWriteArrayList&lt;&gt;();</a>
+<span class="sourceLineNo">054</span><a id="line.54">    // is used only for filtering by class</a>
+<span class="sourceLineNo">055</span><a id="line.55">    private AtomicBoolean isExludeType = new AtomicBoolean(false);</a>
+<span class="sourceLineNo">056</span><a id="line.56">    </a>
+<span class="sourceLineNo">057</span><a id="line.57">    private static Logger logger;</a>
+<span class="sourceLineNo">058</span><a id="line.58"></a>
+<span class="sourceLineNo">059</span><a id="line.59">    /**</a>
+<span class="sourceLineNo">060</span><a id="line.60">     * Filtering on method types.</a>
+<span class="sourceLineNo">061</span><a id="line.61">     * </a>
+<span class="sourceLineNo">062</span><a id="line.62">     */</a>
+<span class="sourceLineNo">063</span><a id="line.63">    @Override</a>
+<span class="sourceLineNo">064</span><a id="line.64">    public Boolean isIgnorableType(AnnotatedClass ac) {</a>
+<span class="sourceLineNo">065</span><a id="line.65">        Boolean isIgnorable = super.isIgnorableType(ac);</a>
+<span class="sourceLineNo">066</span><a id="line.66">        if (isIgnorable == null || !isIgnorable) {</a>
+<span class="sourceLineNo">067</span><a id="line.67">            if (getIsExludeType()) { // could be removed, if cleaning after call ?</a>
+<span class="sourceLineNo">068</span><a id="line.68">                if (!externalFilterExcludeClasses.isEmpty()</a>
+<span class="sourceLineNo">069</span><a id="line.69">                        &amp;&amp; externalFilterExcludeClasses.contains(ac.getName())) {</a>
+<span class="sourceLineNo">070</span><a id="line.70">                    isIgnorable = true;</a>
+<span class="sourceLineNo">071</span><a id="line.71">                }</a>
+<span class="sourceLineNo">072</span><a id="line.72">            } else {</a>
+<span class="sourceLineNo">073</span><a id="line.73">                // not yet used</a>
+<span class="sourceLineNo">074</span><a id="line.74">                if (!externalFilterIncludeClasses.isEmpty()</a>
+<span class="sourceLineNo">075</span><a id="line.75">                        &amp;&amp; !externalFilterIncludeClasses.contains(ac.getName())) {</a>
+<span class="sourceLineNo">076</span><a id="line.76">                        try {</a>
+<span class="sourceLineNo">077</span><a id="line.77">                            Class.forName(ac.getName());</a>
+<span class="sourceLineNo">078</span><a id="line.78">                            isIgnorable = true;</a>
+<span class="sourceLineNo">079</span><a id="line.79">                        } catch (ClassNotFoundException e) {</a>
+<span class="sourceLineNo">080</span><a id="line.80">                            // no clazz ignore, could NOT ignore as no filterable clazz</a>
+<span class="sourceLineNo">081</span><a id="line.81">                        }</a>
+<span class="sourceLineNo">082</span><a id="line.82">                }</a>
+<span class="sourceLineNo">083</span><a id="line.83">            }</a>
+<span class="sourceLineNo">084</span><a id="line.84">        }</a>
+<span class="sourceLineNo">085</span><a id="line.85">        return isIgnorable;</a>
+<span class="sourceLineNo">086</span><a id="line.86">    }</a>
+<span class="sourceLineNo">087</span><a id="line.87">    /**</a>
+<span class="sourceLineNo">088</span><a id="line.88">     * @return Object Filtering on properties returns an object, if</a>
+<span class="sourceLineNo">089</span><a id="line.89">     *         {@link #filteredClasses} contains the class provided. The</a>
+<span class="sourceLineNo">090</span><a id="line.90">     *         filter itself currently is {@link SimpleFilterProvider}.</a>
+<span class="sourceLineNo">091</span><a id="line.91">     */</a>
+<span class="sourceLineNo">092</span><a id="line.92">    @Override</a>
+<span class="sourceLineNo">093</span><a id="line.93">    public Object findFilterId(Annotated ac) {</a>
+<span class="sourceLineNo">094</span><a id="line.94">        Object id = super.findFilterId(ac);</a>
+<span class="sourceLineNo">095</span><a id="line.95">        // Let's default to current behavior if annotation is found:</a>
+<span class="sourceLineNo">096</span><a id="line.96">        // Object id = super.findFilterId(ac);</a>
+<span class="sourceLineNo">097</span><a id="line.97">        // but use simple class name if not</a>
+<span class="sourceLineNo">098</span><a id="line.98">        if (id == null) {</a>
+<span class="sourceLineNo">099</span><a id="line.99">            String name = ac.getName();</a>
+<span class="sourceLineNo">100</span><a id="line.100">            Class&lt;?&gt; targetClazz = ac.getRawType();</a>
+<span class="sourceLineNo">101</span><a id="line.101">            if (!filteredClasses.isEmpty()</a>
+<span class="sourceLineNo">102</span><a id="line.102">                    &amp;&amp; filteredClasses.contains(targetClazz)</a>
+<span class="sourceLineNo">103</span><a id="line.103">                    ) {</a>
+<span class="sourceLineNo">104</span><a id="line.104">                logger.debug("filter applying to " +name);</a>
+<span class="sourceLineNo">105</span><a id="line.105">                id = name;</a>
+<span class="sourceLineNo">106</span><a id="line.106">            } else {</a>
+<span class="sourceLineNo">107</span><a id="line.107">                // check if target class is a child from filter class -&gt; apply filter </a>
+<span class="sourceLineNo">108</span><a id="line.108">                for (Class&lt;?&gt; filterClazz : filteredClasses) {</a>
+<span class="sourceLineNo">109</span><a id="line.109">                    // the currently checked instance of type targetClazz is a child of the filter class filterClazz -&gt;  filter child </a>
+<span class="sourceLineNo">110</span><a id="line.110">                    if (filterClazz.isAssignableFrom(targetClazz)) {</a>
+<span class="sourceLineNo">111</span><a id="line.111">                        logger.debug("filter applying to parent " +filterClazz +" matching child class "+name );</a>
+<span class="sourceLineNo">112</span><a id="line.112">                        id = name;</a>
+<span class="sourceLineNo">113</span><a id="line.113">                        break;</a>
+<span class="sourceLineNo">114</span><a id="line.114">                    }</a>
+<span class="sourceLineNo">115</span><a id="line.115">                    // the currently checked instance of type targetClazz is a parent of the filter class filterClazz -&gt; filter parent</a>
+<span class="sourceLineNo">116</span><a id="line.116">                    if (targetClazz.isAssignableFrom(filterClazz)) {</a>
+<span class="sourceLineNo">117</span><a id="line.117">                        logger.debug("filter applying to child " +filterClazz+" matching parent class "+name);</a>
+<span class="sourceLineNo">118</span><a id="line.118">                        id = name;</a>
+<span class="sourceLineNo">119</span><a id="line.119">                        break;</a>
+<span class="sourceLineNo">120</span><a id="line.120">                    }</a>
+<span class="sourceLineNo">121</span><a id="line.121">                }</a>
+<span class="sourceLineNo">122</span><a id="line.122">            }</a>
+<span class="sourceLineNo">123</span><a id="line.123">        }</a>
+<span class="sourceLineNo">124</span><a id="line.124">        return id;</a>
+<span class="sourceLineNo">125</span><a id="line.125">    }</a>
+<span class="sourceLineNo">126</span><a id="line.126"></a>
+<span class="sourceLineNo">127</span><a id="line.127">    public List&lt;Class&lt;?&gt;&gt; getFilteredClasses() {</a>
+<span class="sourceLineNo">128</span><a id="line.128">        return filteredClasses;</a>
+<span class="sourceLineNo">129</span><a id="line.129">    }</a>
+<span class="sourceLineNo">130</span><a id="line.130"></a>
+<span class="sourceLineNo">131</span><a id="line.131">    public void setFilteredClass(Class&lt;?&gt; filteredClass) {</a>
+<span class="sourceLineNo">132</span><a id="line.132">        if (!filteredClasses.contains(filteredClass)) {</a>
+<span class="sourceLineNo">133</span><a id="line.133">            filteredClasses.add(filteredClass);</a>
+<span class="sourceLineNo">134</span><a id="line.134">        }</a>
+<span class="sourceLineNo">135</span><a id="line.135">    }</a>
+<span class="sourceLineNo">136</span><a id="line.136"></a>
+<span class="sourceLineNo">137</span><a id="line.137">    public void setFilteredClasses(Class&lt;?&gt;... classes) {</a>
+<span class="sourceLineNo">138</span><a id="line.138"></a>
+<span class="sourceLineNo">139</span><a id="line.139">        for (int i = 0; i &lt; classes.length; i++) {</a>
+<span class="sourceLineNo">140</span><a id="line.140">            if (!filteredClasses.contains(classes[i])) {</a>
+<span class="sourceLineNo">141</span><a id="line.141">                filteredClasses.add(classes[i]);</a>
+<span class="sourceLineNo">142</span><a id="line.142">            }</a>
+<span class="sourceLineNo">143</span><a id="line.143">//            if (classes[i].getSuperclass() != null) {</a>
+<span class="sourceLineNo">144</span><a id="line.144">//                Class superClazz = classes[i].getSuperclass();</a>
+<span class="sourceLineNo">145</span><a id="line.145">//                if (!externalFilterClasses.contains(superClazz)) {</a>
+<span class="sourceLineNo">146</span><a id="line.146">//                    externalFilterClasses.add(superClazz);</a>
+<span class="sourceLineNo">147</span><a id="line.147">//                }  </a>
+<span class="sourceLineNo">148</span><a id="line.148">//            }</a>
+<span class="sourceLineNo">149</span><a id="line.149">        }</a>
+<span class="sourceLineNo">150</span><a id="line.150">    }</a>
+<span class="sourceLineNo">151</span><a id="line.151"></a>
+<span class="sourceLineNo">152</span><a id="line.152">    public void removeFilteredClass(Class&lt;?&gt; filteredClass) {</a>
+<span class="sourceLineNo">153</span><a id="line.153">            if (filteredClasses.contains(filteredClass)) {</a>
+<span class="sourceLineNo">154</span><a id="line.154">                filteredClasses.remove(filteredClass);</a>
+<span class="sourceLineNo">155</span><a id="line.155">            }</a>
+<span class="sourceLineNo">156</span><a id="line.156">    }</a>
+<span class="sourceLineNo">157</span><a id="line.157">    </a>
+<span class="sourceLineNo">158</span><a id="line.158">    public void setExternalFilterExcludeClasses(Class&lt;?&gt;... classes) {</a>
+<span class="sourceLineNo">159</span><a id="line.159"></a>
+<span class="sourceLineNo">160</span><a id="line.160">        for (int i = 0; i &lt; classes.length; i++) {</a>
+<span class="sourceLineNo">161</span><a id="line.161">            if (!externalFilterExcludeClasses.contains(classes[i].getName())) {</a>
+<span class="sourceLineNo">162</span><a id="line.162"></a>
+<span class="sourceLineNo">163</span><a id="line.163">                externalFilterExcludeClasses.add(classes[i].getName());</a>
+<span class="sourceLineNo">164</span><a id="line.164">            }</a>
+<span class="sourceLineNo">165</span><a id="line.165">        }</a>
+<span class="sourceLineNo">166</span><a id="line.166">    }</a>
+<span class="sourceLineNo">167</span><a id="line.167">    </a>
+<span class="sourceLineNo">168</span><a id="line.168">    public void removeExternalFilterExcludeClass(Class&lt;?&gt; externalFilterClass) {</a>
+<span class="sourceLineNo">169</span><a id="line.169">        if (externalFilterExcludeClasses.contains(externalFilterClass.getName())) {</a>
+<span class="sourceLineNo">170</span><a id="line.170">            externalFilterExcludeClasses.remove(externalFilterClass.getName());</a>
+<span class="sourceLineNo">171</span><a id="line.171">        }</a>
+<span class="sourceLineNo">172</span><a id="line.172">    }</a>
+<span class="sourceLineNo">173</span><a id="line.173">    </a>
+<span class="sourceLineNo">174</span><a id="line.174">    public void setExternalFilterIncludeClasses(Class&lt;?&gt;... classes) {</a>
+<span class="sourceLineNo">175</span><a id="line.175"></a>
+<span class="sourceLineNo">176</span><a id="line.176">        for (int i = 0; i &lt; classes.length; i++) {</a>
+<span class="sourceLineNo">177</span><a id="line.177">            if (!externalFilterIncludeClasses.contains(classes[i].getName())) {</a>
+<span class="sourceLineNo">178</span><a id="line.178"></a>
+<span class="sourceLineNo">179</span><a id="line.179">                externalFilterIncludeClasses.add(classes[i].getName());</a>
+<span class="sourceLineNo">180</span><a id="line.180">            }</a>
+<span class="sourceLineNo">181</span><a id="line.181">        }</a>
+<span class="sourceLineNo">182</span><a id="line.182">    }</a>
+<span class="sourceLineNo">183</span><a id="line.183">    </a>
+<span class="sourceLineNo">184</span><a id="line.184">    public void removeExternalFilterIncludeClasses(Class&lt;?&gt; externalFilterClass) {</a>
+<span class="sourceLineNo">185</span><a id="line.185">        if (externalFilterIncludeClasses.contains(externalFilterClass.getName())) {</a>
+<span class="sourceLineNo">186</span><a id="line.186">            externalFilterIncludeClasses.remove(externalFilterClass.getName());</a>
+<span class="sourceLineNo">187</span><a id="line.187">        }</a>
+<span class="sourceLineNo">188</span><a id="line.188">    }</a>
+<span class="sourceLineNo">189</span><a id="line.189">    </a>
+<span class="sourceLineNo">190</span><a id="line.190">    public boolean getIsExludeType() {</a>
+<span class="sourceLineNo">191</span><a id="line.191">        return isExludeType.get();</a>
+<span class="sourceLineNo">192</span><a id="line.192">    }</a>
+<span class="sourceLineNo">193</span><a id="line.193">    public void setIsExludeType(boolean isExludeType) {</a>
+<span class="sourceLineNo">194</span><a id="line.194">        this.isExludeType.getAndSet(isExludeType);</a>
+<span class="sourceLineNo">195</span><a id="line.195">    }</a>
+<span class="sourceLineNo">196</span><a id="line.196">    @Override</a>
+<span class="sourceLineNo">197</span><a id="line.197">    public void enableLogging(Logger logger) {</a>
+<span class="sourceLineNo">198</span><a id="line.198">        SimpleNameIntrospector.logger = logger;        </a>
+<span class="sourceLineNo">199</span><a id="line.199">    }</a>
+<span class="sourceLineNo">200</span><a id="line.200"></a>
+<span class="sourceLineNo">201</span><a id="line.201">}</a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</main>
+</body>
+</html>
