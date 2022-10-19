@@ -137,7 +137,7 @@
     <properties>
         <!-- 2.7.x hase Java 7 baseline, but is compiled with Java 6 support, cft. https://github.com/FasterXML/jackson/wiki/Jackson-Release-2.7.
         With Jackson 2.8, Java 7 languages features will be allowed -->
-        <jackson2.version>2.13.4</jackson2.version>
+        <jackson2.version>2.13.4.1</jackson2.version>
     </properties>
     <profiles>
       <profile>
