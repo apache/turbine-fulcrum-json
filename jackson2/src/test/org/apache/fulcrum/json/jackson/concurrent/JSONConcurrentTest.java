@@ -181,7 +181,9 @@ public class JSONConcurrentTest extends BaseUnit4Test {
             if (withType) {
                 // without copy tests will fail in testsRunInParallel
                 objectMapper = ((Jackson2MapperService) jsonService).getMapper().copy();
-                objectMapper.enableDefaultTypingAsProperty(DefaultTyping.NON_FINAL, "type");
+                objectMapper.activateDefaultTypingAsProperty(
+                        objectMapper.getPolymorphicTypeValidator(), 
+                        DefaultTyping.NON_FINAL, "type");
                 AnnotationIntrospector ai = objectMapper.getSerializationConfig().getAnnotationIntrospector();
                 AnnotationIntrospector siai = new SimpleNameIntrospector();
                 AnnotationIntrospector pair = new AnnotationIntrospectorPair(siai, ai);

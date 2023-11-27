@@ -178,8 +178,11 @@ public class JSONConcurrentJunit5Test extends BaseUnit5Test {
             ObjectMapper objectMapper = null;
             if (withType) {
                 // without copy tests will fail in testsRunInParallel
-                objectMapper = ((Jackson2MapperService) jsonService).getMapper().copy();
-                objectMapper.enableDefaultTypingAsProperty(DefaultTyping.NON_FINAL, "type");
+                objectMapper = ((Jackson2MapperService) jsonService).getMapper().copy(); 
+                objectMapper.activateDefaultTypingAsProperty(
+                        objectMapper.getPolymorphicTypeValidator(), 
+                        DefaultTyping.NON_FINAL, "type");
+                
                 AnnotationIntrospector ai = objectMapper.getSerializationConfig().getAnnotationIntrospector();
                 AnnotationIntrospector siai = new SimpleNameIntrospector();
                 AnnotationIntrospector pair = new AnnotationIntrospectorPair(siai, ai);

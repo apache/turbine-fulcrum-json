@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.avalon.framework.activity.Initializable;
-import org.apache.avalon.framework.logger.Log4JLogger;
 import org.apache.avalon.framework.logger.Logger;
 import org.apache.fulcrum.json.JsonService;
 import org.apache.fulcrum.json.jackson.example.Bean;
@@ -40,7 +39,8 @@ import org.apache.fulcrum.json.jackson.mixins.BeanMixin;
 import org.apache.fulcrum.json.jackson.mixins.RectangleMixin;
 import org.apache.fulcrum.json.jackson.mixins.RectangleMixin2;
 import org.apache.fulcrum.testcontainer.BaseUnit5Test;
-import org.apache.log4j.LogManager;
+import org.apache.fulcrum.yaafi.framework.logger.Log4j2Logger;
+import org.apache.logging.log4j.LogManager;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
@@ -65,7 +65,7 @@ public class JacksonMapperTest extends BaseUnit5Test {
     @BeforeEach
     public void setUp() throws Exception {
         sc = (JsonService) this.lookup(JsonService.ROLE);
-        logger = new Log4JLogger(LogManager.getLogger(getClass().getName()) );
+        logger = new Log4j2Logger(LogManager.getLogger(getClass().getName()) );
     }
 
     @Test

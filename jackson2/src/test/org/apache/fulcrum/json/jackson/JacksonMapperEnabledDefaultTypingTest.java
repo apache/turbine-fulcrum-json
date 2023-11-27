@@ -41,7 +41,8 @@ import org.apache.fulcrum.json.jackson.mixins.RectangleMixin;
 import org.apache.fulcrum.json.jackson.mixins.RectangleMixin2;
 import org.apache.fulcrum.json.jackson.mixins.TypedRectangle;
 import org.apache.fulcrum.testcontainer.BaseUnit5Test;
-import org.apache.log4j.LogManager;
+import org.apache.fulcrum.yaafi.framework.logger.Log4j2Logger;
+import org.apache.logging.log4j.LogManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -68,8 +69,8 @@ public class JacksonMapperEnabledDefaultTypingTest extends BaseUnit5Test {
     @BeforeEach
     public void setUp() throws Exception {
         sc = (JsonService) this.lookup(JsonService.ROLE);
-        logger = new Log4JLogger(LogManager.getLogger(getClass().getName()) );
-        ((Jackson2MapperService) sc).getMapper().enableDefaultTypingAsProperty(
+        logger = new Log4j2Logger(LogManager.getLogger(getClass().getName()) );
+        ((Jackson2MapperService) sc).getMapper().activateDefaultTypingAsProperty(((Jackson2MapperService) sc).getMapper().getPolymorphicTypeValidator(), 
                 DefaultTyping.NON_FINAL, "type");
     }
     @Test

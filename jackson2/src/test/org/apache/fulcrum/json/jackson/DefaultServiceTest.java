@@ -31,7 +31,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.avalon.framework.logger.Log4JLogger;
 import org.apache.avalon.framework.logger.Logger;
 import org.apache.fulcrum.json.JsonService;
 import org.apache.fulcrum.json.jackson.example.Bean;
@@ -46,7 +45,8 @@ import org.apache.fulcrum.json.jackson.serializers.TestDummyWrapperDeserializer;
 import org.apache.fulcrum.json.jackson.serializers.TestJsonSerializer;
 import org.apache.fulcrum.json.jackson.serializers.TestSerializer;
 import org.apache.fulcrum.testcontainer.BaseUnit5Test;
-import org.apache.log4j.LogManager;
+import org.apache.fulcrum.yaafi.framework.logger.Log4j2Logger;
+import org.apache.logging.log4j.LogManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestReporter;
@@ -83,7 +83,7 @@ public class DefaultServiceTest extends BaseUnit5Test {
 	 */
 	@BeforeEach
 	public void setUp() throws Exception {
-		logger = new Log4JLogger(LogManager.getLogger(getClass().getName()) );
+		logger = new Log4j2Logger(LogManager.getLogger(getClass().getName()) );
 		                //new ConsoleLogger(ConsoleLogger.LEVEL_DEBUG);
 		sc = (JsonService) this.lookup(JsonService.ROLE);
 	}

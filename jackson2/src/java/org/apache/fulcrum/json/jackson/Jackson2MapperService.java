@@ -710,7 +710,10 @@ public class Jackson2MapperService extends AbstractLogEnabled implements JsonSer
     private void initDefaultTyping() {
         if (defaultTypeDefs != null && defaultTypeDefs.length == 2) {
             DefaultTyping defaultTyping = DefaultTyping.valueOf(defaultTypeDefs[0]);
-            mapper.enableDefaultTypingAsProperty(defaultTyping, defaultTypeDefs[1]);
+            //mapper.enableDefaultTypingAsProperty(defaultTyping, defaultTypeDefs[1]);
+            mapper.activateDefaultTypingAsProperty(mapper.getPolymorphicTypeValidator(), 
+                    defaultTyping, defaultTypeDefs[1]);
+            
             getLogger().info("default typing is " + defaultTypeDefs[0] + " with key:" + defaultTypeDefs[1]);
         }
     }
