@@ -21,7 +21,7 @@
    <parent>
        <artifactId>turbine-parent</artifactId>
        <groupId>org.apache.turbine</groupId>
-       <version>12</version>
+       <version>13-SNAPSHOT</version>
        <relativePath />
    </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -150,6 +150,12 @@
                <artifactId>log4j-core</artifactId>
                <version>${turbine.log4j2.version}</version>
                <scope>test</scope>
+            </dependency>
+            <dependency>
+              <groupId>org.apache.logging.log4j</groupId>
+              <artifactId>log4j-api</artifactId>
+              <version>${turbine.log4j2.version}</version>
+              <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.junit.platform</groupId>
