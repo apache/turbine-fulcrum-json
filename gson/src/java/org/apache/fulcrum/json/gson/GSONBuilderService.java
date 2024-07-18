@@ -435,4 +435,19 @@ public class GSONBuilderService extends AbstractLogEnabled implements
         }.init(clazz, filterAttrs);
     }
 
+    @Override
+    public <T> T convertWithFilter(Object src, Class<T> type, String... filterAttrs) throws Exception
+    {
+        String json = serializeOnlyFilter(src, filterAttrs);
+        return deSer( json, type );
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T convertWithFilter(Object src, String... filterAttrs) throws Exception
+    {
+        String json = serializeOnlyFilter(src, filterAttrs);
+        return deSer( json, (Class<T>) src.getClass() );
+    }
+
 }

@@ -119,6 +119,30 @@ public interface JsonService {
 	 * @throws Exception if serialize collection fails
 	 */
 	<T> Collection<T> deSerCollection(String json, Object collectionType, Class<T> elementType) throws Exception;
+	
+	/**
+	 * This does a filtered convert, that is serialization and deserialization in one call.
+	 * 
+	 * @param <T>  class type of target object  
+	 * @param src the source object
+	 * @param type the target class type
+	 * @param filterAttrs the attributes (bean like) to be included
+	 * @return filtered object
+	 * @throws Exception if convert fails
+	 */
+	 public <T> T convertWithFilter(Object src, Class<T> type, String... filterAttrs) throws Exception;
+	 
+	    /**
+	     * This does a filtered convert, that is serialization and deserialization in one call.
+	     * The target object type T is derived from the source class.
+	     * 
+	     * @param <T>  class type of target object  
+	     * @param src the source object
+	     * @param filterAttrs the attributes (bean like) to be included
+	     * @return filtered object
+	     * @throws Exception if convert fails
+	     */
+	 public <T> T convertWithFilter(Object src, String... filterAttrs) throws Exception;
 
 	/**
 	 * Custom method without caching. Caching is set to <code>false</code> for this

@@ -55,4 +55,11 @@ public final class Rectangle {
     public void setName(String name) {
         this.name = name;
     }
+    
+    @Override
+    public String toString()
+    {
+        return "Rectangle=[ name:" + getName() + ", w:"+ getW()+ ", h:"+ getH()+ ", size:"+ getSize() + " ]";
+
+    }
 }

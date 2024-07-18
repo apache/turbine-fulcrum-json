@@ -47,6 +47,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.databind.ser.PropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
 
 /**
@@ -80,6 +83,22 @@ public class JacksonMapperTest extends BaseUnit5Test {
         Object deson = sc.deSer(serJson, TestClass.class);
         assertEquals(TestClass.class, deson.getClass(), "DeSer failed ");
     }
+    @Test
+    public void testConvertWithFilteredpropsMixin() throws Exception {
+        Rectangle rectangle = new Rectangle(5, 10);
+        rectangle.setName("jim");
+        
+        String[] filterAttrs = new String[]{"name"};
+        Rectangle filteredRectangle = ((Jackson2MapperService)sc).convertWithFilter(rectangle, Rectangle.class, filterAttrs);
+        System.out.println( "1 filteredRectangle: "+ filteredRectangle );
+        assertTrue( filteredRectangle.getName() != null );
+        assertTrue( filteredRectangle.getName().equals( "jim" ) );
+        // example with default from src.getClass()
+        filteredRectangle = ((Jackson2MapperService)sc).convertWithFilter(rectangle, "h","w","size");
+        System.out.println( "2 filteredRectangle: "+ filteredRectangle );
+        assertTrue( filteredRectangle.getName() == null );
+    }
+    
     @Test
     public void testSerializeDateWithDefaultDateFormat() throws Exception {
         Map<String, Date> map = new HashMap<>();

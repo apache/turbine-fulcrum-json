@@ -66,6 +66,7 @@ import com.fasterxml.jackson.databind.ser.PropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 
+
 /**
  * 
  * 
@@ -191,6 +192,36 @@ public class Jackson2MapperService extends AbstractLogEnabled implements JsonSer
      */
     public <T> T deSer(Object src, Class<T> type) {
         return mapper.convertValue(src, type);
+    }
+    
+    public <T> T convert(Object src, Class<T> type) {
+        T filteredObject = mapper.convertValue( src, type );
+        return filteredObject;
+    }
+    
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> T convertWithFilter(Object src, String... filterAttrs) throws Exception {
+        return convertWithFilter(src, (Class<T>) src.getClass(), filterAttrs);
+    }
+    
+    @Override
+    public <T> T convertWithFilter(Object src, Class<T> type, String... filterAttrs) throws Exception {
+        if (filterAttrs != null && filterAttrs.length > 0 && !"".equals(filterAttrs[0])) {
+            PropertyFilter pf = SimpleBeanPropertyFilter.filterOutAllExcept(filterAttrs);
+            SimpleFilterProvider filter = null;
+            if (pf != null) {
+                filter = new SimpleFilterProvider();
+                filter.setDefaultFilter(pf);
+                getMapper().setFilterProvider( filter );
+            }
+            String json = ser( src, filter );
+            T filteredObject = (T) deSer( json, type );
+            getLogger().debug( "filtered Object: " + filteredObject );
+            return filteredObject;
+        } else {
+            return null;
+        }
     }
 
     /**
