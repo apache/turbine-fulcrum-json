@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="ISO-8859-1"?>
 <!--
  Licensed to the Apache Software Foundation (ASF) under one
  or more contributor license agreements.  See the NOTICE file
@@ -18,21 +18,12 @@
  under the License.
 -->
 
-<document>
+<componentConfig>
 
-  <properties>
-    <title>JSON Component for Jackson 2 JSON processor</title>
-    <author email="gk@apache.org">Georg Kallidis</author>
-  </properties>
-
-  <body>
-
-  <section name="Overview">
-    <p>This  component is to provide a configurable and customized integration of JSON De-/Serializer <a href="https://github.com/FasterXML/jackson/wiki">Jackson 2 JSON Processing APIs</a> into Avalon/Turbine. 
-    </p>
-  </section>
-  
-  
-
-</body>
-</document>
+  <json>
+	  <props>
+      	<one>org.apache.fulcrum.One</one>
+        <two>org.apache.fulcrum.Two</two>
+	  </props>
+  </json>
+</componentConfig>
