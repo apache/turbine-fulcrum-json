@@ -17,9 +17,10 @@
  specific language governing permissions and limitations
  under the License.
 -->
+
 <site xmlns="http://maven.apache.org/SITE/2.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/SITE/2.0.0 https://maven.apache.org/xsd/site-2.0.0.xsd"
-  name="Apache Turbine - Fulcrum JSON Component Service" combine.self="merge">  
+  name="Apache Turbine - JSON GSON Implementation" combine.self="merge">  
 
   <bannerLeft href="https://turbine.apache.org/">
     <image src="https://turbine.apache.org/images/turbine-project.png" alt="Apache Turbine" />
@@ -39,29 +40,10 @@
         <version>2.0.0-M11</version>
   </skin>
 
-  
-    <body>
-        <menu name="Overview" inherit="top">
-          <item name="Main"                 href="index.html" collapse="false"/>
-        </menu>
-
-        <menu ref="modules" />
-
-    </body>
-    
-    <custom>
-        <fluidoSkin>
-            <topBarEnabled>false</topBarEnabled>
-            <sideBarEnabled>true</sideBarEnabled>
-            <googleSearch>
-                <sitesearch>${project.url}</sitesearch>
-            </googleSearch>
-            <gitHub>
-                <projectId>apache/${turbine.site.path}</projectId>
-                <ribbonOrientation>right</ribbonOrientation>
-                <ribbonColor>gray</ribbonColor>
-            </gitHub>
-        </fluidoSkin>
-    </custom>
+<body>
+   <menu name="Overview">
+      <item name="Main" href="/index.html"/>
+    </menu>
+</body>
 
 </site>

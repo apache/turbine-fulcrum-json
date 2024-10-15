@@ -21,7 +21,7 @@
    <parent>
        <artifactId>turbine-parent</artifactId>
        <groupId>org.apache.turbine</groupId>
-       <version>13-SNAPSHOT</version>
+       <version>13</version>
        <relativePath />
    </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -29,6 +29,7 @@
     <artifactId>fulcrum-json-parent</artifactId>
     <version>2.0.2-SNAPSHOT</version>
     <packaging>pom</packaging>
+
     <name>Fulcrum JSON Master Build</name>
     <url>http://turbine.apache.org/fulcrum/fulcrum-json/</url>
     <scm>
@@ -141,13 +142,13 @@
              <dependency>
                   <groupId>org.apache.fulcrum</groupId>
                   <artifactId>fulcrum-testcontainer</artifactId>
-                  <version>2.0.1-SNAPSHOT</version>
+                  <version>2.0.1</version>
                   <scope>test</scope>
               </dependency>
               <dependency>
                 <groupId>org.apache.fulcrum</groupId>
                     <artifactId>fulcrum-yaafi</artifactId>
-                    <version>2.0.1-SNAPSHOT</version>
+                    <version>2.0.1</version>
                     <scope>test</scope>
               </dependency>
                <!-- Log4j2 should be used by default, removed optional -->
