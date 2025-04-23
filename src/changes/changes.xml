@@ -24,7 +24,14 @@
   </properties>
 
   <body>
-   <release version="2.0.1" date="in VC">
+   <release version="2.0.2-SNAPSHOT" date="in VC">
+       <action type="update" dev="gk">
+           Update to site 2.0.0,  update to Turbine parent 14.
+           Add in module api a dummy test.
+       </action>
+       <action type="update" dev="gk">
+           Add to JsonService interface method convertWithFilter.
+       </action>
    </release>
   <release version="2.0.1" date="2021-06-29">
     <action type="update" dev="gk">
