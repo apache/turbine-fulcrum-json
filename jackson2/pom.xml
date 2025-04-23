@@ -48,8 +48,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <includes>
-                        <include>**/*Test.*</include>
-                        <include>**/*TestCase.*</include>
+                        <include>*Test*</include>
                     </includes>
                 </configuration>
             </plugin>
@@ -60,7 +59,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.12.0</version>
+            <version>3.17.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.avalon.framework</groupId>
@@ -77,12 +76,11 @@
             <artifactId>fulcrum-yaafi</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.13.2</version>
-              <scope>test</scope>
-        </dependency>
+       <dependency>
+          <groupId>org.apache.fulcrum</groupId>
+          <artifactId>fulcrum-testcontainer</artifactId>
+          <scope>test</scope>
+      </dependency>
         <dependency>
           <groupId>com.fasterxml.jackson.core</groupId>
           <artifactId>jackson-core</artifactId>
@@ -138,26 +136,15 @@
             <optional>true</optional>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-launcher</artifactId>
+        </dependency>
     </dependencies>
     <properties>
         <!-- 2.7.x hase Java 7 baseline, but is compiled with Java 6 support, cft. https://github.com/FasterXML/jackson/wiki/Jackson-Release-2.7.
          2.14 has java 8 baseline, with Jackson 2.8, Java 7 languages features will be allowed -->
-        <jackson2.version>2.16.1</jackson2.version>
+        <jackson2.version>2.18.3</jackson2.version>
     </properties>
-    <profiles>
-      <profile>
-        <id>java12</id>
-        <activation>
-          <jdk>[12,)</jdk>
-        </activation>
-        <dependencies>
-            <!-- removal of jaxb in java 12: https://docs.oracle.com/en/java/javase/12/migrate/index.html -->
-            <dependency>
-                <groupId>org.glassfish.jaxb</groupId>
-                <artifactId>jaxb-runtime</artifactId>
-                <version>4.0.3</version>
-            </dependency>
-        </dependencies>
-      </profile>
-    </profiles>
+
 </project>

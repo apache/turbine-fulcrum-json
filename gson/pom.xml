@@ -49,8 +49,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <includes>
-                        <include>**/*Test.*</include>
-                        <include>**/*TestCase.*</include>
+                        <include>*Test*</include>
                     </includes>
                 </configuration>
             </plugin>
@@ -61,7 +60,7 @@
 		<dependency>
 		    <groupId>org.apache.commons</groupId>
 		    <artifactId>commons-lang3</artifactId>
-		    <version>3.13.0</version>
+		    <version>3.17.0</version>
 		</dependency>    
         <dependency>
             <groupId>org.apache.avalon.framework</groupId>
@@ -78,12 +77,6 @@
             <artifactId>fulcrum-yaafi</artifactId>
             <version>2.0.1</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.13.2</version>
-              <scope>test</scope>
         </dependency>
         <dependency>
            <groupId>com.google.code.gson</groupId>
@@ -111,6 +104,6 @@
         </dependency>
     </dependencies>
         <properties>
-        <gson.version>2.11.0</gson.version>
+        <gson.version>2.13.0</gson.version>
     </properties>
 </project>

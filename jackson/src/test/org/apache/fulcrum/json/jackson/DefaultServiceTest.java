@@ -7,8 +7,6 @@ import org.apache.fulcrum.json.TestClass;
 import org.apache.fulcrum.testcontainer.BaseUnit5Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 
 
 /**
@@ -17,7 +15,6 @@ import org.junit.runner.RunWith;
  * @author gk
  * @version $Id$
  */
-@RunWith(JUnitPlatform.class)
 public class DefaultServiceTest extends BaseUnit5Test {
     private JsonService sc = null;
     private final String preDefinedOutput = 

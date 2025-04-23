@@ -45,6 +45,7 @@ import org.codehaus.jackson.map.ObjectReader;
 import org.codehaus.jackson.map.SerializationConfig.Feature;
 import org.codehaus.jackson.map.introspect.JacksonAnnotationIntrospector;
 import org.codehaus.jackson.map.module.SimpleModule;
+import org.codehaus.jackson.map.ser.BeanPropertyFilter;
 import org.codehaus.jackson.map.ser.FilterProvider;
 import org.codehaus.jackson.map.ser.StdSerializerProvider;
 import org.codehaus.jackson.map.ser.impl.SimpleBeanPropertyFilter;
@@ -60,11 +61,13 @@ import org.codehaus.jackson.map.ser.impl.SimpleFilterProvider;
  * Note: Filters could not easily unregistered. Try setting @link
  * {@link #cacheFilters} to <code>false</code>.
  * 
+ * Use Jackson2MapperService in module jackson2
  * 
  * @author gk
  * @version $Id$
  * 
  */
+@Deprecated
 public class JacksonMapperService extends AbstractLogEnabled implements
         JsonService, Initializable, Configurable {
 
@@ -510,6 +513,32 @@ public class JacksonMapperService extends AbstractLogEnabled implements
         public void setupModule(SetupContext context) {
             context.setMixInAnnotations(this.clazz, this.mixin);
         }
+    }
+
+    @Override
+    public <T> T convertWithFilter(Object src, Class<T> type, String... filterAttrs) throws Exception
+    {
+        if (filterAttrs != null && filterAttrs.length > 0 && !"".equals(filterAttrs[0])) {
+            BeanPropertyFilter pf = SimpleBeanPropertyFilter.filterOutAllExcept(filterAttrs);
+            SimpleFilterProvider filter = null;
+            if (pf != null) {
+                filter = new SimpleFilterProvider();
+                filter.setDefaultFilter(pf);
+                getMapper().setFilters( filter );
+            }
+            String json = ser( src, filter );
+            T filteredObject = (T) deSer( json, type );
+            getLogger().debug( "filtered Object: " + filteredObject );
+            return filteredObject;
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public <T> T convertWithFilter(Object src, String... filterAttrs) throws Exception
+    {
+        return convertWithFilter(src, (Class<T>) src.getClass(), filterAttrs);
     }
 
 }

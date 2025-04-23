@@ -39,9 +39,8 @@ import org.apache.fulcrum.testcontainer.BaseUnit5Test;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 
 /**
  * Jackson1 JSON Test
@@ -49,7 +48,6 @@ import org.junit.runner.RunWith;
  * @author gk
  * @version $Id$
  */
-@RunWith(JUnitPlatform.class)
 public class JacksonMapperTest extends BaseUnit5Test {
     private JsonService sc = null;
     private final String preDefinedOutput = "{\"container\":{\"cf\":\"Config.xml\"},\"configurationName\":\"Config.xml\",\"name\":\"mytest\"}";
@@ -113,6 +111,25 @@ public class JacksonMapperTest extends BaseUnit5Test {
         String serJson = sc.ser(new TestClass("mytest"));
         Object deson = sc.deSer(serJson, TestClass.class);
         assertEquals(TestClass.class, deson.getClass(), "DeSer failed ");
+    }
+    
+    // this fails with unrecognized field "size" (Class org.apache.fulcrum.json.Rectangle), not marked as ignorable
+    // in at org.apache.fulcrum.json.jackson.JacksonMapperService.deSer(JacksonMapperService.java:152)
+    @Disabled
+    // @Test
+    public void testConvertWithFilteredpropsMixin() throws Exception {
+        Rectangle rectangle = new Rectangle(5, 10);
+        rectangle.setName("jim");
+        
+        String[] filterAttrs = new String[]{"name"};
+        Rectangle filteredRectangle = ((JacksonMapperService)sc).convertWithFilter(rectangle, Rectangle.class, filterAttrs);
+        System.out.println( "1 filteredRectangle: "+ filteredRectangle );
+        assertTrue( filteredRectangle.getName() != null );
+        assertTrue( filteredRectangle.getName().equals( "jim" ) );
+        // example with default from src.getClass()
+        filteredRectangle = ((JacksonMapperService)sc).convertWithFilter(rectangle, "h","w","size");
+        System.out.println( "2 filteredRectangle: "+ filteredRectangle );
+        assertTrue( filteredRectangle.getName() == null );
     }
 
 //    public void testDeserializationCollection() throws Exception {

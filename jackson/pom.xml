@@ -46,12 +46,11 @@
         <plugins>
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
+                <!--configuration>
                     <includes>
-                        <include>**/*Test.*</include>
-                        <include>**/*TestCase.*</include>
+                        <include>*Test.*</include>
                     </includes>
-                </configuration>
+                </configuration-->
             </plugin>
         </plugins>
     </build>
@@ -60,7 +59,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.13.0</version>
+            <version>3.17.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.avalon.framework</groupId>
@@ -94,6 +93,12 @@
             <version>1.7.36</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.fulcrum</groupId>
+            <artifactId>fulcrum-testcontainer</artifactId>
+            <version>2.0.0</version>
+            <scope>test</scope>
+         </dependency>
     </dependencies>
     <properties>
         <!-- 1.9.13, released 14-Jul-2013: latest version see https://github.com/FasterXML/jackson -->
@@ -102,14 +107,14 @@
     
    <profiles>
       <profile>
-        <id>jkd-12-compile</id>
+        <id>jkd-above-12-compile</id>
         <activation>
-          <jdk>12</jdk>
+          <jdk>[12,]</jdk>
         </activation>
         <build>
           <pluginManagement>
             <plugins>
-              <plugin>
+                <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
