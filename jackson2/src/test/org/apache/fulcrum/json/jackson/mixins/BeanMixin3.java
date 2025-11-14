@@ -1,4 +1,5 @@
-package org.apache.fulcrum.json.jackson.example;
+package org.apache.fulcrum.json.jackson.mixins;
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -17,38 +18,39 @@ package org.apache.fulcrum.json.jackson.example;
  * specific language governing permissions and limitations
  * under the License.
  */
-public class Bean {
-    private String name;
-    private int age = -1;
-    public String profession;
 
-    public Bean() {
+
+import org.apache.fulcrum.json.jackson.example.Bean;
+
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
+
+@JsonIgnoreProperties(allowGetters = true)
+public class BeanMixin3 extends Bean {
+    
+    public BeanMixin3() {
     }
 
+    @Override
+    @JsonProperty("name")
+    @JsonGetter("bean.name[0]")
+    @JsonSetter("name")
     public String getName() {
-        return name;
+        return super.getName();
     }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public int getAge() {
-        return age;
-    }
-
-    public void setAge(int age) {
-        this.age = age;
-    }
-    public void setProfession( String profession )
-    {
-        this.profession = profession;
-        
+    
+    @JsonProperty("profession")
+    @JsonGetter("bean.profession[0]")
+    public String getProfession() {
+        return super.profession;
     }
     
     @Override
     public String toString()
     {
-        return "Bean { name: "+ getName() + ", age: " + getAge()+ ", profession:" + profession + " }";
+        return "BeanMixin3 { name: "+ getName() + ", age: " + getAge()+ ", " + super.toString() + " }";
     }
 }
+

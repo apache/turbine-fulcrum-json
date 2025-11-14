@@ -36,6 +36,7 @@ import org.apache.fulcrum.json.jackson.example.Bean;
 import org.apache.fulcrum.json.jackson.example.Rectangle;
 import org.apache.fulcrum.json.jackson.example.TestClass;
 import org.apache.fulcrum.json.jackson.mixins.BeanMixin;
+import org.apache.fulcrum.json.jackson.mixins.BeanMixin3;
 import org.apache.fulcrum.json.jackson.mixins.RectangleMixin;
 import org.apache.fulcrum.json.jackson.mixins.RectangleMixin2;
 import org.apache.fulcrum.testcontainer.BaseUnit5Test;
@@ -74,12 +75,101 @@ public class JacksonMapperTest extends BaseUnit5Test {
         assertEquals(preDefinedOutput, serJson, "Serialization failed ");
     }
 
-    @Disabled
+    //@Disabled
+    @Test
     public void testDeSerialize() throws Exception {
         String serJson = sc.ser(new TestClass("mytest"));
         Object deson = sc.deSer(serJson, TestClass.class);
         assertEquals(TestClass.class, deson.getClass(), "DeSer failed ");
     }
+    
+    @Test
+    public void testConvertToList() throws Exception {
+        
+        BeanMixin3 bean = new BeanMixin3();
+        bean.setName("joe2");
+        bean.setAge(12);
+        
+        String serJson = sc.ser(bean);
+        logger.debug("serJson: "+ serJson);
+        
+        // basic convert
+        Object deson = sc.deSer(serJson, BeanMixin3.class);
+        logger.debug("deson: "+ deson);
+        assertEquals(BeanMixin3.class, deson.getClass(), "DeSer failed ");
+        String ser = sc.ser( deson );
+        logger.debug("ser: "+ ser);
+        
+        // convert list-type to List, requires wrapped class
+        List<BeanMixin3> beanList = new ArrayList<BeanMixin3>();
+        beanList.add( bean );
+        String serListBean = sc.ser( beanList );
+        Collection<BeanMixin3> deson3 = ((Jackson2MapperService) sc).deSerCollectionWithType(serListBean, List.class, BeanMixin3.class);
+        logger.debug("deson3: "+ deson3);
+        logger.debug("deson2 class: "+ deson3.getClass());
+        
+        Object serList = sc.ser( deson3 );
+        logger.debug("serList: "+ serList);
+        
+        logger.debug("serList class: "+ deson3.getClass());
+        List resultList = ((List)deson3);
+        logger.debug("serList first element: "+ resultList.get( 0) );
+        assertEquals( BeanMixin3.class, resultList.get( 0).getClass() );
+        BeanMixin3 bm3 = (BeanMixin3) resultList.get( 0);
+        assertEquals("joe2", bm3.getName() );
+    }
+    
+    @Test
+    public void testDifferentMixinStyles() throws Exception {
+        Bean bean = new Bean();
+        bean.setName("joe2");
+        bean.setAge(12);
+        
+        String serJson = ((Jackson2MapperService) sc).getMapper()
+                .addMixIn(Bean.class, BeanMixin3.class)
+                .writer()
+                .forType( Bean.class )
+                .writeValueAsString( bean );
+        String serJson2 = ((Jackson2MapperService) sc)
+                .withMixinModule( bean, "MoodleMixin", Bean.class, BeanMixin3.class );
+        
+        String serJson3 = ((Jackson2MapperService) sc)
+                .setMixins(Bean.class, BeanMixin3.class )
+                .writeValueAsString( bean );
+        logger.debug("serJson: "+ serJson);        
+        assertTrue( serJson.equals( serJson2 ) );
+        assertTrue( serJson2.equals( serJson3 ) );
+
+    }
+    
+    @Test
+    public void testMixinConvertToMap() throws Exception {
+        Bean bean = new Bean();
+        bean.setName("joe2");
+        bean.setAge(12);
+        
+        String serJson = ((Jackson2MapperService) sc).getMapper()
+                .addMixIn(Bean.class, BeanMixin3.class)
+                .writer()
+                .forType( Bean.class )
+                .writeValueAsString( bean );
+        
+        logger.debug("serJson: "+ serJson);
+        
+        // convert from class to Map 
+        Map targetMap = sc.deSer(serJson, Map.class);
+        logger.debug("deson2: "+ targetMap);
+        logger.debug("deson2 class: "+ targetMap.getClass());
+        Map<String,Object> deson2 = ((Map)targetMap);
+        for (Map.Entry<String, Object> entry : deson2.entrySet())
+        {
+            String key = entry.getKey();
+            Object val = entry.getValue();
+            logger.debug("key class: "+ key + ", value:" + val);
+        }
+        assertEquals("joe2", deson2.get("bean.name[0]") );
+    }
+    
     @Test
     public void testConvertWithFilteredpropsMixin() throws Exception {
         Rectangle rectangle = new Rectangle(5, 10);
@@ -130,7 +220,6 @@ public class JacksonMapperTest extends BaseUnit5Test {
     }
     @Test
     public void testSerializationCollectionWithFilter() throws Exception {
-
         List<Bean> beanList = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
             Bean filteredBean = new Bean();
@@ -165,7 +254,7 @@ public class JacksonMapperTest extends BaseUnit5Test {
 
     @Test
     public void testDeserializationCollectionWithFilter() throws Exception {
-
+        // prepare
         List<Bean> beanList = new ArrayList<Bean>();
         for (int i = 0; i < 10; i++) {
             Bean filteredBean = new Bean();
@@ -175,6 +264,7 @@ public class JacksonMapperTest extends BaseUnit5Test {
         }
         String result = sc.serializeOnlyFilter(beanList, Bean.class, "name",
                 "age");
+        // test
         List<Bean> beanList2 = (List<Bean>) ((Jackson2MapperService) sc)
                 .deSerCollectionWithType(result, List.class, Bean.class);
         assertTrue(beanList2.size() == 10, "DeSer failed ");
