@@ -59,7 +59,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.17.0</version>
+            <version>3.19.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.avalon.framework</groupId>
@@ -85,11 +85,6 @@
           <groupId>com.fasterxml.jackson.core</groupId>
           <artifactId>jackson-core</artifactId>
           <version>${jackson2.version}</version>
-        </dependency>
-        <dependency>
-          <groupId>com.fasterxml.jackson.core</groupId>
-          <artifactId>jackson-annotations</artifactId>
-           <version>${jackson2.version}</version>
         </dependency>
          <dependency>
           <groupId>com.fasterxml.jackson.core</groupId>
@@ -119,7 +114,7 @@
         <dependency>
             <groupId>com.jayway.jsonpath</groupId>
             <artifactId>json-path</artifactId>
-            <version>2.9.0</version>
+            <version>2.10.0</version>
             <optional>true</optional>
             <!--  as we are using jackson -->
             <exclusions>
@@ -143,8 +138,8 @@
     </dependencies>
     <properties>
         <!-- 2.7.x hase Java 7 baseline, but is compiled with Java 6 support, cft. https://github.com/FasterXML/jackson/wiki/Jackson-Release-2.7.
-         2.14 has java 8 baseline, with Jackson 2.8, Java 7 languages features will be allowed -->
-        <jackson2.version>2.18.3</jackson2.version>
+         2.14, 2.18, 2.19 has java 8 baseline, with Jackson 2.8, Java 7 languages features will be allowed -->
+        <jackson2.version>2.20.1</jackson2.version>
     </properties>
 
 </project>

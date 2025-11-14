@@ -60,7 +60,7 @@
 		<dependency>
 		    <groupId>org.apache.commons</groupId>
 		    <artifactId>commons-lang3</artifactId>
-		    <version>3.17.0</version>
+		    <version>3.19.0</version>
 		</dependency>    
         <dependency>
             <groupId>org.apache.avalon.framework</groupId>
@@ -86,7 +86,7 @@
          <dependency>
             <groupId>com.jayway.jsonpath</groupId>
             <artifactId>json-path</artifactId>
-            <version>2.9.0</version>
+            <version>2.10.0</version>
             <optional>true</optional>
             <!--  as we are using gson -->
             <exclusions>
@@ -104,6 +104,6 @@
         </dependency>
     </dependencies>
         <properties>
-        <gson.version>2.13.0</gson.version>
+        <gson.version>2.13.2</gson.version>
     </properties>
 </project>
